@@ -19,4 +19,10 @@
       <ProjectReference Include="..\UserService.Infrastructure\UserService.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+      <Folder Include="Extensions\" />
+      <Folder Include="ModelBinders\" />
+    </ItemGroup>
+
 </Project>

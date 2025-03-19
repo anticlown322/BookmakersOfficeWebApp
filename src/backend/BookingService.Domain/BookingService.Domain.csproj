@@ -14,4 +14,10 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models\" />
+      <Folder Include="RepositoryContracts\" />
+      <Folder Include="RequestFeatures\" />
+    </ItemGroup>
+
 </Project>

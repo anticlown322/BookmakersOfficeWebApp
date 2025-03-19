@@ -19,4 +19,10 @@
       <ProjectReference Include="..\BookingService.Infrastructure\BookingService.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+      <Folder Include="Extensions\" />
+      <Folder Include="ModelBinders\" />
+    </ItemGroup>
+
 </Project>
