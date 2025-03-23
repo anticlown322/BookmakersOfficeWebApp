@@ -5,7 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <CodeAnalysisRuleSet>$(SolutionDir)\stylecop.ruleset</CodeAnalysisRuleSet>
-    </PropertyGroup>
+      <UserSecretsId>5f10b754-a97f-4c0c-8b60-e979fea7eff5</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\UserService.Application\UserService.Application.csproj" />
@@ -23,11 +24,6 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Logs\" />
-      <Folder Include="Repository\" />
     </ItemGroup>
 
 </Project>
