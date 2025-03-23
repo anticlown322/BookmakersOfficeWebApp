@@ -4,17 +4,23 @@ using UserService.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Properties\nlog.config");
-    LogManager.Setup().LoadConfigurationFromFile(configFilePath);
+    var configuration = new ConfigurationBuilder()
+        .AddSecretsYaml()
+        .Build();
+
+    builder.Configuration.AddConfiguration(configuration);
+    builder.Services.AddAppSettings(builder.Configuration);
+
+    builder.Services.ConfigureNLog();
     builder.Services.ConfigureLoggerService();
 
     builder.Services.ConfigureRepositoryManager();
-    builder.Services.ConfigureSqlContext(builder.Configuration);
+    builder.Services.ConfigureSqlContext();
     builder.Services.ConfigureAutoMapper();
 
     builder.Services.AddAuthentication();
     builder.Services.ConfigureIdentity();
-    builder.Services.ConfigureJwt(builder.Configuration);
+    builder.Services.ConfigureJwt();
     builder.Services.ConfigureAuthenticationManager();
     builder.Services.ConfigureUseCases();
     builder.Services.AddValidators();

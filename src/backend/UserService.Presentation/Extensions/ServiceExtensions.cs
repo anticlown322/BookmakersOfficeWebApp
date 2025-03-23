@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using NLog;
 using UserService.Application.Contracts;
 using UserService.Application.Contracts.UseCaseContracts;
 using UserService.Application.DTO;
@@ -16,6 +18,7 @@ using UserService.Application.Validation.Validators;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.Infrastructure;
+using UserService.Infrastructure.AppSettings;
 using UserService.Infrastructure.Logs;
 using UserService.Infrastructure.Repository;
 
@@ -23,6 +26,33 @@ namespace UserService.Presentation.Extensions;
 
 public static class ServiceExtensions
 {
+    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
+    {
+        var path = Directory.GetCurrentDirectory() + @"\Properties";
+
+        return configurationBuilder
+            .SetBasePath(path)
+            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
+    }
+
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
+
+        if (!File.Exists(configFilePath))
+        {
+            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+        }
+
+        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
+    }
+
+    public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+    }
+
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerManager, LoggerManager>();
 
@@ -39,12 +69,13 @@ public static class ServiceExtensions
         services.AddScoped<IRefreshTokenForAuthUseCase, RefreshTokenForAuthUseCase>();
     }
 
-    public static void ConfigureSqlContext(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static void ConfigureSqlContext(this IServiceCollection services)
     {
+        var serviceProvider = services.BuildServiceProvider();
+        var databaseSettings = serviceProvider.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+
         services.AddDbContext<RepositoryContext>(opts =>
-            opts.UseNpgsql(configuration.GetConnectionString("localSqlConnection")));
+            opts.UseNpgsql(databaseSettings.ConnectionString));
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
@@ -71,11 +102,11 @@ public static class ServiceExtensions
             .AddDefaultTokenProviders();
     }
 
-    public static void ConfigureJwt(this IServiceCollection services, IConfiguration
-        configuration)
+    public static void ConfigureJwt(this IServiceCollection services)
     {
-        var jwtSettings = configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings.GetSection("validIssuer").Value;
+        var serviceProvider = services.BuildServiceProvider();
+        var jwtSettings = serviceProvider.GetRequiredService<IOptions<JwtSettings>>().Value;
+        var secretKey = jwtSettings.SecretKey;
 
         services.AddAuthentication(opt =>
             {
@@ -90,8 +121,8 @@ public static class ServiceExtensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings.GetSection("validIssuer").Value,
-                    ValidAudience = jwtSettings.GetSection("validAudience").Value,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
                 };
             });

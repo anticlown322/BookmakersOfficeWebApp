@@ -4,18 +4,21 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
 using UserService.Application.DTO;
 using UserService.Domain.Models;
+using UserService.Infrastructure.AppSettings;
 
 namespace UserService.Infrastructure;
 
 public class AuthenticationManager(
     UserManager<User> userManager,
-    IConfiguration configuration)
+    IOptions<JwtSettings> jwtSettings)
     : IAuthenticationManager
 {
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private User? _user;
 
     public async Task<TokenDto> CreateTokens(User user, bool populateExp)
@@ -67,10 +70,8 @@ public class AuthenticationManager(
 
     private SigningCredentials GetSigningCredentials()
     {
-        var jwtSettings = configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings.GetSection("validIssuer").Value;
-
-        var key = Encoding.UTF8.GetBytes(secretKey!);
+        var secretKey = _jwtSettings.SecretKey;
+        var key = Encoding.UTF8.GetBytes(secretKey);
         var secret = new SymmetricSecurityKey(key);
 
         return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
@@ -95,14 +96,13 @@ public class AuthenticationManager(
 
     private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
     {
-        var jwtSettings = configuration.GetSection("JwtSettings");
         var tokenOptions = new JwtSecurityToken(
-            issuer: jwtSettings["validIssuer"],
-            audience: jwtSettings["validAudience"],
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: claims,
-            expires:
-            DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings.GetSection("expires").Value)),
+            expires: DateTime.Now.AddMinutes(_jwtSettings.ExpiryMinutes),
             signingCredentials: signingCredentials);
+
         return tokenOptions;
     }
 }

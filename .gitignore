@@ -38,3 +38,4 @@ Desktop.ini
 /src/backend/BookingService.Presentation/Logs/
 publish/
 Migrations/
+secrets.yaml
