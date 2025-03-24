@@ -1,5 +1,5 @@
-﻿using Application.DTO.User;
-using AutoMapper;
+﻿using AutoMapper;
+using UserService.Application.DTO.Authentication;
 
 namespace UserService.Application.DTO.MappingProfiles;
 

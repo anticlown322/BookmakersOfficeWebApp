@@ -1,4 +1,4 @@
-﻿namespace UserService.Infrastructure.AppSettings;
+﻿namespace UserService.Domain.Models;
 
 public class JwtSettings
 {

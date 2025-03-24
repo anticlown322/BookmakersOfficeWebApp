@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using UserService.Domain.Models;
+using UserService.Infrastructure.Repository.Configs;
 
 namespace UserService.Infrastructure.Repository;
 

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace UserService.Infrastructure.Repository;
+namespace UserService.Infrastructure.Repository.Configs;
 
 public class RoleConfig : IEntityTypeConfiguration<IdentityRole>
 {

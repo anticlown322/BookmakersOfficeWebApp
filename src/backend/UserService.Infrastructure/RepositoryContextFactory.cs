@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using UserService.Infrastructure.AppSettings;
+using UserService.Domain.Models;
 using UserService.Infrastructure.Repository;
 
 namespace UserService.Infrastructure;

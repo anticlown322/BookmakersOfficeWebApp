@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using Application.DTO.User;
-using Application.UseCases.Authentication;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,16 +10,22 @@ using Microsoft.IdentityModel.Tokens;
 using NLog;
 using UserService.Application.Contracts;
 using UserService.Application.Contracts.UseCaseContracts;
+using UserService.Application.Contracts.UseCaseContracts.Authentication;
+using UserService.Application.Contracts.UseCaseContracts.User;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Authentication;
 using UserService.Application.DTO.MappingProfiles;
 using UserService.Application.UseCases;
+using UserService.Application.UseCases.Authentication;
+using UserService.Application.UseCases.User;
 using UserService.Application.Validation.Validators;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.Infrastructure;
-using UserService.Infrastructure.AppSettings;
 using UserService.Infrastructure.Logs;
 using UserService.Infrastructure.Repository;
+using UserService.Infrastructure.Repository.Repositories;
+using UserService.Infrastructure.Services;
 
 namespace UserService.Presentation.Extensions;
 
@@ -56,17 +61,26 @@ public static class ServiceExtensions
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerManager, LoggerManager>();
 
-    public static void ConfigureRepositoryManager(this IServiceCollection services) =>
-        services.AddScoped<IRepositoryManager, RepositoryManager>();
+    public static void AddTokenService(this IServiceCollection services) =>
+        services.AddScoped<ITokenService, TokenService>();
 
-    public static void ConfigureAuthenticationManager(this IServiceCollection services) =>
-        services.AddScoped<IAuthenticationManager, AuthenticationManager>();
+    public static void AddUserRepository(this IServiceCollection services) =>
+        services.AddScoped<IUsersRepository, UserRepository>();
 
     public static void ConfigureUseCases(this IServiceCollection services)
     {
+        // auth
         services.AddScoped<IRegisterUserUseCase, RegisterUserUseCase>();
-        services.AddScoped<ICreateTokenForAuthUseCase, CreateTokenForAuthUseCase>();
+        services.AddScoped<ILoginUseCase, LoginUseCase>();
         services.AddScoped<IRefreshTokenForAuthUseCase, RefreshTokenForAuthUseCase>();
+
+        // users
+        services.AddScoped<IGetAllUsersUseCase, GetAllUsersUseCase>();
+        services.AddScoped<IGetUserByIdUseCase, GetUserByIdUseCase>();
+        services.AddScoped<IGetUserByNameUseCase, GetUserByNameUseCase>();
+        services.AddScoped<IDeleteUserUseCase, DeleteUserUseCase>();
+
+        // account
     }
 
     public static void ConfigureSqlContext(this IServiceCollection services)
@@ -84,6 +98,7 @@ public static class ServiceExtensions
             cfg =>
         {
             cfg.AddProfile<RegisterUserMappingProfile>();
+            cfg.AddProfile<GetUsersMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 

@@ -2,21 +2,25 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
 using UserService.Application.Contracts.UseCaseContracts;
+using UserService.Application.Contracts.UseCaseContracts.Authentication;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.Models;
 
-namespace UserService.Application.UseCases;
+namespace UserService.Application.UseCases.Authentication;
 
 public class RefreshTokenForAuthUseCase(
-    IConfiguration configuration,
-    UserManager<User> userManager,
-    IAuthenticationManager authenticationManager) : IRefreshTokenForAuthUseCase
+    IOptions<JwtSettings> jwtSettings,
+    UserManager<Domain.Models.User> userManager,
+    ITokenService tokenService) : IRefreshTokenForAuthUseCase
 {
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
+
     public async Task<string> ExecuteAsync(TokenDto tokenDto)
     {
         var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
@@ -28,7 +32,7 @@ public class RefreshTokenForAuthUseCase(
             throw new RefreshTokenBadRequest();
         }
 
-        var newAccessToken = await authenticationManager.CreateAccessToken(user);
+        var newAccessToken = await tokenService.CreateAccessToken(user);
 
         if (newAccessToken is null)
         {
@@ -40,22 +44,19 @@ public class RefreshTokenForAuthUseCase(
 
     private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
-        var jwtSettings = configuration.GetSection("JwtSettings");
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
             ValidateIssuer = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings.GetSection("validIssuer").Value)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
             ValidateLifetime = true,
-            ValidIssuer = jwtSettings["validIssuer"],
-            ValidAudience = jwtSettings["validAudience"],
+            ValidIssuer = _jwtSettings.Issuer,
+            ValidAudience = _jwtSettings.Audience,
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        SecurityToken securityToken;
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
         var jwtSecurityToken = securityToken as JwtSecurityToken;
         if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(

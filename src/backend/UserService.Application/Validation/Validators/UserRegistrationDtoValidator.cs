@@ -1,5 +1,5 @@
-﻿using Application.DTO.User;
-using FluentValidation;
+﻿using FluentValidation;
+using UserService.Application.DTO.Authentication;
 
 namespace UserService.Application.Validation.Validators;
 

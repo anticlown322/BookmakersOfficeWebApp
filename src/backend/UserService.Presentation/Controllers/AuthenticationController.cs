@@ -1,7 +1,8 @@
-﻿using Application.DTO.User;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCaseContracts;
+using UserService.Application.Contracts.UseCaseContracts.Authentication;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation;
 
 namespace UserService.Presentation.Controllers;
@@ -10,15 +11,17 @@ namespace UserService.Presentation.Controllers;
 [ApiController]
 public class AuthenticationController(
     IRegisterUserUseCase registerUserUseCase,
-    ICreateTokenForAuthUseCase createTokenForAuthUseCase,
+    ILoginUseCase loginUseCase,
     IRefreshTokenForAuthUseCase refreshTokenForAuthUseCase)
     : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("register")]
     [ValidationFilter<UserForRegistrationDto>]
-    public async Task<IActionResult> RegisterUser([FromBody] UserForRegistrationDto userForRegistration)
+    public async Task<IActionResult> RegisterUser(
+        [FromBody] UserForRegistrationDto userForRegistration,
+        CancellationToken cancellationToken)
     {
-        var result = await registerUserUseCase.ExecuteAsync(userForRegistration);
+        var result = await registerUserUseCase.ExecuteAsync(userForRegistration, cancellationToken);
 
         if (!result.Succeeded)
         {
@@ -35,14 +38,18 @@ public class AuthenticationController(
 
     [HttpPost("login")]
     [ValidationFilter<UserForAuthenticationDto>]
-    public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
+    public async Task<IActionResult> Authenticate(
+        [FromBody] UserForAuthenticationDto user,
+        CancellationToken cancellationToken)
     {
-        var tokenDto = await createTokenForAuthUseCase.ExecuteAsync(user, populateExp: true);
+        var tokenDto = await loginUseCase.ExecuteAsync(user, populateExp: true, cancellationToken);
         return Ok(tokenDto);
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody]TokenDto tokenDto)
+    public async Task<IActionResult> Refresh(
+        [FromBody]TokenDto tokenDto,
+        CancellationToken cancellationToken)
     {
         var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokenDto);
         return Ok(tokenDtoToReturn);

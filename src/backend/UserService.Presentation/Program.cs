@@ -1,4 +1,3 @@
-using NLog;
 using UserService.Application.Contracts;
 using UserService.Presentation.Extensions;
 
@@ -14,14 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureNLog();
     builder.Services.ConfigureLoggerService();
 
-    builder.Services.ConfigureRepositoryManager();
     builder.Services.ConfigureSqlContext();
     builder.Services.ConfigureAutoMapper();
 
     builder.Services.AddAuthentication();
     builder.Services.ConfigureIdentity();
     builder.Services.ConfigureJwt();
-    builder.Services.ConfigureAuthenticationManager();
+    builder.Services.AddTokenService();
+
+    builder.Services.AddUserRepository();
     builder.Services.ConfigureUseCases();
     builder.Services.AddValidators();
 

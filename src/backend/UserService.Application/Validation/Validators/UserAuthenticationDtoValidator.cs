@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Authentication;
 
 namespace UserService.Application.Validation.Validators;
 

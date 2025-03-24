@@ -1,0 +1,24 @@
+﻿using AutoMapper;
+using UserService.Application.Contracts.UseCaseContracts.User;
+using UserService.Application.DTO.User;
+using UserService.Application.Validation.Exceptions.Specific;
+using UserService.Domain.RepositoryContracts;
+
+namespace UserService.Application.UseCases.User;
+
+public class GetUserByNameUseCase(
+    IUsersRepository usersRepository,
+    IMapper mapper) : IGetUserByNameUseCase
+{
+    public async Task<UserForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
+    {
+        var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
+        if (userToGet is null)
+        {
+            throw new UserNotFoundByNameException(username);
+        }
+
+        var userDto = mapper.Map<UserForGetDto>(userToGet);
+        return userDto;
+    }
+}

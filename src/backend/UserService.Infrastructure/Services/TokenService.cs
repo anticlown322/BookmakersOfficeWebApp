@@ -3,20 +3,19 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Authentication;
 using UserService.Domain.Models;
-using UserService.Infrastructure.AppSettings;
 
-namespace UserService.Infrastructure;
+namespace UserService.Infrastructure.Services;
 
-public class AuthenticationManager(
+public class TokenService(
     UserManager<User> userManager,
     IOptions<JwtSettings> jwtSettings)
-    : IAuthenticationManager
+    : ITokenService
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private User? _user;
@@ -27,13 +26,10 @@ public class AuthenticationManager(
 
         var signingCredentials = GetSigningCredentials();
         var claims = await GetClaims();
-
         var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
-
         var refreshToken = GenerateRefreshToken();
 
         _user.RefreshToken = refreshToken;
-
         if (populateExp)
         {
             _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(1).ToUniversalTime();

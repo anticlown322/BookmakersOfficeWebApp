@@ -23,6 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Contracts\UseCaseContracts\Account\" />
+      <Folder Include="DTO\Account\" />
+      <Folder Include="UseCases\Account\" />
       <Folder Include="Validation\Exceptions\" />
     </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿namespace Application.DTO.User;
+﻿namespace UserService.Application.DTO.Authentication;
 
 public record UserForRegistrationDto
 {
