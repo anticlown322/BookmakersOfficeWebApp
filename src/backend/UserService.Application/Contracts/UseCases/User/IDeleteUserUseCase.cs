@@ -1,4 +1,4 @@
-﻿namespace UserService.Application.Contracts.UseCaseContracts.User;
+﻿namespace UserService.Application.Contracts.UseCases.User;
 
 public interface IDeleteUserUseCase
 {

@@ -5,26 +5,28 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
-using UserService.Application.Contracts.UseCaseContracts;
-using UserService.Application.Contracts.UseCaseContracts.Authentication;
+using UserService.Application.Contracts.Services;
+using UserService.Application.Contracts.UseCases;
+using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.Models;
+using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Authentication;
 
 public class RefreshTokenForAuthUseCase(
     IOptions<JwtSettings> jwtSettings,
-    UserManager<Domain.Models.User> userManager,
+    IUsersRepository usersRepository,
     ITokenService tokenService) : IRefreshTokenForAuthUseCase
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
-    public async Task<string> ExecuteAsync(TokenDto tokenDto)
+    public async Task<string> ExecuteAsync(TokenDto tokenDto, CancellationToken cancellationToken)
     {
         var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
-        var user = await userManager.FindByNameAsync(principal.Identity.Name);
+        var user = await usersRepository.GetUserByNameAsync(principal.Identity.Name, cancellationToken);
 
         if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
             user.RefreshTokenExpiryTime <= DateTime.Now)

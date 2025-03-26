@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
+using UserService.Application.Contracts.Services;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Domain.Models;

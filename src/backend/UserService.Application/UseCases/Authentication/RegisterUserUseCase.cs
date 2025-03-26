@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using UserService.Application.Contracts.UseCaseContracts;
-using UserService.Application.Contracts.UseCaseContracts.Authentication;
+using UserService.Application.Contracts.UseCases;
+using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.Models;

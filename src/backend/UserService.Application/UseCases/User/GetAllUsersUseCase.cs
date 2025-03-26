@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Domain.RequestFeatures;
-using UserService.Application.Contracts.UseCaseContracts.User;
+using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.User;
 using UserService.Domain.RepositoryContracts;

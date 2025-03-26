@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UserService.Application.Contracts.UseCaseContracts;
-using UserService.Application.Contracts.UseCaseContracts.Authentication;
+using UserService.Application.Contracts.UseCases;
+using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation;
@@ -12,12 +12,13 @@ namespace UserService.Presentation.Controllers;
 public class AuthenticationController(
     IRegisterUserUseCase registerUserUseCase,
     ILoginUseCase loginUseCase,
-    IRefreshTokenForAuthUseCase refreshTokenForAuthUseCase)
+    IRefreshTokenForAuthUseCase refreshTokenForAuthUseCase,
+    ILogoutUseCase logoutUseCase)
     : ControllerBase
 {
     [HttpPost("register")]
     [ValidationFilter<UserForRegistrationDto>]
-    public async Task<IActionResult> RegisterUser(
+    public async Task<IActionResult> Register(
         [FromBody] UserForRegistrationDto userForRegistration,
         CancellationToken cancellationToken)
     {
@@ -37,9 +38,9 @@ public class AuthenticationController(
     }
 
     [HttpPost("login")]
-    [ValidationFilter<UserForAuthenticationDto>]
-    public async Task<IActionResult> Authenticate(
-        [FromBody] UserForAuthenticationDto user,
+    [ValidationFilter<UserForLoginDto>]
+    public async Task<IActionResult> Login(
+        [FromBody] UserForLoginDto user,
         CancellationToken cancellationToken)
     {
         var tokenDto = await loginUseCase.ExecuteAsync(user, populateExp: true, cancellationToken);
@@ -51,7 +52,16 @@ public class AuthenticationController(
         [FromBody]TokenDto tokenDto,
         CancellationToken cancellationToken)
     {
-        var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokenDto);
+        var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokenDto, cancellationToken);
         return Ok(tokenDtoToReturn);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(
+        UserForLogoutDto userForLogoutDto,
+        CancellationToken cancellationToken)
+    {
+        await logoutUseCase.ExecuteAsync(userForLogoutDto, populateExp: true, cancellationToken);
+        return Ok();
     }
 }

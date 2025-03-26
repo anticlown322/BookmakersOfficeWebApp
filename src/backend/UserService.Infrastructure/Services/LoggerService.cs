@@ -1,9 +1,10 @@
 ﻿using NLog;
 using UserService.Application.Contracts;
+using UserService.Application.Contracts.Services;
 
 namespace UserService.Infrastructure.Logs;
 
-public class LoggerManager : ILoggerManager
+public class LoggerService : ILoggerService
 {
     private static ILogger _logger = LogManager.GetCurrentClassLogger();
 

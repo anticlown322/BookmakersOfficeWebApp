@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UserService.Application.Contracts;
-using UserService.Application.Contracts.UseCaseContracts;
-using UserService.Application.Contracts.UseCaseContracts.Authentication;
+using UserService.Application.Contracts.Services;
+using UserService.Application.Contracts.UseCases;
+using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation.Exceptions.Specific;
@@ -17,7 +18,7 @@ public class LoginUseCase(
     : ILoginUseCase
 {
     public async Task<TokenDto> ExecuteAsync(
-        UserForAuthenticationDto userDto,
+        UserForLoginDto userDto,
         bool populateExp,
         CancellationToken cancellationToken)
     {

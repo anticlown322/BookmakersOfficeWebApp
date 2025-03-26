@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UserService.Application.DTO.Authentication;
 
-namespace UserService.Application.Contracts.UseCaseContracts.Authentication;
+namespace UserService.Application.Contracts.UseCases.Authentication;
 
 public interface IRegisterUserUseCase
 {

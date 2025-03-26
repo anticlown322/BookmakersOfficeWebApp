@@ -1,4 +1,5 @@
 using UserService.Application.Contracts;
+using UserService.Application.Contracts.Services;
 using UserService.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddUserRepository();
     builder.Services.ConfigureUseCases();
+    builder.Services.AddEmailService();
     builder.Services.AddValidators();
 
     builder.Services.AddControllers();
@@ -31,7 +33,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    var logger = app.Services.GetRequiredService<ILoggerManager>();
+    var logger = app.Services.GetRequiredService<ILoggerService>();
     app.ConfigureExceptionHandler(logger);
 
     app.UseAuthentication();

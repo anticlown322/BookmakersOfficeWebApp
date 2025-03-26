@@ -4,7 +4,7 @@ using UserService.Application.DTO.Authentication;
 
 namespace UserService.Application.Validation.Validators;
 
-public class UserAuthenticationDtoValidator : AbstractValidator<UserForAuthenticationDto>
+public class UserAuthenticationDtoValidator : AbstractValidator<UserForLoginDto>
 {
     private const int MaxLoginLength = 100;
     private const int MaxPasswordLength = 100;

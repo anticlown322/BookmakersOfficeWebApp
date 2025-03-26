@@ -1,4 +1,4 @@
-﻿using UserService.Application.Contracts.UseCaseContracts.User;
+﻿using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.RepositoryContracts;
 

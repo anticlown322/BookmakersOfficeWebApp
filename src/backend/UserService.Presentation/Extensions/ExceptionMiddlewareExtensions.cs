@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using UserService.Application.Contracts;
+using UserService.Application.Contracts.Services;
 using UserService.Application.ErrorModel;
 using UserService.Application.Validation.Exceptions.Base;
 
@@ -8,7 +9,7 @@ namespace UserService.Presentation.Extensions;
 
 public static class ExceptionMiddlewareExtensions
 {
-    public static void ConfigureExceptionHandler(this WebApplication app, ILoggerManager logger)
+    public static void ConfigureExceptionHandler(this WebApplication app, ILoggerService logger)
     {
         app.UseExceptionHandler(appError =>
         {

@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Net.Mail;
+using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,13 +11,16 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
 using UserService.Application.Contracts;
-using UserService.Application.Contracts.UseCaseContracts;
-using UserService.Application.Contracts.UseCaseContracts.Authentication;
-using UserService.Application.Contracts.UseCaseContracts.User;
+using UserService.Application.Contracts.Services;
+using UserService.Application.Contracts.UseCases;
+using UserService.Application.Contracts.UseCases.Account;
+using UserService.Application.Contracts.UseCases.Authentication;
+using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.DTO.MappingProfiles;
 using UserService.Application.UseCases;
+using UserService.Application.UseCases.Account;
 using UserService.Application.UseCases.Authentication;
 using UserService.Application.UseCases.User;
 using UserService.Application.Validation.Validators;
@@ -56,13 +61,33 @@ public static class ServiceExtensions
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
     }
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
-        services.AddSingleton<ILoggerManager, LoggerManager>();
+        services.AddSingleton<ILoggerService, LoggerService>();
 
     public static void AddTokenService(this IServiceCollection services) =>
         services.AddScoped<ITokenService, TokenService>();
+
+    public static void AddEmailService(this IServiceCollection services)
+    {
+        services.AddScoped<IEmailService, EmailService>();
+
+        var serviceProvider = services.BuildServiceProvider();
+        var emailSettings = serviceProvider.GetRequiredService<IOptions<EmailSettings>>().Value;
+        services
+            .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
+            .AddSmtpSender(() => new SmtpClient
+            {
+                Host = emailSettings.Server,
+                Port = emailSettings.Port,
+                EnableSsl = emailSettings.UseSsl,
+                Credentials = new NetworkCredential(
+                    emailSettings.Username,
+                    emailSettings.Password),
+            });
+    }
 
     public static void AddUserRepository(this IServiceCollection services) =>
         services.AddScoped<IUsersRepository, UserRepository>();
@@ -73,6 +98,7 @@ public static class ServiceExtensions
         services.AddScoped<IRegisterUserUseCase, RegisterUserUseCase>();
         services.AddScoped<ILoginUseCase, LoginUseCase>();
         services.AddScoped<IRefreshTokenForAuthUseCase, RefreshTokenForAuthUseCase>();
+        services.AddScoped<ILogoutUseCase, LogoutUseCase>();
 
         // users
         services.AddScoped<IGetAllUsersUseCase, GetAllUsersUseCase>();
@@ -81,6 +107,8 @@ public static class ServiceExtensions
         services.AddScoped<IDeleteUserUseCase, DeleteUserUseCase>();
 
         // account
+        services.AddScoped<ISendConfirmationEmailUseCase, SendConfirmationEmailUseCase>();
+        services.AddScoped<IConfirmEmailUseCase, ConfirmEmailUseCase>();
     }
 
     public static void ConfigureSqlContext(this IServiceCollection services)
@@ -147,7 +175,7 @@ public static class ServiceExtensions
     {
         services.AddTransient<IValidator<User>, UserValidator>();
         services.AddTransient<IValidator<UserForRegistrationDto>, UserRegistrationDtoValidator>();
-        services.AddTransient<IValidator<UserForAuthenticationDto>, UserAuthenticationDtoValidator>();
+        services.AddTransient<IValidator<UserForLoginDto>, UserAuthenticationDtoValidator>();
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using UserService.Application.Contracts.UseCaseContracts.User;
+using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.User;
 using UserService.Domain.RequestFeatures;
@@ -38,7 +38,7 @@ public class UsersController(
     }
 
     [HttpGet("{username}")]
-    public async Task<IActionResult> GetUserById(string username, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetUserByName(string username, CancellationToken cancellationToken)
     {
         var eventToGet = await getUserByNameUseCase.ExecuteAsync(username, cancellationToken);
 

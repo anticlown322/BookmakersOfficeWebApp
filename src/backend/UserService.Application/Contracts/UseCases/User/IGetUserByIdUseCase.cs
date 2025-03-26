@@ -1,6 +1,6 @@
 ﻿using UserService.Application.DTO.User;
 
-namespace UserService.Application.Contracts.UseCaseContracts.User;
+namespace UserService.Application.Contracts.UseCases.User;
 
 public interface IGetUserByIdUseCase
 {

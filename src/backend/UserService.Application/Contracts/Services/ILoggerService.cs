@@ -1,6 +1,6 @@
-﻿namespace UserService.Application.Contracts;
+﻿namespace UserService.Application.Contracts.Services;
 
-public interface ILoggerManager
+public interface ILoggerService
 {
     void LogInfo(string message);
     void LogWarn(string message);
