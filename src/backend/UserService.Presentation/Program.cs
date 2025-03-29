@@ -15,17 +15,18 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureLoggerService();
 
     builder.Services.ConfigureSqlContext();
-    builder.Services.ConfigureAutoMapper();
+    builder.Services.AddUserRepository();
 
     builder.Services.AddAuthentication();
     builder.Services.ConfigureIdentity();
     builder.Services.ConfigureJwt();
     builder.Services.AddTokenService();
+    builder.Services.AddAuthorizationPolicies();
 
-    builder.Services.AddUserRepository();
     builder.Services.ConfigureUseCases();
     builder.Services.AddEmailService();
     builder.Services.AddValidators();
+    builder.Services.ConfigureAutoMapper();
 
     builder.Services.AddControllers();
     builder.Services.ConfigureApiBehaviorOptions();

@@ -17,6 +17,7 @@ public class RepositoryContext : IdentityDbContext<User>
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new RoleConfig());
+        modelBuilder.ApplyConfiguration(new UserConfig());
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

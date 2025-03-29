@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.Domain.RequestFeatures;
@@ -40,8 +41,17 @@ public class UserRepository(
 
     public async Task<User> GetUserByNameAsync(string userName, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByNameAsync(userName);
+        var user = await repositoryContext.Users
+            .Include(u => u.Profile)
+            .Include(u => u.Balance)
+            .ThenInclude(b => b.Transactions)
+            .FirstOrDefaultAsync(u => u.UserName == userName, cancellationToken);
         return user;
+    }
+
+    public async Task<IList<string>> GetUserRolesAsync(User user, CancellationToken cancellationToken)
+    {
+        return await userManager.GetRolesAsync(user);
     }
 
     public async Task<IdentityResult> CreateUserAsync(User user, string password, ICollection<string> roles, CancellationToken cancellationToken)

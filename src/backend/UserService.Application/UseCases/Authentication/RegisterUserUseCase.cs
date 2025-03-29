@@ -25,13 +25,22 @@ public class RegisterUserUseCase(
         }
 
         var user = mapper.Map<Domain.Models.User>(userForRegistration);
-        var result = await usersRepository.CreateUserAsync(user, userForRegistration.Password, userForRegistration.Roles, cancellationToken);
 
-        if (result.Errors.Any())
+        var result = await usersRepository.CreateUserAsync(
+            user,
+            userForRegistration.Password,
+            userForRegistration.Roles ?? new List<string>(),
+            cancellationToken);
+
+        if (!result.Succeeded)
         {
-            var error = result.Errors.FirstOrDefault();
-            throw new UserCanNonBeRegistered(error.Description);
+            throw new UserCanNonBeRegistered(result.Errors.First().Description);
         }
+
+        user.Profile.UserId = user.Id;
+        user.Balance.UserId = user.Id;
+        user.Balance.LastUpdated = DateTime.UtcNow.ToUniversalTime();
+        await usersRepository.UpdateUserAsync(user, cancellationToken);
 
         return result;
     }

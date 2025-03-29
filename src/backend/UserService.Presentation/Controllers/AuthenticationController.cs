@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCases;
 using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO;
@@ -24,16 +25,6 @@ public class AuthenticationController(
     {
         var result = await registerUserUseCase.ExecuteAsync(userForRegistration, cancellationToken);
 
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.TryAddModelError(error.Code, error.Description);
-            }
-
-            return BadRequest(ModelState);
-        }
-
         return StatusCode(201);
     }
 
@@ -44,24 +35,29 @@ public class AuthenticationController(
         CancellationToken cancellationToken)
     {
         var tokenDto = await loginUseCase.ExecuteAsync(user, populateExp: true, cancellationToken);
+
         return Ok(tokenDto);
     }
 
     [HttpPost("refresh")]
+    [Authorize(Policy= "AllUsers")]
     public async Task<IActionResult> Refresh(
-        [FromBody]TokenDto tokenDto,
+        [FromBody] TokenDto tokenDto,
         CancellationToken cancellationToken)
     {
         var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokenDto, cancellationToken);
+
         return Ok(tokenDtoToReturn);
     }
 
     [HttpPost("logout")]
+    [Authorize(Policy= "AllUsers")]
     public async Task<IActionResult> Logout(
-        UserForLogoutDto userForLogoutDto,
+        [FromBody] UserForLogoutDto userForLogoutDto,
         CancellationToken cancellationToken)
     {
         await logoutUseCase.ExecuteAsync(userForLogoutDto, populateExp: true, cancellationToken);
+
         return Ok();
     }
 }

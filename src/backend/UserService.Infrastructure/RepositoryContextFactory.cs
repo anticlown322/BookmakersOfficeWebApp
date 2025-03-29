@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Yaml;
 using UserService.Domain.Models;
 using UserService.Infrastructure.Repository;
 
@@ -15,12 +16,11 @@ public class RepositoryContextFactory : IDesignTimeDbContextFactory<RepositoryCo
     public RepositoryContext CreateDbContext(string[] args)
     {
         var presentationAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var presentationPath = Path.Combine(presentationAssemblyPath, @"..\..\..\..\", "UserService.Presentation");
+        var presentationPath = Path.Combine(presentationAssemblyPath, @"..\..\..\..\", @"UserService.Presentation\Properties");
 
-        // Загружаем конфигурацию из appsettings.json
         var configuration = new ConfigurationBuilder()
             .SetBasePath(presentationPath)
-            .AddJsonFile("appsettings.json")
+            .AddYamlFile("secrets.yaml")
             .Build();
 
         var databaseSettings = configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();

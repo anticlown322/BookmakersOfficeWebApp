@@ -8,7 +8,6 @@ namespace UserService.Application.UseCases.Account;
 
 public class SendConfirmationEmailUseCase(
     IUsersRepository usersRepository,
-    UserManager<Domain.Models.User> userManager,
     IEmailService emailService) : ISendConfirmationEmailUseCase
 {
     public async Task ExecuteAsync(string username, string baseUrl, CancellationToken cancellationToken)
@@ -19,8 +18,12 @@ public class SendConfirmationEmailUseCase(
             throw new UserNotFoundByNameException(username);
         }
 
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        var confirmationLink = $"{baseUrl}/api/users/{username}/account/confirm-email?token={token}";
+        if (user.EmailConfirmed)
+        {
+            throw new EmailCanNotBeConfirmedException($"Your email is already confirmed.");
+        }
+
+        var confirmationLink = $"{baseUrl}/api/users/{username}/account/confirm-email";
 
         await emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
     }

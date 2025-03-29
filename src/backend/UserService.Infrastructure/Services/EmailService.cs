@@ -12,18 +12,19 @@ public class EmailService(
 {
     public async Task SendConfirmationEmailAsync(string email, string confirmationLink)
     {
-        var senderEmail = emailSettings.Value.SenderEmail;
-        var senderName = emailSettings.Value.SenderName;
-
         await fluentEmail
-            .To("karasandrey2005@gmail.com")
+            .To(email)
             .Subject("Account confirmation")
             .Body($"Please, follow this link to confirm your account: <a href='{confirmationLink}'>Confirm</a>", isHtml: true)
             .SendAsync();
     }
 
-    public Task SendResetPasswordEmailAsync(string email, string resetPasswordLink)
+    public async Task SendResetPasswordEmailAsync(string email, string resetCode)
     {
-        throw new NotImplementedException();
+        await fluentEmail
+            .To(email)
+            .Subject("Password reset code")
+            .Body($"Password reset code: {resetCode}")
+            .SendAsync();
     }
 }

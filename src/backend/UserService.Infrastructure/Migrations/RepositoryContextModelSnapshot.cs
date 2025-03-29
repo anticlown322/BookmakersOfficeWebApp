@@ -50,37 +50,37 @@ namespace UserService.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "d6296c70-a0f5-49fb-b82f-5727ea43d2ab",
+                            Id = "8a1f1669-2a03-46d6-bc7d-2825250bdf94",
                             Name = "Guest",
                             NormalizedName = "GUEST"
                         },
                         new
                         {
-                            Id = "acd3a917-d6c0-4526-9fc1-3a42f5289ee9",
+                            Id = "0e5fbdc5-8ce3-4698-9f16-895c783de3ea",
                             Name = "Gambler",
                             NormalizedName = "GAMBLER"
                         },
                         new
                         {
-                            Id = "9d32c1e2-69cd-4651-ad41-41190c2a42aa",
+                            Id = "a2e9937b-bb43-4d77-9e71-f94d60551ba6",
                             Name = "Moderator",
                             NormalizedName = "MODERATOR"
                         },
                         new
                         {
-                            Id = "a19b6f9b-59b4-4e18-ade7-6265bae1735f",
+                            Id = "7a4daa19-f143-4efd-b7b6-f9eabc3aaa8e",
                             Name = "Bookmaker",
                             NormalizedName = "BOOKMAKER"
                         },
                         new
                         {
-                            Id = "89aa0dbd-c511-428d-8a31-a1cc6f035070",
+                            Id = "842f7499-9144-42d2-b0f1-609ab54da08e",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "e33cb3fa-c362-4dac-986f-a0c4626f6191",
+                            Id = "a647935a-0615-4a38-8b4d-6a0095776ef3",
                             Name = "Banned",
                             NormalizedName = "BANNED"
                         });
@@ -192,6 +192,43 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("UserService.Domain.Models.BalanceTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OperationType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("UserBalanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserBalanceId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BalanceTransaction", (string)null);
+                });
+
             modelBuilder.Entity("UserService.Domain.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -210,14 +247,6 @@ namespace UserService.Infrastructure.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -270,6 +299,66 @@ namespace UserService.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("UserService.Domain.Models.UserBalance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CurrentAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserBalance", (string)null);
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.UserProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Roles")
+                        .IsRequired()
+                        .HasColumnType("json");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserProfile", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -319,6 +408,55 @@ namespace UserService.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.BalanceTransaction", b =>
+                {
+                    b.HasOne("UserService.Domain.Models.UserBalance", null)
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserBalanceId");
+
+                    b.HasOne("UserService.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.UserBalance", b =>
+                {
+                    b.HasOne("UserService.Domain.Models.User", "User")
+                        .WithOne("Balance")
+                        .HasForeignKey("UserService.Domain.Models.UserBalance", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.UserProfile", b =>
+                {
+                    b.HasOne("UserService.Domain.Models.User", null)
+                        .WithOne("Profile")
+                        .HasForeignKey("UserService.Domain.Models.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.User", b =>
+                {
+                    b.Navigation("Balance")
+                        .IsRequired();
+
+                    b.Navigation("Profile")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UserService.Domain.Models.UserBalance", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

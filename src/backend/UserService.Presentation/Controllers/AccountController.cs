@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCases.Account;
-using UserService.Application.DTO.Authentication;
+using UserService.Application.DTO.Account;
 using UserService.Application.UseCases.Account;
-using YamlDotNet.Core.Tokens;
 
 namespace UserService.Presentation.Controllers;
 
@@ -10,18 +10,25 @@ namespace UserService.Presentation.Controllers;
 [ApiController]
 public class AccountController(
     ISendConfirmationEmailUseCase sendConfirmationEmailUseCase,
-    IConfirmEmailUseCase confirmEmailUseCase)
+    IConfirmEmailUseCase confirmEmailUseCase,
+    ISendResetPasswordEmailUseCase sendResetPasswordEmailUseCase,
+    IResetPasswordUseCase resetPasswordUseCase,
+    IGetUserProfileUseCase getUserProfileUseCase,
+    IUpdateUserProfileUseCase updateUserProfileUseCase)
     : ControllerBase
 {
     [HttpGet("confirm-email")]
-    public async Task<ActionResult> ConfirmEmail([FromRoute] string username, [FromQuery] string token, CancellationToken cancellationToken)
+    public async Task<ActionResult> ConfirmEmail(
+        [FromRoute] string username,
+        CancellationToken cancellationToken)
     {
-        await confirmEmailUseCase.ExecuteAsync(username, token, cancellationToken);
+        await confirmEmailUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok();
     }
 
     [HttpPost("send-confirmation-email")]
+    [Authorize(Policy= "AllUsers")]
     public async Task<ActionResult> SendConfirmationEmail(
         [FromRoute] string username,
         [FromServices] IHttpContextAccessor httpContextAccessor,
@@ -31,5 +38,48 @@ public class AccountController(
         await sendConfirmationEmailUseCase.ExecuteAsync(username, baseUrl, cancellationToken);
 
         return Ok();
+    }
+
+    [HttpPost("send-reset-email")]
+    public async Task<ActionResult> SendResetEmail(
+        [FromRoute] string username,
+        CancellationToken cancellationToken)
+    {
+        await sendResetPasswordEmailUseCase.ExecuteAsync(username, cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<ActionResult> ResetPassword(
+        [FromRoute] string username,
+        [FromBody] PasswordResetDto passwordResetDto,
+        CancellationToken cancellationToken)
+    {
+        await resetPasswordUseCase.ExecuteAsync(username, passwordResetDto, cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpGet("profile")]
+    [Authorize(Policy= "AllUsers")]
+    public async Task<ActionResult> GetUserProfile(
+        [FromRoute] string username,
+        CancellationToken cancellationToken)
+    {
+        var result = await getUserProfileUseCase.ExecuteAsync(username, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPut("profile")]
+    [Authorize(Policy= "AllUsers")]
+    public async Task<ActionResult> UpdateUserProfile(
+        [FromRoute] string username,
+        [FromBody] UserProfileForUpdateDto userProfileDto,
+        CancellationToken cancellationToken)
+    {
+        await updateUserProfileUseCase.ExecuteAsync(username, userProfileDto, cancellationToken);
+        return NoContent();
     }
 }

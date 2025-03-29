@@ -38,7 +38,6 @@ public class RoleConfig : IEntityTypeConfiguration<IdentityRole>
             {
                 Name = "Banned",
                 NormalizedName = "BANNED",
-            }
-        );
+            });
     }
 }

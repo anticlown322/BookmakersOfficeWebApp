@@ -23,8 +23,13 @@ public class LoginUseCase(
         CancellationToken cancellationToken)
     {
         var userEntity = await usersRepository.GetUserByNameAsync(userDto.UserName, cancellationToken);
+        if (userEntity == null)
+        {
+            throw new UserNotFoundByNameException(userDto.UserName);
+        }
+
         var passwordCheckResult = await signInManager.CheckPasswordSignInAsync(userEntity, userDto.Password, false);
-        if (userEntity == null || !passwordCheckResult.Succeeded)
+        if (!passwordCheckResult.Succeeded)
         {
             throw new InvalidCredentialsException(userDto.UserName, userDto.Password);
         }

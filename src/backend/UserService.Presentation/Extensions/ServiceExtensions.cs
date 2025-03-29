@@ -15,6 +15,7 @@ using UserService.Application.Contracts.Services;
 using UserService.Application.Contracts.UseCases;
 using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.Contracts.UseCases.Authentication;
+using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
@@ -22,6 +23,7 @@ using UserService.Application.DTO.MappingProfiles;
 using UserService.Application.UseCases;
 using UserService.Application.UseCases.Account;
 using UserService.Application.UseCases.Authentication;
+using UserService.Application.UseCases.Balance;
 using UserService.Application.UseCases.User;
 using UserService.Application.Validation.Validators;
 using UserService.Domain.Models;
@@ -109,6 +111,16 @@ public static class ServiceExtensions
         // account
         services.AddScoped<ISendConfirmationEmailUseCase, SendConfirmationEmailUseCase>();
         services.AddScoped<IConfirmEmailUseCase, ConfirmEmailUseCase>();
+        services.AddScoped<ISendResetPasswordEmailUseCase, SendResetPasswordEmailUseCase>();
+        services.AddScoped<IResetPasswordUseCase, ResetPasswordUseCase>();
+        services.AddScoped<IGetUserProfileUseCase, GetUserProfileUseCase>();
+        services.AddScoped<IUpdateUserProfileUseCase, UpdateUserProfileUseCase>();
+
+        // balance
+        services.AddScoped<IGetUserBalanceUseCase, GetUserBalanceUseCase>();
+        services.AddScoped<IDepositToUserBalanceUseCase, DepositToUserBalanceUseCase>();
+        services.AddScoped<IWithDrawFromUserBalanceUseCase, WithDrawFromUserBalanceUseCase>();
+        services.AddScoped<IGetTransactionHistory, GetTransactionHistoryUseCase>();
     }
 
     public static void ConfigureSqlContext(this IServiceCollection services)
@@ -127,6 +139,9 @@ public static class ServiceExtensions
         {
             cfg.AddProfile<RegisterUserMappingProfile>();
             cfg.AddProfile<GetUsersMappingProfile>();
+            cfg.AddProfile<GetUserProfileMappingProfile>();
+            cfg.AddProfile<UpdateUserProfileMappingProfile>();
+            cfg.AddProfile<GetTransactionsMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 
@@ -170,6 +185,34 @@ public static class ServiceExtensions
                 };
             });
     }
+
+    public static void AddAuthorizationPolicies(this IServiceCollection services) =>
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("GamblerOnly", policy =>
+                policy.RequireRole("Gambler"));
+
+            options.AddPolicy("ModeratorOnly", policy =>
+                policy.RequireRole("Moderator"));
+
+            options.AddPolicy("BookmakerOnly", policy =>
+                policy.RequireRole("Bookmaker"));
+
+            options.AddPolicy("AdministratorOnly", policy =>
+                policy.RequireRole("Administrator"));
+
+            options.AddPolicy("AdministratorOrGambler", policy =>
+                policy.RequireRole("Gambler", "Administrator"));
+
+            options.AddPolicy("AdministratorOrModerator", policy =>
+                policy.RequireRole("Administrator", "Moderator"));
+
+            options.AddPolicy("AdministratorOrModeratorOrGambler", policy =>
+                policy.RequireRole("Administrator", "Moderator", "Gambler"));
+
+            options.AddPolicy("AllUsers", policy =>
+                policy.RequireRole("Gambler", "Moderator", "Bookmaker", "Administrator"));
+        });
 
     public static void AddValidators(this IServiceCollection services)
     {

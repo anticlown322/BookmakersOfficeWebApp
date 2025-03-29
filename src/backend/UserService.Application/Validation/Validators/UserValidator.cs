@@ -9,16 +9,6 @@ public class UserValidator : AbstractValidator<Domain.Models.User>
 
     public UserValidator()
     {
-        RuleFor(u => u.FirstName)
-            .NotEmpty()
-            .WithMessage(u => ValidationUtils.EmptyParamMessage(nameof(u.FirstName)))
-            .MaximumLength(MaxFirstNameLength)
-            .WithMessage(u => ValidationUtils.TooLongParamMessage(nameof(u.UserName), MaxFirstNameLength));
 
-        RuleFor(u => u.LastName)
-            .NotEmpty()
-            .WithMessage(u => ValidationUtils.EmptyParamMessage(nameof(u.LastName)))
-            .MaximumLength(MaxLastNameLength)
-            .WithMessage(u => ValidationUtils.TooLongParamMessage(nameof(u.LastName), MaxLastNameLength));
     }
 }
