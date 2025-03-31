@@ -1,21 +1,20 @@
 ﻿using FluentValidation;
-using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 
-namespace UserService.Application.Validation.Validators;
+namespace UserService.Application.Validation.Validators.Authentication;
 
-public class UserAuthenticationDtoValidator : AbstractValidator<UserForLoginDto>
+public class UserLoginDtoValidator : AbstractValidator<UserLoginDto>
 {
-    private const int MaxLoginLength = 100;
+    private const int MaxUsernameLength = 100;
     private const int MaxPasswordLength = 100;
 
-    public UserAuthenticationDtoValidator()
+    public UserLoginDtoValidator()
     {
         RuleFor(l => l.UserName)
             .NotEmpty()
             .WithMessage(l => ValidationUtils.EmptyParamMessage(nameof(l.UserName)))
-            .MaximumLength(MaxLoginLength)
-            .WithMessage(l => ValidationUtils.TooLongParamMessage(nameof(l.UserName), MaxLoginLength));
+            .MaximumLength(MaxUsernameLength)
+            .WithMessage(l => ValidationUtils.TooLongParamMessage(nameof(l.UserName), MaxUsernameLength));
 
         RuleFor(l => l.Password)
             .NotEmpty()

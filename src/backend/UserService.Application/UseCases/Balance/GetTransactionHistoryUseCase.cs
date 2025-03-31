@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Domain.RequestFeatures;
 using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.DTO.Balance;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.RepositoryContracts;
+using UserService.Domain.RequestFeatures;
 
 namespace UserService.Application.UseCases.Balance;
 
@@ -11,29 +13,26 @@ public class GetTransactionHistoryUseCase(
     IMapper mapper
     ) : IGetTransactionHistory
 {
-    public async Task<TransactionHistoryForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<TransactionDto> transactions, MetaData metaData)> ExecuteAsync(
+        string username, TransactionParameters transactionParameters, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
-        if (userToGet.Balance?.Transactions is null || !userToGet.Balance.Transactions.Any())
-        {
-            return new TransactionHistoryForGetDto(
-                Transactions: Array.Empty<TransactionDto>(),
-                TotalCount: 0);
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var transactions = userToGet.Balance.Transactions
-            .OrderByDescending(t => t.CreatedAt)
-            .ToList();
+        var transactionsWithMetaData = await usersRepository.GetAllBalanceTransactionsAsync(
+            transactionParameters, userToGet, cancellationToken);
 
-        var mappedTransactions = mapper.Map<List<TransactionDto>>(transactions);
+        var transactionsDto = mapper.Map<IEnumerable<TransactionDto>>(transactionsWithMetaData);
 
-        return new TransactionHistoryForGetDto(
-            Transactions: mappedTransactions.AsReadOnly(),
-            TotalCount: mappedTransactions.Count);
+        return (
+            transactions: transactionsDto,
+            metaData: transactionsWithMetaData.MetaData);
     }
 }

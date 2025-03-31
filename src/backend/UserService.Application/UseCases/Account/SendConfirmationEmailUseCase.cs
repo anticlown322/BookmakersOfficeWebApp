@@ -12,6 +12,8 @@ public class SendConfirmationEmailUseCase(
 {
     public async Task ExecuteAsync(string username, string baseUrl, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (user is null)
         {
@@ -24,6 +26,8 @@ public class SendConfirmationEmailUseCase(
         }
 
         var confirmationLink = $"{baseUrl}/api/users/{username}/account/confirm-email";
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         await emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
     }

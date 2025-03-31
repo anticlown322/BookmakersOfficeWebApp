@@ -7,7 +7,7 @@ public class UpdateUserProfileMappingProfile : Profile
 {
     public UpdateUserProfileMappingProfile()
     {
-        CreateMap<UserProfileForUpdateDto, Domain.Models.User>()
+        CreateMap<UserProfileUpdateDto, Domain.Models.User>()
             .ForPath(dest => dest.Profile.FirstName, opt => opt.MapFrom(src => src.FirstName))
             .ForPath(dest => dest.Profile.LastName, opt => opt.MapFrom(src => src.LastName));
     }

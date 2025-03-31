@@ -1,8 +1,7 @@
 ﻿using NLog;
-using UserService.Application.Contracts;
 using UserService.Application.Contracts.Services;
 
-namespace UserService.Infrastructure.Logs;
+namespace UserService.Infrastructure.Services;
 
 public class LoggerService : ILoggerService
 {

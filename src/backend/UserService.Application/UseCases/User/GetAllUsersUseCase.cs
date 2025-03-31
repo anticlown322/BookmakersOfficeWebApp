@@ -13,10 +13,12 @@ public class GetAllUsersUseCase(
     IMapper mapper)
     : IGetAllUsersUseCase
 {
-    public async Task<(IEnumerable<UserForGetDto> users, MetaData metaData)> ExecuteAsync(UserParameters userParams, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<UserGetDto> users, MetaData metaData)> ExecuteAsync(UserParameters userParams, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var usersWithMetaData = await usersRepository.GetAllUsersAsync(userParams, cancellationToken);
-        var usersDto = mapper.Map<IEnumerable<UserForGetDto>>(usersWithMetaData);
+        var usersDto = mapper.Map<IEnumerable<UserGetDto>>(usersWithMetaData);
 
         return (
             users: usersDto,

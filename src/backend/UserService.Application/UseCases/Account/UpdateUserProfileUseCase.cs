@@ -11,15 +11,20 @@ public class UpdateUserProfileUseCase(
     IMapper mapper
     ) : IUpdateUserProfileUseCase
 {
-    public async Task ExecuteAsync(string username, UserProfileForUpdateDto userProfileForUpdateDto, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(string username, UserProfileUpdateDto userProfileUpdateDto, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
-        mapper.Map(userProfileForUpdateDto, userToGet);
+        mapper.Map(userProfileUpdateDto, userToGet);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         await usersRepository.UpdateUserAsync(userToGet, cancellationToken);
     }
 }

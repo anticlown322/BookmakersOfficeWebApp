@@ -10,13 +10,17 @@ public class ResetPasswordUseCase(IUsersRepository usersRepository, UserManager<
 {
     public async Task ExecuteAsync(string username, PasswordResetDto passwordResetDto, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (user is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
-        var result = await userManager.ResetPasswordAsync(user, passwordResetDto.token, passwordResetDto.newPassword);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var result = await userManager.ResetPasswordAsync(user, passwordResetDto.Token, passwordResetDto.NewPassword);
         if (result.Errors.Any())
         {
             var error = result.Errors.FirstOrDefault();

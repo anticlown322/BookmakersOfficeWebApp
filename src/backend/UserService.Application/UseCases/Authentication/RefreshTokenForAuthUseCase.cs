@@ -23,22 +23,25 @@ public class RefreshTokenForAuthUseCase(
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
-    public async Task<string> ExecuteAsync(TokenDto tokenDto, CancellationToken cancellationToken)
+    public async Task<string> ExecuteAsync(TokensRefreshDto tokensGetDto, CancellationToken cancellationToken)
     {
-        var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var principal = GetPrincipalFromExpiredToken(tokensGetDto.AccessToken);
         var user = await usersRepository.GetUserByNameAsync(principal.Identity.Name, cancellationToken);
 
-        if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
+        if (user == null || user.RefreshToken != tokensGetDto.RefreshToken ||
             user.RefreshTokenExpiryTime <= DateTime.Now)
         {
             throw new RefreshTokenBadRequest();
         }
 
-        var newAccessToken = await tokenService.CreateAccessToken(user);
+        cancellationToken.ThrowIfCancellationRequested();
 
+        var newAccessToken = await tokenService.CreateAccessToken(user);
         if (newAccessToken is null)
         {
-            throw new TokenNotCreatedException(nameof(tokenDto.AccessToken));
+            throw new TokenNotCreatedException(nameof(tokensGetDto.AccessToken));
         }
 
         return newAccessToken;

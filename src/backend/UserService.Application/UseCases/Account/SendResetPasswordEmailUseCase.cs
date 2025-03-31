@@ -13,13 +13,19 @@ public class SendResetPasswordEmailUseCase(
 {
     public async Task ExecuteAsync(string username, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (user is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         await emailService.SendResetPasswordEmailAsync(user.Email, resetToken);
     }

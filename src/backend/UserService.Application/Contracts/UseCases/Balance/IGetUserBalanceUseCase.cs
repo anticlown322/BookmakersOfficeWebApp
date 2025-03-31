@@ -4,5 +4,5 @@ namespace UserService.Application.Contracts.UseCases.Balance;
 
 public interface IGetUserBalanceUseCase
 {
-    Task<UserBalanceForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken);
+    Task<UserBalanceGetDto> ExecuteAsync(string username, CancellationToken cancellationToken);
 }

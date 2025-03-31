@@ -2,7 +2,7 @@
 
 namespace UserService.Application.Contracts.UseCases.Balance;
 
-public interface IWithDrawFromUserBalanceUseCase
+public interface IWithdrawFromUserBalanceUseCase
 {
     Task ExecuteAsync(string username, WithdrawRequestDto withdrawRequestDto, CancellationToken cancellationToken);
 }

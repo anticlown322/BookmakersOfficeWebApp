@@ -11,17 +11,21 @@ public class GetUserProfileUseCase(
     IMapper mapper)
     : IGetUserProfileUseCase
 {
-    public async Task<UserProfileForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
+    public async Task<UserProfileGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var roles = await usersRepository.GetUserRolesAsync(userToGet, cancellationToken);
 
-        var userProfileDto = mapper.Map<UserProfileForGetDto>(userToGet, opts => 
+        var userProfileDto = mapper.Map<UserProfileGetDto>(userToGet, opts => 
             opts.Items["Roles"] = roles.ToList());
 
         return userProfileDto;

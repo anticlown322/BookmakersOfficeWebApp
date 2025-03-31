@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.DTO.Account;
 using UserService.Application.UseCases.Account;
+using UserService.Application.Validation;
 
 namespace UserService.Presentation.Controllers;
 
@@ -74,9 +75,10 @@ public class AccountController(
 
     [HttpPut("profile")]
     [Authorize(Policy= "AllUsers")]
+    [ValidationFilter<UserProfileUpdateDto>]
     public async Task<ActionResult> UpdateUserProfile(
         [FromRoute] string username,
-        [FromBody] UserProfileForUpdateDto userProfileDto,
+        [FromBody] UserProfileUpdateDto userProfileDto,
         CancellationToken cancellationToken)
     {
         await updateUserProfileUseCase.ExecuteAsync(username, userProfileDto, cancellationToken);

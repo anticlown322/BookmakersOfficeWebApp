@@ -5,7 +5,7 @@ using UserService.Domain.Models;
 
 namespace UserService.Infrastructure.Repository.Configs;
 
-public class UserConfig : IEntityTypeConfiguration<UserProfile>
+public class UserProfileConfig : IEntityTypeConfiguration<UserProfile>
 {
     private static readonly JsonSerializerOptions JsonOptions = new ()
     {
@@ -33,7 +33,8 @@ public class UserConfig : IEntityTypeConfiguration<UserProfile>
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
-        builder.HasIndex(up => up.UserId).IsUnique();
+        builder.HasIndex(up => up.UserId)
+            .IsUnique();
 
         builder.Ignore(up => up.User);
 

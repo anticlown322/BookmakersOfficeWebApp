@@ -15,21 +15,21 @@ public class RegisterUserUseCase(
     : IRegisterUserUseCase
 {
     public async Task<IdentityResult> ExecuteAsync(
-        UserForRegistrationDto userForRegistration,
+        UserRegistrationDto userRegistration,
         CancellationToken cancellationToken)
     {
-        var existingUser = await usersRepository.GetUserByNameAsync(userForRegistration.UserName, cancellationToken);
+        var existingUser = await usersRepository.GetUserByNameAsync(userRegistration.UserName, cancellationToken);
         if (existingUser != null)
         {
-            throw new UserAlreadyExistsException(userForRegistration.UserName);
+            throw new UserAlreadyExistsException(userRegistration.UserName);
         }
 
-        var user = mapper.Map<Domain.Models.User>(userForRegistration);
+        var user = mapper.Map<Domain.Models.User>(userRegistration);
 
         var result = await usersRepository.CreateUserAsync(
             user,
-            userForRegistration.Password,
-            userForRegistration.Roles ?? new List<string>(),
+            userRegistration.Password,
+            userRegistration.Roles ?? new List<string>(),
             cancellationToken);
 
         if (!result.Succeeded)

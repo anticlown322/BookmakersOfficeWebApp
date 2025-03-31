@@ -11,15 +11,17 @@ public class GetUserByNameUseCase(
     IMapper mapper)
     : IGetUserByNameUseCase
 {
-    public async Task<UserForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
+    public async Task<UserGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
             throw new UserNotFoundByNameException(username);
         }
 
-        var userDto = mapper.Map<UserForGetDto>(userToGet);
+        var userDto = mapper.Map<UserGetDto>(userToGet);
         return userDto;
     }
 }

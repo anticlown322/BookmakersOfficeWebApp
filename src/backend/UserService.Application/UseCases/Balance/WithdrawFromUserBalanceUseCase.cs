@@ -1,15 +1,18 @@
 ﻿using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.DTO.Balance;
+using UserService.Application.Utility;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Balance;
 
-public class WithDrawFromUserBalanceUseCase(IUsersRepository usersRepository) : IWithDrawFromUserBalanceUseCase
+public class WithdrawFromUserBalanceUseCase(IUsersRepository usersRepository) : IWithdrawFromUserBalanceUseCase
 {
     public async Task ExecuteAsync(string username, WithdrawRequestDto withdrawRequestDto, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
@@ -34,11 +37,13 @@ public class WithDrawFromUserBalanceUseCase(IUsersRepository usersRepository) : 
             UserId = userToGet.Id,
             Amount = withdrawRequestDto.Amount,
             CreatedAt = DateTime.UtcNow.ToUniversalTime(),
-            OperationType = "Withdraw",
+            OperationType = BalanceOperationTypesAndStatuses.WithdrawOperation,
             Comment = withdrawRequestDto.Comment
         };
-
         userToGet.Balance.Transactions.Add(transaction);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         await usersRepository.UpdateUserAsync(userToGet, cancellationToken);
     }
 }

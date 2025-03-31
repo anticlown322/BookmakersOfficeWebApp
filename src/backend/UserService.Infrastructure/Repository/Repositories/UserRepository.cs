@@ -15,11 +15,13 @@ public class UserRepository(
         UserParameters userParameters,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var users = await FindAllAsync(false, cancellationToken);
 
         var orderedUsers = users.OrderBy(p => p.UserName);
 
-        var pagedParticipants = orderedUsers
+        var pagedUsers = orderedUsers
             .Skip((userParameters.PageNumber - 1) * userParameters.PageSize)
             .Take(userParameters.PageSize)
             .ToList();
@@ -27,7 +29,7 @@ public class UserRepository(
         var totalCount = orderedUsers.Count();
 
         return new PagedList<User>(
-            pagedParticipants,
+            pagedUsers,
             totalCount,
             userParameters.PageNumber,
             userParameters.PageSize);
@@ -35,34 +37,73 @@ public class UserRepository(
 
     public async Task<User> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await userManager.FindByIdAsync(userId.ToString());
+
         return user;
     }
 
     public async Task<User> GetUserByNameAsync(string userName, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await repositoryContext.Users
             .Include(u => u.Profile)
             .Include(u => u.Balance)
-            .ThenInclude(b => b.Transactions)
             .FirstOrDefaultAsync(u => u.UserName == userName, cancellationToken);
+
         return user;
     }
 
     public async Task<IList<string>> GetUserRolesAsync(User user, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         return await userManager.GetRolesAsync(user);
+    }
+
+    public async Task<PagedList<BalanceTransaction>> GetAllBalanceTransactionsAsync(
+        TransactionParameters transactionParameters, User user, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var userWithTransactions = await repositoryContext.Users
+            .Include(u => u.Balance)
+            .ThenInclude(b => b.Transactions)
+            .FirstOrDefaultAsync(u => u.UserName == user.UserName, cancellationToken);
+
+        var orderedTransactions = userWithTransactions.Balance.Transactions
+            .OrderBy(p => p.CreatedAt);
+
+        var pagedTransactions = orderedTransactions
+            .Skip((transactionParameters.PageNumber - 1) * transactionParameters.PageSize)
+            .Take(transactionParameters.PageSize)
+            .ToList();
+
+        var totalCount = orderedTransactions.Count();
+
+        return new PagedList<BalanceTransaction>(
+            pagedTransactions,
+            totalCount,
+            transactionParameters.PageNumber,
+            transactionParameters.PageSize);
     }
 
     public async Task<IdentityResult> CreateUserAsync(User user, string password, ICollection<string> roles, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         await userManager.CreateAsync(user, password);
         var registrationResult = await userManager.AddToRolesAsync(user, roles);
+
         return registrationResult;
     }
 
     public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         await userManager.UpdateAsync(user);
     }
 

@@ -21,7 +21,7 @@ public class TokenService(
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private User? _user;
 
-    public async Task<TokenDto> CreateTokens(User user, bool populateExp)
+    public async Task<TokensGetDto> CreateTokens(User user, bool populateExp)
     {
         _user = user;
 
@@ -40,7 +40,7 @@ public class TokenService(
 
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-        return new TokenDto(accessToken, refreshToken);
+        return new TokensGetDto(accessToken, refreshToken);
     }
 
     public async Task<string> CreateAccessToken(User user)

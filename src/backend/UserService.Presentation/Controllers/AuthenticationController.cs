@@ -18,20 +18,20 @@ public class AuthenticationController(
     : ControllerBase
 {
     [HttpPost("register")]
-    [ValidationFilter<UserForRegistrationDto>]
+    [ValidationFilter<UserRegistrationDto>]
     public async Task<IActionResult> Register(
-        [FromBody] UserForRegistrationDto userForRegistration,
+        [FromBody] UserRegistrationDto userRegistration,
         CancellationToken cancellationToken)
     {
-        var result = await registerUserUseCase.ExecuteAsync(userForRegistration, cancellationToken);
+        var result = await registerUserUseCase.ExecuteAsync(userRegistration, cancellationToken);
 
         return StatusCode(201);
     }
 
     [HttpPost("login")]
-    [ValidationFilter<UserForLoginDto>]
+    [ValidationFilter<UserLoginDto>]
     public async Task<IActionResult> Login(
-        [FromBody] UserForLoginDto user,
+        [FromBody] UserLoginDto user,
         CancellationToken cancellationToken)
     {
         var tokenDto = await loginUseCase.ExecuteAsync(user, populateExp: true, cancellationToken);
@@ -41,22 +41,24 @@ public class AuthenticationController(
 
     [HttpPost("refresh")]
     [Authorize(Policy= "AllUsers")]
+    [ValidationFilter<TokensRefreshDto>]
     public async Task<IActionResult> Refresh(
-        [FromBody] TokenDto tokenDto,
+        [FromBody] TokensRefreshDto tokensGetDto,
         CancellationToken cancellationToken)
     {
-        var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokenDto, cancellationToken);
+        var tokenDtoToReturn = await refreshTokenForAuthUseCase.ExecuteAsync(tokensGetDto, cancellationToken);
 
         return Ok(tokenDtoToReturn);
     }
 
     [HttpPost("logout")]
     [Authorize(Policy= "AllUsers")]
+    [ValidationFilter<UserLogoutDto>]
     public async Task<IActionResult> Logout(
-        [FromBody] UserForLogoutDto userForLogoutDto,
+        [FromBody] UserLogoutDto userLogoutDto,
         CancellationToken cancellationToken)
     {
-        await logoutUseCase.ExecuteAsync(userForLogoutDto, populateExp: true, cancellationToken);
+        await logoutUseCase.ExecuteAsync(userLogoutDto, populateExp: true, cancellationToken);
 
         return Ok();
     }

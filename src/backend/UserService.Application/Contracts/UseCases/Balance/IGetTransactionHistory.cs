@@ -1,8 +1,11 @@
-﻿using UserService.Application.DTO.Balance;
+﻿using Domain.RequestFeatures;
+using UserService.Application.DTO.Balance;
+using UserService.Domain.RequestFeatures;
 
 namespace UserService.Application.Contracts.UseCases.Balance;
 
 public interface IGetTransactionHistory
 {
-    Task<TransactionHistoryForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken);
+    Task<(IEnumerable<TransactionDto> transactions, MetaData metaData)> ExecuteAsync(
+        string username, TransactionParameters transactionParameters, CancellationToken cancellationToken);
 }

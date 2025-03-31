@@ -17,22 +17,28 @@ public class LoginUseCase(
     SignInManager<Domain.Models.User> signInManager)
     : ILoginUseCase
 {
-    public async Task<TokenDto> ExecuteAsync(
-        UserForLoginDto userDto,
+    public async Task<TokensGetDto> ExecuteAsync(
+        UserLoginDto userDto,
         bool populateExp,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userEntity = await usersRepository.GetUserByNameAsync(userDto.UserName, cancellationToken);
         if (userEntity == null)
         {
             throw new UserNotFoundByNameException(userDto.UserName);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var passwordCheckResult = await signInManager.CheckPasswordSignInAsync(userEntity, userDto.Password, false);
         if (!passwordCheckResult.Succeeded)
         {
             throw new InvalidCredentialsException(userDto.UserName, userDto.Password);
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var tokenDto = await tokenService.CreateTokens(userEntity, populateExp);
 

@@ -8,11 +8,15 @@ public class DeleteUserUseCase(IUsersRepository usersRepository) : IDeleteUserUs
 {
     public async Task ExecuteAsync(string userName, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToDelete = await usersRepository.GetUserByNameAsync(userName, cancellationToken);
         if (userToDelete is null)
         {
             throw new UserNotFoundByNameException(userName);
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         await usersRepository.DeleteUserAsync(userToDelete);
     }

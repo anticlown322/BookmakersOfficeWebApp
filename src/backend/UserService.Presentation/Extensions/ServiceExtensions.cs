@@ -18,7 +18,9 @@ using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Account;
 using UserService.Application.DTO.Authentication;
+using UserService.Application.DTO.Balance;
 using UserService.Application.DTO.MappingProfiles;
 using UserService.Application.UseCases;
 using UserService.Application.UseCases.Account;
@@ -26,13 +28,17 @@ using UserService.Application.UseCases.Authentication;
 using UserService.Application.UseCases.Balance;
 using UserService.Application.UseCases.User;
 using UserService.Application.Validation.Validators;
+using UserService.Application.Validation.Validators.Account;
+using UserService.Application.Validation.Validators.Authentication;
+using UserService.Application.Validation.Validators.Balance;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.Infrastructure;
-using UserService.Infrastructure.Logs;
 using UserService.Infrastructure.Repository;
 using UserService.Infrastructure.Repository.Repositories;
 using UserService.Infrastructure.Services;
+using UserService.Infrastructure.Utility;
+using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Extensions;
 
@@ -119,7 +125,7 @@ public static class ServiceExtensions
         // balance
         services.AddScoped<IGetUserBalanceUseCase, GetUserBalanceUseCase>();
         services.AddScoped<IDepositToUserBalanceUseCase, DepositToUserBalanceUseCase>();
-        services.AddScoped<IWithDrawFromUserBalanceUseCase, WithDrawFromUserBalanceUseCase>();
+        services.AddScoped<IWithdrawFromUserBalanceUseCase, WithdrawFromUserBalanceUseCase>();
         services.AddScoped<IGetTransactionHistory, GetTransactionHistoryUseCase>();
     }
 
@@ -189,36 +195,46 @@ public static class ServiceExtensions
     public static void AddAuthorizationPolicies(this IServiceCollection services) =>
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("GamblerOnly", policy =>
-                policy.RequireRole("Gambler"));
+            options.AddPolicy(AuthorizationPolicies.GamblerOnly, policy =>
+                policy.RequireRole(UserRoles.Gambler));
 
-            options.AddPolicy("ModeratorOnly", policy =>
-                policy.RequireRole("Moderator"));
+            options.AddPolicy(AuthorizationPolicies.ModeratorOnly, policy =>
+                policy.RequireRole(UserRoles.Moderator));
 
-            options.AddPolicy("BookmakerOnly", policy =>
-                policy.RequireRole("Bookmaker"));
+            options.AddPolicy(AuthorizationPolicies.BookmakerOnly, policy =>
+                policy.RequireRole(UserRoles.Bookmaker));
 
-            options.AddPolicy("AdministratorOnly", policy =>
-                policy.RequireRole("Administrator"));
+            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
+                policy.RequireRole(UserRoles.Administrator));
 
-            options.AddPolicy("AdministratorOrGambler", policy =>
-                policy.RequireRole("Gambler", "Administrator"));
+            options.AddPolicy(AuthorizationPolicies.AdministratorOrGambler, policy =>
+                policy.RequireRole(UserRoles.Gambler, UserRoles.Administrator));
 
-            options.AddPolicy("AdministratorOrModerator", policy =>
-                policy.RequireRole("Administrator", "Moderator"));
+            options.AddPolicy(AuthorizationPolicies.AdministratorOrModerator, policy =>
+                policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator));
 
-            options.AddPolicy("AdministratorOrModeratorOrGambler", policy =>
-                policy.RequireRole("Administrator", "Moderator", "Gambler"));
+            options.AddPolicy(AuthorizationPolicies.AdministratorOrModeratorOrGambler, policy =>
+                policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator, UserRoles.Gambler));
 
-            options.AddPolicy("AllUsers", policy =>
-                policy.RequireRole("Gambler", "Moderator", "Bookmaker", "Administrator"));
+            options.AddPolicy(AuthorizationPolicies.AllUsers, policy =>
+                policy.RequireRole(UserRoles.Administrator, UserRoles.Gambler, UserRoles.Moderator, UserRoles.Bookmaker));
         });
 
     public static void AddValidators(this IServiceCollection services)
     {
-        services.AddTransient<IValidator<User>, UserValidator>();
-        services.AddTransient<IValidator<UserForRegistrationDto>, UserRegistrationDtoValidator>();
-        services.AddTransient<IValidator<UserForLoginDto>, UserAuthenticationDtoValidator>();
+        // account
+        services.AddTransient<IValidator<PasswordResetDto>, PasswordResetDtoValidator>();
+        services.AddTransient<IValidator<UserProfileUpdateDto>, UserProfileUpdateDtoValidator>();
+
+        // auth
+        services.AddTransient<IValidator<UserRegistrationDto>, UserRegistrationDtoValidator>();
+        services.AddTransient<IValidator<UserLoginDto>, UserLoginDtoValidator>();
+        services.AddTransient<IValidator<TokensRefreshDto>, TokensRefreshDtoValidator>();
+        services.AddTransient<IValidator<UserLogoutDto>, UserLogoutDtoValidator>();
+
+        // balance
+        services.AddTransient<IValidator<DepositRequestDto>, DepositRequestDtoValidator>();
+        services.AddTransient<IValidator<WithdrawRequestDto>, WithdrawRequestDtoValidator>();
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>

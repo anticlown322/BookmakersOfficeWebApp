@@ -1,6 +1,6 @@
 ﻿namespace UserService.Application.DTO.Authentication;
 
-public record UserForRegistrationDto
+public record UserRegistrationDto
 {
     public string? FirstName { get; init; }
     public string? LastName { get; init; }

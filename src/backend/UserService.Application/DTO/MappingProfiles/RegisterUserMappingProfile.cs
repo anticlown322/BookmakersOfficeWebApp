@@ -8,7 +8,7 @@ public class RegisterUserMappingProfile : Profile
 {
     public RegisterUserMappingProfile()
     {
-        CreateMap<UserForRegistrationDto, Domain.Models.User>()
+        CreateMap<UserRegistrationDto, Domain.Models.User>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))

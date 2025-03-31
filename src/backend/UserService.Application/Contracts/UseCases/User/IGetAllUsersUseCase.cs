@@ -7,6 +7,6 @@ namespace UserService.Application.Contracts.UseCases.User;
 
 public interface IGetAllUsersUseCase
 {
-    Task<(IEnumerable<UserForGetDto> users, MetaData metaData)>
+    Task<(IEnumerable<UserGetDto> users, MetaData metaData)>
         ExecuteAsync(UserParameters userParams, CancellationToken cancellationToken);
 }

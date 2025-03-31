@@ -50,37 +50,37 @@ namespace UserService.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8a1f1669-2a03-46d6-bc7d-2825250bdf94",
+                            Id = "098e8192-7edf-45b6-aa8f-e3d950204015",
                             Name = "Guest",
                             NormalizedName = "GUEST"
                         },
                         new
                         {
-                            Id = "0e5fbdc5-8ce3-4698-9f16-895c783de3ea",
+                            Id = "483cfe48-3bc8-4ee8-bbd4-f7c3ed8df8ee",
                             Name = "Gambler",
                             NormalizedName = "GAMBLER"
                         },
                         new
                         {
-                            Id = "a2e9937b-bb43-4d77-9e71-f94d60551ba6",
+                            Id = "4bee1774-005d-4336-8f9f-45b53738f94b",
                             Name = "Moderator",
                             NormalizedName = "MODERATOR"
                         },
                         new
                         {
-                            Id = "7a4daa19-f143-4efd-b7b6-f9eabc3aaa8e",
+                            Id = "511f249b-f68e-4e84-88a9-f92b60411820",
                             Name = "Bookmaker",
                             NormalizedName = "BOOKMAKER"
                         },
                         new
                         {
-                            Id = "842f7499-9144-42d2-b0f1-609ab54da08e",
+                            Id = "f508305c-5e5c-4adf-8aa1-a36ab4c6e149",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         },
                         new
                         {
-                            Id = "a647935a-0615-4a38-8b4d-6a0095776ef3",
+                            Id = "57f2ca91-e673-4609-bd3a-9a5d1e38b955",
                             Name = "Banned",
                             NormalizedName = "BANNED"
                         });
@@ -201,20 +201,19 @@ namespace UserService.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OperationType")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("UserBalanceId")
-                        .HasColumnType("integer");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -222,11 +221,9 @@ namespace UserService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserBalanceId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("BalanceTransaction", (string)null);
+                    b.ToTable("BalanceTransaction");
                 });
 
             modelBuilder.Entity("UserService.Domain.Models.User", b =>
@@ -308,7 +305,7 @@ namespace UserService.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("CurrentAmount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
@@ -322,7 +319,7 @@ namespace UserService.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserBalance", (string)null);
+                    b.ToTable("UserBalance");
                 });
 
             modelBuilder.Entity("UserService.Domain.Models.UserProfile", b =>
@@ -356,7 +353,7 @@ namespace UserService.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfile", (string)null);
+                    b.ToTable("UserProfile");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -414,26 +411,19 @@ namespace UserService.Infrastructure.Migrations
                 {
                     b.HasOne("UserService.Domain.Models.UserBalance", null)
                         .WithMany("Transactions")
-                        .HasForeignKey("UserBalanceId");
-
-                    b.HasOne("UserService.Domain.Models.User", "User")
-                        .WithMany()
                         .HasForeignKey("UserId")
+                        .HasPrincipalKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UserService.Domain.Models.UserBalance", b =>
                 {
-                    b.HasOne("UserService.Domain.Models.User", "User")
+                    b.HasOne("UserService.Domain.Models.User", null)
                         .WithOne("Balance")
                         .HasForeignKey("UserService.Domain.Models.UserBalance", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("UserService.Domain.Models.UserProfile", b =>

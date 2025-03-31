@@ -4,5 +4,5 @@ namespace UserService.Application.Contracts.UseCases.User;
 
 public interface IGetUserByIdUseCase
 {
-    Task<UserForGetDto> ExecuteAsync(Guid userId, CancellationToken cancellationToken);
+    Task<UserGetDto> ExecuteAsync(Guid userId, CancellationToken cancellationToken);
 }

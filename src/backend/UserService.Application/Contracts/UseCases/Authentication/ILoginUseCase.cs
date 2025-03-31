@@ -5,5 +5,5 @@ namespace UserService.Application.Contracts.UseCases.Authentication;
 
 public interface ILoginUseCase
 {
-    Task<TokenDto> ExecuteAsync(UserForLoginDto userDto, bool populateExp, CancellationToken cancellationToken);
+    Task<TokensGetDto> ExecuteAsync(UserLoginDto userDto, bool populateExp, CancellationToken cancellationToken);
 }

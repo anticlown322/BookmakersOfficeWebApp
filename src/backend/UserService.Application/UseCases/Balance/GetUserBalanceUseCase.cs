@@ -7,8 +7,10 @@ namespace UserService.Application.UseCases.Balance;
 
 public class GetUserBalanceUseCase(IUsersRepository usersRepository) : IGetUserBalanceUseCase
 {
-    public async Task<UserBalanceForGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
+    public async Task<UserBalanceGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userToGet = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (userToGet is null)
         {
@@ -20,7 +22,7 @@ public class GetUserBalanceUseCase(IUsersRepository usersRepository) : IGetUserB
             throw new BalanceDataIsNotFoundException(username);
         }
 
-        return new UserBalanceForGetDto(
+        return new UserBalanceGetDto(
             userToGet.Balance.CurrentAmount,
             userToGet.Balance.LastUpdated);
     }

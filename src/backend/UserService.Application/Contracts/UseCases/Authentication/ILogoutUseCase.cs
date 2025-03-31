@@ -4,5 +4,5 @@ namespace UserService.Application.Contracts.UseCases.Authentication;
 
 public interface ILogoutUseCase
 {
-    Task ExecuteAsync(UserForLogoutDto userForLogoutDto, bool populateExp, CancellationToken cancellationToken);
+    Task ExecuteAsync(UserLogoutDto userLogoutDto, bool populateExp, CancellationToken cancellationToken);
 }

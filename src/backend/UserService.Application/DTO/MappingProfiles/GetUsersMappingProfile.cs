@@ -7,6 +7,6 @@ public class GetUsersMappingProfile : Profile
 {
     public GetUsersMappingProfile()
     {
-        CreateMap<Domain.Models.User, UserForGetDto>().ReverseMap();
+        CreateMap<Domain.Models.User, UserGetDto>().ReverseMap();
     }
 }

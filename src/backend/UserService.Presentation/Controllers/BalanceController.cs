@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Text.Json;
+using Domain.RequestFeatures;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.DTO.Balance;
+using UserService.Application.Validation;
+using UserService.Domain.RequestFeatures;
 
 namespace UserService.Presentation.Controllers;
 
@@ -9,7 +13,7 @@ namespace UserService.Presentation.Controllers;
 public class BalanceController(
     IGetUserBalanceUseCase getUserBalanceUseCase,
     IDepositToUserBalanceUseCase depositToUserBalanceUseCase,
-    IWithDrawFromUserBalanceUseCase withdrawFromUserBalanceUseCase,
+    IWithdrawFromUserBalanceUseCase withdrawFromUserBalanceUseCase,
     IGetTransactionHistory getTransactionHistory)
     : ControllerBase
 {
@@ -25,6 +29,7 @@ public class BalanceController(
     }
 
     [HttpPost("deposit")]
+    [ValidationFilter<DepositRequestDto>]
     public async Task Deposit(
         [FromRoute] string username,
         [FromBody] DepositRequestDto dto,
@@ -37,6 +42,7 @@ public class BalanceController(
 
     [HttpPost("withdraw")]
     [Authorize(Policy= "GamblerOnly")]
+    [ValidationFilter<WithdrawRequestDto>]
     public async Task Withdraw(
         [FromRoute] string username,
         [FromBody] WithdrawRequestDto dto,
@@ -51,10 +57,13 @@ public class BalanceController(
     [Authorize(Policy= "AdministratorOrModeratorOrGambler")]
     public async Task<IActionResult> GetTransactionHistory(
         [FromRoute] string username,
+        [FromQuery] TransactionParameters transactionParameters,
         CancellationToken cancellationToken)
     {
-        var history = await getTransactionHistory.ExecuteAsync(username, cancellationToken);
+        var pagedResult = await getTransactionHistory.ExecuteAsync(username, transactionParameters, cancellationToken);
 
-        return Ok(history);
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));
+
+        return Ok(pagedResult.transactions);
     }
 }

@@ -13,6 +13,8 @@ public class ConfirmEmailUseCase(
 {
     public async Task ExecuteAsync(string username, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var user = await usersRepository.GetUserByNameAsync(username, cancellationToken);
         if (user is null)
         {
@@ -24,7 +26,12 @@ public class ConfirmEmailUseCase(
             throw new EmailCanNotBeConfirmedException($"Your email is already confirmed.");
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
         var result = await userManager.ConfirmEmailAsync(user, token);
         if (result.Errors.Any())
         {
