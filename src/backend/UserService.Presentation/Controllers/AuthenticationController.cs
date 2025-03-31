@@ -5,6 +5,7 @@ using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.Validation;
+using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Controllers;
 
@@ -40,7 +41,7 @@ public class AuthenticationController(
     }
 
     [HttpPost("refresh")]
-    [Authorize(Policy= "AllUsers")]
+    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
     [ValidationFilter<TokensRefreshDto>]
     public async Task<IActionResult> Refresh(
         [FromBody] TokensRefreshDto tokensGetDto,
@@ -52,7 +53,7 @@ public class AuthenticationController(
     }
 
     [HttpPost("logout")]
-    [Authorize(Policy= "AllUsers")]
+    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
     [ValidationFilter<UserLogoutDto>]
     public async Task<IActionResult> Logout(
         [FromBody] UserLogoutDto userLogoutDto,

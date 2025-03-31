@@ -4,6 +4,7 @@ using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.DTO.Account;
 using UserService.Application.UseCases.Account;
 using UserService.Application.Validation;
+using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Controllers;
 
@@ -29,7 +30,7 @@ public class AccountController(
     }
 
     [HttpPost("send-confirmation-email")]
-    [Authorize(Policy= "AllUsers")]
+    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
     public async Task<ActionResult> SendConfirmationEmail(
         [FromRoute] string username,
         [FromServices] IHttpContextAccessor httpContextAccessor,
@@ -63,7 +64,7 @@ public class AccountController(
     }
 
     [HttpGet("profile")]
-    [Authorize(Policy= "AllUsers")]
+    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
     public async Task<ActionResult> GetUserProfile(
         [FromRoute] string username,
         CancellationToken cancellationToken)
@@ -74,7 +75,7 @@ public class AccountController(
     }
 
     [HttpPut("profile")]
-    [Authorize(Policy= "AllUsers")]
+    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
     [ValidationFilter<UserProfileUpdateDto>]
     public async Task<ActionResult> UpdateUserProfile(
         [FromRoute] string username,

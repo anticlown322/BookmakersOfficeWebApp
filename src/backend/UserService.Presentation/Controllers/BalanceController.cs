@@ -6,6 +6,7 @@ using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.DTO.Balance;
 using UserService.Application.Validation;
 using UserService.Domain.RequestFeatures;
+using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Controllers;
 
@@ -18,7 +19,7 @@ public class BalanceController(
     : ControllerBase
 {
     [HttpGet("current")]
-    [Authorize(Policy= "AdministratorOrModeratorOrGambler")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
     public async Task<IActionResult> GetCurrentBalance(
         [FromRoute] string username,
         CancellationToken cancellationToken)
@@ -41,7 +42,7 @@ public class BalanceController(
     }
 
     [HttpPost("withdraw")]
-    [Authorize(Policy= "GamblerOnly")]
+    [Authorize(Policy= AuthorizationPolicies.GamblerOnly)]
     [ValidationFilter<WithdrawRequestDto>]
     public async Task Withdraw(
         [FromRoute] string username,
@@ -54,7 +55,7 @@ public class BalanceController(
     }
 
     [HttpGet("history")]
-    [Authorize(Policy= "AdministratorOrModeratorOrGambler")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
     public async Task<IActionResult> GetTransactionHistory(
         [FromRoute] string username,
         [FromQuery] TransactionParameters transactionParameters,

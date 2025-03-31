@@ -5,6 +5,7 @@ using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.User;
 using UserService.Domain.RequestFeatures;
+using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Controllers;
 
@@ -18,7 +19,7 @@ public class UsersController(
     : ControllerBase
 {
     [HttpGet]
-    [Authorize(Policy= "AdministratorOrModerator")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModerator)]
     public async Task<IActionResult> GetUsers(
         [FromQuery] UserParameters userParameters,
         CancellationToken cancellationToken)
@@ -31,7 +32,7 @@ public class UsersController(
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize(Policy= "AdministratorOrModerator")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModerator)]
     public async Task<IActionResult> GetUserById(Guid id, CancellationToken cancellationToken)
     {
         var eventToGet = await getUserByIdUseCase.ExecuteAsync(id, cancellationToken);
@@ -40,7 +41,7 @@ public class UsersController(
     }
 
     [HttpGet("{username}")]
-    [Authorize(Policy= "AdministratorOrModerator")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModerator)]
     public async Task<IActionResult> GetUserByName(string username, CancellationToken cancellationToken)
     {
         var eventToGet = await getUserByNameUseCase.ExecuteAsync(username, cancellationToken);
@@ -49,7 +50,7 @@ public class UsersController(
     }
 
     [HttpDelete("{username}")]
-    [Authorize(Policy= "AdministratorOrGambler")]
+    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModerator)]
     public async Task<IActionResult> DeleteUser(string username, CancellationToken cancellationToken)
     {
         await deleteUserUseCase.ExecuteAsync(username, cancellationToken);
