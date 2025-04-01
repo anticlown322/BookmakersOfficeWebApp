@@ -4,7 +4,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.User;
 
-public class DeleteUserUseCase(IUsersRepository usersRepository) : IDeleteUserUseCase
+public class DeleteUserUseCase(
+    IUsersRepository usersRepository)
+    : IDeleteUserUseCase
 {
     public async Task ExecuteAsync(string userName, CancellationToken cancellationToken)
     {

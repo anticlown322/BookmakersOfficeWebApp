@@ -5,7 +5,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Balance;
 
-public class GetUserBalanceUseCase(IUsersRepository usersRepository) : IGetUserBalanceUseCase
+public class GetUserBalanceUseCase(
+    IUsersRepository usersRepository)
+    : IGetUserBalanceUseCase
 {
     public async Task<UserBalanceGetDto> ExecuteAsync(string username, CancellationToken cancellationToken)
     {

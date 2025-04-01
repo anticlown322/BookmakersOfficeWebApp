@@ -19,7 +19,8 @@ namespace UserService.Application.UseCases.Authentication;
 public class RefreshTokenForAuthUseCase(
     IOptions<JwtSettings> jwtSettings,
     IUsersRepository usersRepository,
-    ITokenService tokenService) : IRefreshTokenForAuthUseCase
+    ITokenService tokenService)
+    : IRefreshTokenForAuthUseCase
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 

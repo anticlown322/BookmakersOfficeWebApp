@@ -7,7 +7,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Balance;
 
-public class DepositToUserBalanceUseCase(IUsersRepository usersRepository) : IDepositToUserBalanceUseCase
+public class DepositToUserBalanceUseCase(
+    IUsersRepository usersRepository)
+    : IDepositToUserBalanceUseCase
 {
     public async Task ExecuteAsync(string username, DepositRequestDto depositRequestDto, CancellationToken cancellationToken)
     {

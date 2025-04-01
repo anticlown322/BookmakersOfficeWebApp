@@ -8,7 +8,8 @@ namespace UserService.Application.UseCases.User;
 
 public class GetUserByIdUseCase(
     IUsersRepository usersRepository,
-    IMapper mapper) : IGetUserByIdUseCase
+    IMapper mapper)
+    : IGetUserByIdUseCase
 {
     public async Task<UserGetDto> ExecuteAsync(Guid userId, CancellationToken cancellationToken)
     {

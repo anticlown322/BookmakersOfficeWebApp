@@ -1,15 +1,14 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Identity;
 using UserService.Application.Contracts.UseCases.Account;
-using UserService.Application.Validation.Exceptions.Base;
 using UserService.Application.Validation.Exceptions.Specific;
 using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Account;
 
 public class ConfirmEmailUseCase(
-    IUsersRepository usersRepository,
-    UserManager<Domain.Models.User> userManager) : IConfirmEmailUseCase
+    IUsersRepository usersRepository)
+    : IConfirmEmailUseCase
 {
     public async Task ExecuteAsync(string username, CancellationToken cancellationToken)
     {
@@ -28,11 +27,11 @@ public class ConfirmEmailUseCase(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var token = await usersRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var result = await userManager.ConfirmEmailAsync(user, token);
+        var result = await usersRepository.ConfirmEmailAsync(user, token, cancellationToken);
         if (result.Errors.Any())
         {
             var error = result.Errors.FirstOrDefault();

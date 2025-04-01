@@ -11,9 +11,7 @@ public class UserRepository(
     UserManager<User> userManager)
     : RepositoryBase<User>(repositoryContext), IUsersRepository
 {
-    public async Task<PagedList<User>> GetAllUsersAsync(
-        UserParameters userParameters,
-        CancellationToken cancellationToken)
+    public async Task<PagedList<User>> GetAllUsersAsync(UserParameters userParameters, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -35,7 +33,7 @@ public class UserRepository(
             userParameters.PageSize);
     }
 
-    public async Task<User> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<User> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -44,7 +42,7 @@ public class UserRepository(
         return user;
     }
 
-    public async Task<User> GetUserByNameAsync(string userName, CancellationToken cancellationToken)
+    public async Task<User> GetUserByNameAsync(string userName, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -56,7 +54,7 @@ public class UserRepository(
         return user;
     }
 
-    public async Task<IList<string>> GetUserRolesAsync(User user, CancellationToken cancellationToken)
+    public async Task<IList<string>> GetUserRolesAsync(User user, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -64,7 +62,7 @@ public class UserRepository(
     }
 
     public async Task<PagedList<BalanceTransaction>> GetAllBalanceTransactionsAsync(
-        TransactionParameters transactionParameters, User user, CancellationToken cancellationToken)
+        TransactionParameters transactionParameters, User user, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -90,7 +88,7 @@ public class UserRepository(
             transactionParameters.PageSize);
     }
 
-    public async Task<IdentityResult> CreateUserAsync(User user, string password, ICollection<string> roles, CancellationToken cancellationToken)
+    public async Task<IdentityResult> CreateUserAsync(User user, string password, ICollection<string> roles, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -100,7 +98,7 @@ public class UserRepository(
         return registrationResult;
     }
 
-    public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
+    public async Task UpdateUserAsync(User user, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -110,5 +108,40 @@ public class UserRepository(
     public async Task DeleteUserAsync(User user)
     {
         await userManager.DeleteAsync(user);
+    }
+
+    public async Task<string> GenerateEmailConfirmationTokenAsync(User user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        return token;
+    }
+
+    public async Task<IdentityResult> ConfirmEmailAsync(User user, string token, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+
+        return result;
+    }
+
+    public async Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        return result;
+    }
+
+    public async Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+        return resetToken;
     }
 }

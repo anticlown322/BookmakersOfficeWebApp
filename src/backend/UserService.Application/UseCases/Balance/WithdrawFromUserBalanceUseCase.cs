@@ -7,7 +7,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Balance;
 
-public class WithdrawFromUserBalanceUseCase(IUsersRepository usersRepository) : IWithdrawFromUserBalanceUseCase
+public class WithdrawFromUserBalanceUseCase(
+    IUsersRepository usersRepository)
+    : IWithdrawFromUserBalanceUseCase
 {
     public async Task ExecuteAsync(string username, WithdrawRequestDto withdrawRequestDto, CancellationToken cancellationToken)
     {

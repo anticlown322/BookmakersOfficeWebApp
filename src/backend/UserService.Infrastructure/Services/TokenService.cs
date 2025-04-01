@@ -10,11 +10,12 @@ using UserService.Application.Contracts.Services;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Authentication;
 using UserService.Domain.Models;
+using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Infrastructure.Services;
 
 public class TokenService(
-    UserManager<User> userManager,
+    IUsersRepository usersRepository,
     IOptions<JwtSettings> jwtSettings)
     : ITokenService
 {
@@ -36,7 +37,7 @@ public class TokenService(
             _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(1).ToUniversalTime();
         }
 
-        await userManager.UpdateAsync(_user);
+        await usersRepository.UpdateUserAsync(_user);
 
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
@@ -50,7 +51,7 @@ public class TokenService(
         var claims = await GetClaims();
         var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
 
-        await userManager.UpdateAsync(_user);
+        await usersRepository.UpdateUserAsync(_user);
         var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
         return accessToken;
     }
@@ -81,7 +82,7 @@ public class TokenService(
             new (ClaimTypes.Name, _user.UserName),
         };
 
-        var roles = await userManager.GetRolesAsync(_user);
+        var roles = await usersRepository.GetUserRolesAsync(_user);
 
         foreach (var role in roles)
         {

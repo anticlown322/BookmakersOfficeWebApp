@@ -5,7 +5,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Authentication;
 
-public class LogoutUseCase(IUsersRepository usersRepository) : ILogoutUseCase
+public class LogoutUseCase(
+    IUsersRepository usersRepository)
+    : ILogoutUseCase
 {
     public async Task ExecuteAsync(UserLogoutDto userLogoutDto, bool populateExp, CancellationToken cancellationToken)
     {

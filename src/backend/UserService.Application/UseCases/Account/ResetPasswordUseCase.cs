@@ -6,7 +6,9 @@ using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Account;
 
-public class ResetPasswordUseCase(IUsersRepository usersRepository, UserManager<Domain.Models.User> userManager) : IResetPasswordUseCase
+public class ResetPasswordUseCase(
+    IUsersRepository usersRepository)
+    : IResetPasswordUseCase
 {
     public async Task ExecuteAsync(string username, PasswordResetDto passwordResetDto, CancellationToken cancellationToken)
     {
@@ -20,7 +22,7 @@ public class ResetPasswordUseCase(IUsersRepository usersRepository, UserManager<
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var result = await userManager.ResetPasswordAsync(user, passwordResetDto.Token, passwordResetDto.NewPassword);
+        var result = await usersRepository.ResetPasswordAsync(user, passwordResetDto.Token, passwordResetDto.NewPassword, cancellationToken);
         if (result.Errors.Any())
         {
             var error = result.Errors.FirstOrDefault();
