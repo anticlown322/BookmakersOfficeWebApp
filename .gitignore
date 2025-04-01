@@ -30,3 +30,11 @@ _UpgradeReport_Files/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Project specific
+*.log
+/src/backend/UserService.Presentation/Logs/
+/src/backend/SportDataService.Presentation/Logs/
+/src/backend/BookingService.Presentation/Logs/
+publish/
+secrets.yaml

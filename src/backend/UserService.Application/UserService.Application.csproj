@@ -14,6 +14,7 @@
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="14.0.0" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+      <PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,11 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Contracts\" />
-      <Folder Include="DTO\MappingProfiles\" />
-      <Folder Include="UseCases\" />
-      <Folder Include="Valiadtion\Exceptions\" />
-      <Folder Include="Valiadtion\Validators\" />
+      <Folder Include="Validation\Exceptions\" />
     </ItemGroup>
 
 </Project>
