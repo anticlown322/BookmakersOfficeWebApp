@@ -21,11 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Contracts\" />
-      <Folder Include="DTO\MappingProfiles\" />
-      <Folder Include="UseCases\" />
-      <Folder Include="Valiadtion\Exceptions\" />
-      <Folder Include="Valiadtion\Validators\" />
+      <Folder Include="Validation\Exceptions\Specific\" />
+      <Folder Include="Validation\Validators\" />
     </ItemGroup>
 
 </Project>
