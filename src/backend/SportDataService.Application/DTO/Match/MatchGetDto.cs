@@ -1,8 +1,6 @@
-﻿using SportDataService.Application.UseCases.Match;
+﻿namespace SportDataService.Application.DTO.Match;
 
-namespace SportDataService.Application.DTO.Match;
-
-public record MatchGetDto(
+public sealed record MatchGetDto(
     string Id,
     string LeagueId,
     TeamShortDto HomeTeam,

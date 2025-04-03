@@ -12,6 +12,7 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
         var oddsValidator = ConfigureOddsValidation();
         var teamsValidator = ConfigureTeamsValidation();
         var leaguesValidator = ConfigureLeaguesValidation();
+        var playersValidator = ConfigurePlayersValidation();
 
         var validators = new Dictionary<string, BsonDocument>
         {
@@ -20,6 +21,7 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
             { "leagues", leaguesValidator },
             { "odds", oddsValidator },
             { "teams", teamsValidator },
+            { "players", playersValidator },
         };
 
         foreach (var (collectionName, validator) in validators)
@@ -102,17 +104,7 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
                     {
                         "properties", new BsonDocument
                         {
-                            {
-                                "type",
-                                new BsonDocument
-                                {
-                                    {
-                                        "enum",
-                                        new BsonArray
-                                            { "goal", "yellow_card", "red_card", "substitution", "penalty", "corner" }
-                                    },
-                                }
-                            },
+                            { "type", new BsonDocument { { "bsonType", "string" } } },
                             { "minute", new BsonDocument { { "minimum", 0 }, { "maximum", 120 } } },
                             { "teamId", new BsonDocument { { "bsonType", "string" } } },
                             { "playerId", new BsonDocument { { "bsonType", "string" } } },
@@ -204,5 +196,40 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
         };
 
         return teamsValidator;
+    }
+
+    private BsonDocument ConfigurePlayersValidation()
+    {
+        var playersValidator = new BsonDocument
+        {
+            {
+                "$jsonSchema", new BsonDocument
+                {
+                    { "bsonType", "object" },
+                    { "required", new BsonArray { "name", "birthDate", "nationality" } },
+                    {
+                        "properties", new BsonDocument
+                        {
+                            { "name", new BsonDocument { { "bsonType", "string" }, { "minLength", 1 } } },
+                            { "teamId", new BsonDocument { { "bsonType", "string" } } },
+                            { "position", new BsonDocument { { "bsonType", "string" } } },
+                            {
+                                "number",
+                                new BsonDocument
+                                {
+                                    { "bsonType", "int" },
+                                    { "minimum", 1 },
+                                    { "maximum", 99 },
+                                }
+                            },
+                            { "birthDate", new BsonDocument { { "bsonType", "date" } } },
+                            { "nationality", new BsonDocument { { "bsonType", "string" }, { "minLength", 2 } } },
+                        }
+                    },
+                }
+            },
+        };
+
+        return playersValidator;
     }
 }

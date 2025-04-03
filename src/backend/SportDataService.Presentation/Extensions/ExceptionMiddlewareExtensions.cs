@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.ErrorModel;
-using UserService.Application.Validation.Exceptions.Base;
+using SportDataService.Application.Validation.Exceptions.Base;
 
 namespace SportDataService.Presentation.Extensions;
 

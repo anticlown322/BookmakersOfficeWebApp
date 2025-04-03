@@ -1,6 +1,7 @@
 ﻿using SportDataService.Application.DTO.Match;
 using SportDataService.Application.UseCases.Match;
 using SportDataService.Domain.RequestFeatures;
+using SportDataService.Domain.RequestFeatures.Params;
 
 namespace SportDataService.Application.Contracts.UseCases.Match;
 

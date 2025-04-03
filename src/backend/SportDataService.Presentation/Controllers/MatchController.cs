@@ -1,14 +1,16 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.UseCases.Match;
 using SportDataService.Domain.RequestFeatures;
+using SportDataService.Domain.RequestFeatures.Params;
 
 namespace SportDataService.Presentation.Controllers;
 
 [Route("api/matches")]
 [ApiController]
 public class MatchController(
-    GetAllMatchesUseCase getAllMatchesUseCase)
+    IGetAllMatchesUseCase getAllMatchesUseCase)
     : ControllerBase
 {
     [HttpGet]

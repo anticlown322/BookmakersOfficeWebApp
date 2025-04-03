@@ -3,6 +3,7 @@ using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.DTO.Match;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures;
+using SportDataService.Domain.RequestFeatures.Params;
 
 namespace SportDataService.Application.UseCases.Match;
 

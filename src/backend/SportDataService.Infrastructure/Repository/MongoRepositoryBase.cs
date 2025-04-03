@@ -24,7 +24,8 @@ public abstract class MongoRepositoryBase<T> : IRepositoryBase<T>
 
     public virtual async Task<T> GetByIdAsync(string entityId, CancellationToken ct)
     {
-        var filter = Builders<T>.Filter.Eq("_id", entityId);
+        var objectId = ObjectId.Parse(entityId);
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 
@@ -43,7 +44,8 @@ public abstract class MongoRepositoryBase<T> : IRepositoryBase<T>
     public virtual async Task UpdateAsync(T entity, CancellationToken ct)
     {
         var id = GetEntityId(entity);
-        var filter = Builders<T>.Filter.Eq("_id", id);
+        var objectId = ObjectId.Parse(id);
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         await Collection.ReplaceOneAsync(
             filter,
             entity,
@@ -56,7 +58,8 @@ public abstract class MongoRepositoryBase<T> : IRepositoryBase<T>
 
     public virtual async Task DeleteAsync(string entityId, CancellationToken ct)
     {
-        var filter = Builders<T>.Filter.Eq("_id", entityId);
+        var objectId = ObjectId.Parse(entityId);
+        var filter = Builders<T>.Filter.Eq("_id", objectId);
         await Collection.DeleteOneAsync(filter, ct);
     }
 

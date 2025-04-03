@@ -1,8 +1,7 @@
-﻿namespace SportDataService.Domain.Models;
+﻿namespace SportDataService.Application.DTO.Player;
 
-public class Player
+public sealed class PlayerUpdateDto
 {
-    public string Id { get; set; }
     public string Name { get; set; }
     public string? TeamId { get; set; }
     public string? Position { get; set; }

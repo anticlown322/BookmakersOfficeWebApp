@@ -1,4 +1,4 @@
-﻿namespace UserService.Application.Validation.Exceptions.Base;
+﻿namespace SportDataService.Application.Validation.Exceptions.Base;
 
 public abstract class UnauthorizedException : Exception
 {

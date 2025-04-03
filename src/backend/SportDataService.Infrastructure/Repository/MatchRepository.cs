@@ -2,6 +2,7 @@
 using SportDataService.Domain.Models;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures;
+using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
 
 namespace SportDataService.Infrastructure.Repository;
