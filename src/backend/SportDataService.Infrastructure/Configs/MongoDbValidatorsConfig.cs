@@ -64,21 +64,12 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
                     { "bsonType", "object" },
                     {
                         "required",
-                        new BsonArray { "matchId", "leagueId", "homeTeamId", "awayTeamId", "startTime", "status" }
+                        new BsonArray { "leagueId", "homeTeamId", "awayTeamId", "startTime", "status" }
                     },
                     {
                         "properties", new BsonDocument
                         {
-                            {
-                                "status",
-                                new BsonDocument
-                                {
-                                    {
-                                        "enum",
-                                        new BsonArray { "scheduled", "live", "finished", "postponed", "canceled" }
-                                    },
-                                }
-                            },
+                            { "status", new BsonDocument { { "bsonType", "string" } } },
                             { "startTime", new BsonDocument { { "bsonType", "date" } } },
                             { "currentScore.home", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 } } },
                             { "currentScore.away", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 } } },

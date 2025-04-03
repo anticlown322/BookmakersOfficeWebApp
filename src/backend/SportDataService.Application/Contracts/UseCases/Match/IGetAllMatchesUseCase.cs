@@ -1,5 +1,4 @@
 ﻿using SportDataService.Application.DTO.Match;
-using SportDataService.Application.UseCases.Match;
 using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;
 
@@ -7,5 +6,5 @@ namespace SportDataService.Application.Contracts.UseCases.Match;
 
 public interface IGetAllMatchesUseCase
 {
-    Task<(IEnumerable<MatchGetDto> matches, MetaData metaData)> ExecuteAsync(MatchParameters matchParams, CancellationToken cancellationToken);
+    Task<(IEnumerable<MatchGetDto> matches, MetaData metaData)> ExecuteAsync(MatchParameters matchParameters, CancellationToken cancellationToken);
 }

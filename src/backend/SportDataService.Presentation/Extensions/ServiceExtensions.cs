@@ -60,6 +60,10 @@ public static class ServiceExtensions
     {
         // match
         services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
+        services.AddScoped<ICreateMatchUseCase, CreateMatchUseCase>();
+        services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
+        services.AddScoped<IUpdateMatchUseCase, UpdateMatchUseCase>();
+        services.AddScoped<IDeleteMatchUseCase, DeleteMatchUseCase>();
 
         // player
         services.AddScoped<IGetAllPlayersUseCase, GetAllPlayersUseCase>();
@@ -132,7 +136,9 @@ public static class ServiceExtensions
             cfg =>
         {
             // match
-            cfg.AddProfile<GetMatchesMappingProfile>();
+            cfg.AddProfile<GetMatchMappingProfile>();
+            cfg.AddProfile<CreateMatchMappingProfile>();
+            cfg.AddProfile<UpdateMatchMappingProfile>();
 
             // player
             cfg.AddProfile<GetPlayerMappingProfile>();

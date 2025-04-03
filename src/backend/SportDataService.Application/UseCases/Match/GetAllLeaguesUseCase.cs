@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.DTO.Match;
+using SportDataService.Application.DTO.Match;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;
@@ -12,11 +13,11 @@ public sealed class GetAllMatchesUseCase(
     IMapper mapper)
     : IGetAllMatchesUseCase
 {
-    public async Task<(IEnumerable<MatchGetDto> matches, MetaData metaData)> ExecuteAsync(MatchParameters matchParams, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<MatchGetDto> matches, MetaData metaData)> ExecuteAsync(MatchParameters matchParameters, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var matchesWithMetaData = await matchRepository.FindAllMatchesAsync(matchParams, cancellationToken);
+        var matchesWithMetaData = await matchRepository.FindAllMatchesAsync(matchParameters, cancellationToken);
 
         var matchGetDtos = mapper.Map<IEnumerable<MatchGetDto>>(matchesWithMetaData);
 
