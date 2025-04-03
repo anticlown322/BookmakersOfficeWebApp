@@ -4,15 +4,18 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
+using SportDataService.Application.Contracts.UseCases.Event;
 using SportDataService.Application.Contracts.UseCases.League;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.Contracts.UseCases.Player;
 using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.DTO.MappingProfiles;
+using SportDataService.Application.DTO.MappingProfiles.Event;
 using SportDataService.Application.DTO.MappingProfiles.League;
 using SportDataService.Application.DTO.MappingProfiles.Match;
 using SportDataService.Application.DTO.MappingProfiles.Player;
 using SportDataService.Application.DTO.MappingProfiles.Team;
+using SportDataService.Application.UseCases.Event;
 using SportDataService.Application.UseCases.League;
 using SportDataService.Application.UseCases.Match;
 using SportDataService.Application.UseCases.Player;
@@ -85,6 +88,13 @@ public static class ServiceExtensions
         services.AddScoped<IGetLeagueByIdUseCase, GetLeagueByIdUseCase>();
         services.AddScoped<IUpdateLeagueUseCase, UpdateLeagueUseCase>();
         services.AddScoped<IDeleteLeagueUseCase, DeleteLeagueUseCase>();
+
+        // event
+        services.AddScoped<IGetAllEventsUseCase, GetAllEventsUseCase>();
+        services.AddScoped<ICreateEventUseCase, CreateEventUseCase>();
+        services.AddScoped<IGetEventByIdUseCase, GetEventByIdUseCase>();
+        services.AddScoped<IUpdateEventUseCase, UpdateEventUseCase>();
+        services.AddScoped<IDeleteEventUseCase, DeleteEventUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -154,6 +164,11 @@ public static class ServiceExtensions
             cfg.AddProfile<GetLeagueMappingProfile>();
             cfg.AddProfile<CreateLeagueMappingProfile>();
             cfg.AddProfile<UpdateLeagueMappingProfile>();
+
+            // event
+            cfg.AddProfile<GetEventMappingProfile>();
+            cfg.AddProfile<CreateEventMappingProfile>();
+            cfg.AddProfile<UpdateEventMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 
