@@ -6,10 +6,13 @@ using NLog;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.Contracts.UseCases.Player;
+using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.DTO.MappingProfiles;
 using SportDataService.Application.DTO.MappingProfiles.Player;
+using SportDataService.Application.DTO.MappingProfiles.Team;
 using SportDataService.Application.UseCases.Match;
 using SportDataService.Application.UseCases.Player;
+using SportDataService.Application.UseCases.Team;
 using SportDataService.Domain.Models;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Infrastructure.Configs;
@@ -60,6 +63,13 @@ public static class ServiceExtensions
         services.AddScoped<IGetPlayerByIdUseCase, GetPlayerByIdUseCase>();
         services.AddScoped<IUpdatePlayerUseCase, UpdatePlayerUseCase>();
         services.AddScoped<IDeletePlayerUseCase, DeletePlayerUseCase>();
+
+        // team
+        services.AddScoped<IGetAllTeamsUseCase, GetAllTeamsUseCase>();
+        services.AddScoped<ICreateTeamUseCase, CreateTeamUseCase>();
+        services.AddScoped<IGetTeamByIdUseCase, GetTeamByIdUseCase>();
+        services.AddScoped<IUpdateTeamUseCase, UpdateTeamUseCase>();
+        services.AddScoped<IDeleteTeamUseCase, DeleteTeamUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -111,9 +121,16 @@ public static class ServiceExtensions
             cfg =>
         {
             cfg.AddProfile<GetMatchesMappingProfile>();
+
+            // player
             cfg.AddProfile<GetPlayerMappingProfile>();
             cfg.AddProfile<CreatePlayerMappingProfile>();
             cfg.AddProfile<UpdatePlayerMappingProfile>();
+
+            // team
+            cfg.AddProfile<GetTeamMappingProfile>();
+            cfg.AddProfile<CreateTeamMappingProfile>();
+            cfg.AddProfile<UpdateTeamMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 
