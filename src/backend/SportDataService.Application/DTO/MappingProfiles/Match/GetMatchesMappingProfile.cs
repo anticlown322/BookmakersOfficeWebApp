@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
 using SportDataService.Application.DTO.Match;
-using SportDataService.Domain.Models;
 
-namespace SportDataService.Application.DTO.MappingProfiles;
+namespace SportDataService.Application.DTO.MappingProfiles.Match;
 
 public class GetMatchesMappingProfile : Profile
 {

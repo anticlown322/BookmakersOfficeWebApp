@@ -4,12 +4,16 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
+using SportDataService.Application.Contracts.UseCases.League;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.Contracts.UseCases.Player;
 using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.DTO.MappingProfiles;
+using SportDataService.Application.DTO.MappingProfiles.League;
+using SportDataService.Application.DTO.MappingProfiles.Match;
 using SportDataService.Application.DTO.MappingProfiles.Player;
 using SportDataService.Application.DTO.MappingProfiles.Team;
+using SportDataService.Application.UseCases.League;
 using SportDataService.Application.UseCases.Match;
 using SportDataService.Application.UseCases.Player;
 using SportDataService.Application.UseCases.Team;
@@ -70,6 +74,13 @@ public static class ServiceExtensions
         services.AddScoped<IGetTeamByIdUseCase, GetTeamByIdUseCase>();
         services.AddScoped<IUpdateTeamUseCase, UpdateTeamUseCase>();
         services.AddScoped<IDeleteTeamUseCase, DeleteTeamUseCase>();
+
+        // league
+        services.AddScoped<IGetAllLeaguesUseCase, GetAllLeaguesUseCase>();
+        services.AddScoped<ICreateLeagueUseCase, CreateLeagueUseCase>();
+        services.AddScoped<IGetLeagueByIdUseCase, GetLeagueByIdUseCase>();
+        services.AddScoped<IUpdateLeagueUseCase, UpdateLeagueUseCase>();
+        services.AddScoped<IDeleteLeagueUseCase, DeleteLeagueUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -120,6 +131,7 @@ public static class ServiceExtensions
         services.AddAutoMapper(
             cfg =>
         {
+            // match
             cfg.AddProfile<GetMatchesMappingProfile>();
 
             // player
@@ -131,6 +143,11 @@ public static class ServiceExtensions
             cfg.AddProfile<GetTeamMappingProfile>();
             cfg.AddProfile<CreateTeamMappingProfile>();
             cfg.AddProfile<UpdateTeamMappingProfile>();
+
+            // league
+            cfg.AddProfile<GetLeagueMappingProfile>();
+            cfg.AddProfile<CreateLeagueMappingProfile>();
+            cfg.AddProfile<UpdateLeagueMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 
