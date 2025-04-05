@@ -7,17 +7,20 @@ using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Event;
 using SportDataService.Application.Contracts.UseCases.League;
 using SportDataService.Application.Contracts.UseCases.Match;
+using SportDataService.Application.Contracts.UseCases.Odds;
 using SportDataService.Application.Contracts.UseCases.Player;
 using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.DTO.MappingProfiles;
 using SportDataService.Application.DTO.MappingProfiles.Event;
 using SportDataService.Application.DTO.MappingProfiles.League;
 using SportDataService.Application.DTO.MappingProfiles.Match;
+using SportDataService.Application.DTO.MappingProfiles.Odds;
 using SportDataService.Application.DTO.MappingProfiles.Player;
 using SportDataService.Application.DTO.MappingProfiles.Team;
 using SportDataService.Application.UseCases.Event;
 using SportDataService.Application.UseCases.League;
 using SportDataService.Application.UseCases.Match;
+using SportDataService.Application.UseCases.Odds;
 using SportDataService.Application.UseCases.Player;
 using SportDataService.Application.UseCases.Team;
 using SportDataService.Domain.Models;
@@ -95,6 +98,13 @@ public static class ServiceExtensions
         services.AddScoped<IGetEventByIdUseCase, GetEventByIdUseCase>();
         services.AddScoped<IUpdateEventUseCase, UpdateEventUseCase>();
         services.AddScoped<IDeleteEventUseCase, DeleteEventUseCase>();
+
+        // odds
+        services.AddScoped<IGetAllOddsUseCase, GetAllOddsUseCase>();
+        services.AddScoped<ICreateOddsUseCase, CreateOddsUseCase>();
+        services.AddScoped<IGetOddsByIdUseCase, GetOddsByIdUseCase>();
+        services.AddScoped<IUpdateOddsUseCase, UpdateOddsUseCase>();
+        services.AddScoped<IDeleteOddsUseCase, DeleteOddsUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -169,6 +179,11 @@ public static class ServiceExtensions
             cfg.AddProfile<GetEventMappingProfile>();
             cfg.AddProfile<CreateEventMappingProfile>();
             cfg.AddProfile<UpdateEventMappingProfile>();
+
+            // event
+            cfg.AddProfile<GetOddsMappingProfile>();
+            cfg.AddProfile<CreateOddsMappingProfile>();
+            cfg.AddProfile<UpdateOddsMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 

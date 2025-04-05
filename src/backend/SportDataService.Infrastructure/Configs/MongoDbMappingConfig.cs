@@ -91,7 +91,6 @@ public static class MongoDbMappingConfig
                 .SetIdGenerator(StringObjectIdGenerator.Instance)
                 .SetSerializer(new StringSerializer(BsonType.ObjectId));
             cm.MapProperty(o => o.MatchId).SetElementName("matchId");
-            cm.MapProperty(o => o.BookmakerId).SetElementName("bookmakerId");
             cm.MapProperty(o => o.MarketType).SetElementName("marketType");
             cm.MapProperty(o => o.Values).SetElementName("odds");
             cm.MapProperty(o => o.Timestamp).SetElementName("timestamp");

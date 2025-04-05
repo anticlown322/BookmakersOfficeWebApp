@@ -1,6 +1,6 @@
-﻿namespace SportDataService.Domain.Models;
+﻿namespace SportDataService.Application.DTO.Odds;
 
-public class OddsValue
+public sealed class OddsValueCreateDto
 {
     public decimal Home { get; set; }
     public decimal? Draw { get; set; }
