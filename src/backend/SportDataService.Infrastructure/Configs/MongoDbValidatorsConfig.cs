@@ -7,22 +7,13 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
 {
     public async Task ConfigureSchemaValidationsAsync()
     {
-        var matchesValidator = ConfigureMatchesValidation();
-        var eventsValidator = ConfigureEventsValidation();
-        var oddsValidator = ConfigureOddsValidation();
-        var teamsValidator = ConfigureTeamsValidation();
-        var leaguesValidator = ConfigureLeaguesValidation();
-        var playersValidator = ConfigurePlayersValidation();
-
         var validators = new Dictionary<string, BsonDocument>
         {
-            { "matches", matchesValidator },
-            { "events", eventsValidator },
-            { "leagues", leaguesValidator },
-            { "odds", oddsValidator },
-            { "teams", teamsValidator },
-            { "players", playersValidator },
+            { "teams", ConfigureTeamValidation() },
+            { "matches", ConfigureMatchValidation() },
+            { "tournaments", ConfigureTournamentValidation() },
         };
+
 
         foreach (var (collectionName, validator) in validators)
         {
@@ -54,115 +45,7 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
         }
     }
 
-    private BsonDocument ConfigureMatchesValidation()
-    {
-        var matchesValidator = new BsonDocument
-        {
-            {
-                "$jsonSchema", new BsonDocument
-                {
-                    { "bsonType", "object" },
-                    {
-                        "required",
-                        new BsonArray { "leagueId", "homeTeamId", "awayTeamId", "startTime", "status" }
-                    },
-                    {
-                        "properties", new BsonDocument
-                        {
-                            { "status", new BsonDocument { { "bsonType", "string" } } },
-                            { "startTime", new BsonDocument { { "bsonType", "date" } } },
-                            { "currentScore.home", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 } } },
-                            { "currentScore.away", new BsonDocument { { "bsonType", "int" }, { "minimum", 0 } } },
-                            { "eventIds", new BsonDocument { { "bsonType", "array" } } },
-                        }
-                    },
-                }
-            },
-        };
-
-        return matchesValidator;
-    }
-
-    private BsonDocument ConfigureEventsValidation()
-    {
-        var eventsValidator = new BsonDocument
-        {
-            {
-                "$jsonSchema", new BsonDocument
-                {
-                    { "bsonType", "object" },
-                    { "required", new BsonArray { "matchId", "type", "minute", "teamId" } },
-                    {
-                        "properties", new BsonDocument
-                        {
-                            { "type", new BsonDocument { { "bsonType", "string" } } },
-                            { "minute", new BsonDocument { { "minimum", 0 }, { "maximum", 120 } } },
-                            { "teamId", new BsonDocument { { "bsonType", "string" } } },
-                            { "playerId", new BsonDocument { { "bsonType", "string" } } },
-                        }
-                    },
-                }
-            },
-        };
-
-        return eventsValidator;
-    }
-
-    private BsonDocument ConfigureOddsValidation()
-    {
-        var oddsValidator = new BsonDocument
-        {
-            {
-                "$jsonSchema", new BsonDocument
-                {
-                    { "bsonType", "object" },
-                    { "required", new BsonArray { "matchId", "marketType", "odds", "timestamp" } },
-                    {
-                        "properties", new BsonDocument
-                        {
-                            {
-                                "marketType",
-                                new BsonDocument { { "enum", new BsonArray { "1x2", "handicap", "total" } } }
-                            },
-                            { "odds.home", new BsonDocument { { "bsonType", "decimal" } } },
-                            { "odds.draw", new BsonDocument { { "bsonType", "decimal" } } },
-                            { "odds.away", new BsonDocument { { "bsonType", "decimal" } } },
-                            { "timestamp", new BsonDocument { { "bsonType", "date" } } },
-                        }
-                    },
-                }
-            },
-        };
-
-        return oddsValidator;
-    }
-
-    private BsonDocument ConfigureLeaguesValidation()
-    {
-        var leaguesValidator = new BsonDocument
-        {
-            {
-                "$jsonSchema", new BsonDocument
-                {
-                    { "bsonType", "object" },
-                    { "required", new BsonArray { "name", "sportType" } },
-                    {
-                        "properties", new BsonDocument
-                        {
-                            {
-                                "sportType",
-                                new BsonDocument { { "enum", new BsonArray { "football", "basketball", "tennis" } } }
-                            },
-                        }
-                    },
-                }
-            },
-        };
-
-        return leaguesValidator;
-    }
-
-    private BsonDocument ConfigureTeamsValidation()
+    private BsonDocument ConfigureTeamValidation()
     {
         var teamsValidator = new BsonDocument
         {
@@ -170,18 +53,32 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
                 "$jsonSchema", new BsonDocument
                 {
                     { "bsonType", "object" },
-                    { "required", new BsonArray { "name", "sportType" } },
+                    { "required", new BsonArray { "name", "teamId" } },
                     {
                         "properties", new BsonDocument
                         {
+                            { "_id", new BsonDocument { { "bsonType", "objectId" } } },
                             {
-                                "sportType",
-                                new BsonDocument { { "enum", new BsonArray { "football", "basketball", "tennis" } } }
+                                "teamId", new BsonDocument
+                                {
+                                    { "bsonType", "string" },
+                                    { "description", "must be a string and is required" },
+                                    { "minLength", 1 },
+                                    { "maxLength", 50 },
+                                }
                             },
-                            { "country", new BsonDocument { { "bsonType", "string" } } },
-                            { "players", new BsonDocument { { "bsonType", "array" } } },
+                            {
+                                "name", new BsonDocument
+                                {
+                                    { "bsonType", "string" },
+                                    { "description", "must be a string and is required" },
+                                    { "minLength", 2 },
+                                    { "maxLength", 100 },
+                                }
+                            },
                         }
                     },
+                    { "additionalProperties", false },
                 }
             },
         };
@@ -189,38 +86,201 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
         return teamsValidator;
     }
 
-    private BsonDocument ConfigurePlayersValidation()
+    private BsonDocument ConfigureMatchValidation()
     {
-        var playersValidator = new BsonDocument
+        return new BsonDocument
         {
             {
                 "$jsonSchema", new BsonDocument
                 {
                     { "bsonType", "object" },
-                    { "required", new BsonArray { "name", "birthDate", "nationality" } },
+                    { "required", new BsonArray { "matchId", "tournamentId", "startTime", "opponent1", "opponent2" } },
                     {
                         "properties", new BsonDocument
                         {
-                            { "name", new BsonDocument { { "bsonType", "string" }, { "minLength", 1 } } },
-                            { "teamId", new BsonDocument { { "bsonType", "string" } } },
-                            { "position", new BsonDocument { { "bsonType", "string" } } },
+                            { "_id", new BsonDocument { { "bsonType", "objectId" } } },
                             {
-                                "number",
-                                new BsonDocument
+                                "matchId", new BsonDocument
                                 {
-                                    { "bsonType", "int" },
-                                    { "minimum", 1 },
-                                    { "maximum", 99 },
+                                    { "bsonType", "string" },
+                                    { "minLength", 1 },
+                                    { "maxLength", 50 },
                                 }
                             },
-                            { "birthDate", new BsonDocument { { "bsonType", "date" } } },
-                            { "nationality", new BsonDocument { { "bsonType", "string" }, { "minLength", 2 } } },
+                            {
+                                "tournamentId", new BsonDocument
+                                {
+                                    { "bsonType", "string" },
+                                    { "minLength", 1 },
+                                }
+                            },
+                            {
+                                "startTime", new BsonDocument
+                                {
+                                    { "bsonType", "date" },
+                                    { "description", "Match start time in UTC + 3 (Moscow)" },
+                                }
+                            },
+                            {
+                                "opponent1", new BsonDocument
+                                {
+                                    { "bsonType", "object" },
+                                    { "required", new BsonArray { "teamId", "name" } },
+                                    { "properties", ConfigureTeamValidation() },
+                                }
+                            },
+                            {
+                                "opponent2", new BsonDocument
+                                {
+                                    { "bsonType", "object" },
+                                    { "required", new BsonArray { "teamId", "name" } },
+                                    { "properties", ConfigureTeamValidation() },
+                                }
+                            },
+                            { "mainLine", MainLineValidationSchema() },
+                            { "killsLine", KillsLineValidationSchema() },
+                            { "mapsLine", MapsLineValidationSchema() },
+                            { "specialLine", SpecialLineValidationSchema() },
                         }
                     },
+                    { "additionalProperties", false },
                 }
             },
         };
+    }
 
-        return playersValidator;
+    private BsonDocument MainLineValidationSchema()
+    {
+        return new BsonDocument
+        {
+            { "bsonType", new BsonArray { "object", "null" } },
+            {
+                "properties", new BsonDocument
+                {
+                    { "opponent1Win", MarketValueValidationSchema() },
+                    { "opponent2Win", MarketValueValidationSchema() },
+                    { "draw", MarketValueValidationSchema() },
+                    { "opponent1WinOrDraw", MarketValueValidationSchema() },
+                    { "opponent2WinOrDraw", MarketValueValidationSchema() },
+                }
+            },
+            { "additionalProperties", false },
+        };
+    }
+
+    private BsonDocument KillsLineValidationSchema()
+    {
+        return new BsonDocument
+        {
+            { "bsonType", new BsonArray { "object", "null" } },
+            {
+                "properties", new BsonDocument
+                {
+                    { "opponent1KillsMain", MarketValueValidationSchema() },
+                    { "opponent2KillsMain", MarketValueValidationSchema() },
+                    { "totalKillsUnder", MarketValueValidationSchema() },
+                    { "totalKillsOver", MarketValueValidationSchema() },
+                    { "opponent1KillsHandicap", MarketValueValidationSchema() },
+                    { "opponent2KillsHandicap", MarketValueValidationSchema() },
+                }
+            },
+            { "additionalProperties", false },
+        };
+    }
+
+    private BsonDocument MapsLineValidationSchema()
+    {
+        return new BsonDocument
+        {
+            { "bsonType", new BsonArray { "object", "null" } },
+            {
+                "properties", new BsonDocument
+                {
+                    { "map1HandicapOpponent1", MarketValueValidationSchema() },
+                    { "map1HandicapOpponent2", MarketValueValidationSchema() },
+                    { "map2HandicapOpponent1", MarketValueValidationSchema() },
+                    { "map2HandicapOpponent2", MarketValueValidationSchema() },
+                }
+            },
+            { "additionalProperties", false },
+        };
+    }
+
+    private BsonDocument SpecialLineValidationSchema()
+    {
+        return new BsonDocument
+        {
+            { "bsonType", new BsonArray { "object", "null" } },
+            {
+                "properties", new BsonDocument
+                {
+                    { "eitherOpponent1OrOpponent2", MarketValueValidationSchema() },
+                }
+            },
+            { "additionalProperties", false },
+        };
+    }
+
+    private BsonDocument MarketValueValidationSchema()
+    {
+        return new BsonDocument
+        {
+            { "bsonType", new BsonArray { "object", "null" } },
+            {
+                "properties", new BsonDocument
+                {
+                    { "value", new BsonDocument { { "bsonType", "string" } } },
+                    { "updatedAt", new BsonDocument { { "bsonType", new BsonArray { "date", "null" } } } },
+                    { "isActive", new BsonDocument { { "bsonType", "bool" } } },
+                }
+            },
+            { "additionalProperties", false },
+        };
+    }
+
+    private BsonDocument ConfigureTournamentValidation()
+    {
+        return new BsonDocument
+        {
+            {
+                "$jsonSchema", new BsonDocument
+                {
+                    { "bsonType", "object" },
+                    { "required", new BsonArray { "tournamentId", "name" } },
+                    {
+                        "properties", new BsonDocument
+                        {
+                            { "_id", new BsonDocument { { "bsonType", "objectId" } } },
+                            {
+                                "tournamentId", new BsonDocument
+                                {
+                                    { "bsonType", "string" },
+                                    { "minLength", 1 },
+                                    { "maxLength", 50 },
+                                }
+                            },
+                            {
+                                "name", new BsonDocument
+                                {
+                                    { "bsonType", "string" },
+                                    { "minLength", 2 },
+                                    { "maxLength", 100 },
+                                }
+                            },
+                            {
+                                "matches", new BsonDocument
+                                {
+                                    { "bsonType", "array" },
+                                    {
+                                        "items", ConfigureMatchValidation()["$jsonSchema"]
+                                    },
+                                }
+                            },
+                        }
+                    },
+                    { "additionalProperties", false },
+                }
+            },
+        };
     }
 }

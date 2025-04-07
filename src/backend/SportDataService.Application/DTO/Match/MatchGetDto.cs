@@ -1,15 +1,18 @@
-﻿namespace SportDataService.Application.DTO.Match;
+﻿using SportDataService.Application.DTO.Lines;
+using SportDataService.Application.DTO.Team;
+
+namespace SportDataService.Application.DTO.Match;
 
 public sealed class MatchGetDto
 {
-    public string Id { get; set; }
-    public string LeagueId { get; set; }
-    public string HomeTeamId { get; set; }
-    public string AwayTeamId { get; set; }
-    public DateTime StartTime { get; set; }
-    public string Status { get; set; }
-    public ScoreGetDto CurrentScoreGet { get; set; }
-    public IReadOnlyCollection<string> EventIds { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public string Id { get; init; }
+    public string MatchId { get; init; }
+    public string TournamentId { get; init; }
+    public TeamGetDto Opponent1 { get; init; }
+    public TeamGetDto Opponent2 { get; init; }
+    public DateTime StartTime { get; init; }
+    public MainLineGetDto? MainLine { get; init; }
+    public KillsLineGetDto? KillsLine { get; init; }
+    public MapsLineGetDto? MapsLine { get; init; }
+    public SpecialLineGetDto? SpecialLine { get; init; }
 }

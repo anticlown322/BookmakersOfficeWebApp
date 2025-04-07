@@ -4,30 +4,19 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
-using SportDataService.Application.Contracts.UseCases.Event;
-using SportDataService.Application.Contracts.UseCases.League;
 using SportDataService.Application.Contracts.UseCases.Match;
-using SportDataService.Application.Contracts.UseCases.Odds;
-using SportDataService.Application.Contracts.UseCases.Player;
 using SportDataService.Application.Contracts.UseCases.Team;
+using SportDataService.Application.Contracts.UseCases.Tournament;
 using SportDataService.Application.DTO.MappingProfiles;
-using SportDataService.Application.DTO.MappingProfiles.Event;
-using SportDataService.Application.DTO.MappingProfiles.League;
-using SportDataService.Application.DTO.MappingProfiles.Match;
-using SportDataService.Application.DTO.MappingProfiles.Odds;
-using SportDataService.Application.DTO.MappingProfiles.Player;
-using SportDataService.Application.DTO.MappingProfiles.Team;
-using SportDataService.Application.UseCases.Event;
-using SportDataService.Application.UseCases.League;
 using SportDataService.Application.UseCases.Match;
-using SportDataService.Application.UseCases.Odds;
-using SportDataService.Application.UseCases.Player;
 using SportDataService.Application.UseCases.Team;
-using SportDataService.Domain.Models;
+using SportDataService.Application.UseCases.Tournament;
+using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
 using SportDataService.Infrastructure.Services;
+using SportDataService.Infrastructure.Services.DataCollection;
 
 namespace SportDataService.Presentation.Extensions;
 
@@ -57,54 +46,29 @@ public static class ServiceExtensions
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
     }
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerService, LoggerService>();
 
+    public static void ConfigureDataCollectionService(this IServiceCollection services) =>
+        services.AddSingleton<IDataCollectionService, DataCollectionService>();
+
     public static void ConfigureUseCases(this IServiceCollection services)
     {
-        // match
-        services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
-        services.AddScoped<ICreateMatchUseCase, CreateMatchUseCase>();
-        services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
-        services.AddScoped<IUpdateMatchUseCase, UpdateMatchUseCase>();
-        services.AddScoped<IDeleteMatchUseCase, DeleteMatchUseCase>();
-
-        // player
-        services.AddScoped<IGetAllPlayersUseCase, GetAllPlayersUseCase>();
-        services.AddScoped<ICreatePlayerUseCase, CreatePlayerUseCase>();
-        services.AddScoped<IGetPlayerByIdUseCase, GetPlayerByIdUseCase>();
-        services.AddScoped<IUpdatePlayerUseCase, UpdatePlayerUseCase>();
-        services.AddScoped<IDeletePlayerUseCase, DeletePlayerUseCase>();
+        // tournament
+        services.AddScoped<IGetAllTournamentsUseCase, GetAllTournamentsUseCase>();
+        services.AddScoped<IGetTournamentByIdUseCase, GetTournamentByIdUseCase>();
+        services.AddScoped<IForceTournamentRefresh, ForceTournamentRefresh>();
 
         // team
         services.AddScoped<IGetAllTeamsUseCase, GetAllTeamsUseCase>();
-        services.AddScoped<ICreateTeamUseCase, CreateTeamUseCase>();
         services.AddScoped<IGetTeamByIdUseCase, GetTeamByIdUseCase>();
-        services.AddScoped<IUpdateTeamUseCase, UpdateTeamUseCase>();
-        services.AddScoped<IDeleteTeamUseCase, DeleteTeamUseCase>();
 
-        // league
-        services.AddScoped<IGetAllLeaguesUseCase, GetAllLeaguesUseCase>();
-        services.AddScoped<ICreateLeagueUseCase, CreateLeagueUseCase>();
-        services.AddScoped<IGetLeagueByIdUseCase, GetLeagueByIdUseCase>();
-        services.AddScoped<IUpdateLeagueUseCase, UpdateLeagueUseCase>();
-        services.AddScoped<IDeleteLeagueUseCase, DeleteLeagueUseCase>();
-
-        // event
-        services.AddScoped<IGetAllEventsUseCase, GetAllEventsUseCase>();
-        services.AddScoped<ICreateEventUseCase, CreateEventUseCase>();
-        services.AddScoped<IGetEventByIdUseCase, GetEventByIdUseCase>();
-        services.AddScoped<IUpdateEventUseCase, UpdateEventUseCase>();
-        services.AddScoped<IDeleteEventUseCase, DeleteEventUseCase>();
-
-        // odds
-        services.AddScoped<IGetAllOddsUseCase, GetAllOddsUseCase>();
-        services.AddScoped<ICreateOddsUseCase, CreateOddsUseCase>();
-        services.AddScoped<IGetOddsByIdUseCase, GetOddsByIdUseCase>();
-        services.AddScoped<IUpdateOddsUseCase, UpdateOddsUseCase>();
-        services.AddScoped<IDeleteOddsUseCase, DeleteOddsUseCase>();
+        // match
+        services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
+        services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -132,22 +96,14 @@ public static class ServiceExtensions
 
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IMatchRepository>(sp =>
-            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IEventRepository>(sp =>
-            new EventRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<ILeagueRepository>(sp =>
-            new LeagueRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IPlayerRepository>(sp =>
-            new PlayerRepository(sp.GetRequiredService<IMongoDatabase>()));
+        services.AddScoped<ITournamentRepository>(sp =>
+            new TournamentsRepository(sp.GetRequiredService<IMongoDatabase>()));
 
         services.AddScoped<ITeamRepository>(sp =>
             new TeamRepository(sp.GetRequiredService<IMongoDatabase>()));
 
-        services.AddScoped<IOddsRepository, OddsRepository>();
+        services.AddScoped<IMatchRepository>(sp =>
+            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
@@ -155,35 +111,9 @@ public static class ServiceExtensions
         services.AddAutoMapper(
             cfg =>
         {
-            // match
-            cfg.AddProfile<GetMatchMappingProfile>();
-            cfg.AddProfile<CreateMatchMappingProfile>();
-            cfg.AddProfile<UpdateMatchMappingProfile>();
-
-            // player
-            cfg.AddProfile<GetPlayerMappingProfile>();
-            cfg.AddProfile<CreatePlayerMappingProfile>();
-            cfg.AddProfile<UpdatePlayerMappingProfile>();
-
-            // team
+            cfg.AddProfile<GetTournamentMappingProfile>();
             cfg.AddProfile<GetTeamMappingProfile>();
-            cfg.AddProfile<CreateTeamMappingProfile>();
-            cfg.AddProfile<UpdateTeamMappingProfile>();
-
-            // league
-            cfg.AddProfile<GetLeagueMappingProfile>();
-            cfg.AddProfile<CreateLeagueMappingProfile>();
-            cfg.AddProfile<UpdateLeagueMappingProfile>();
-
-            // event
-            cfg.AddProfile<GetEventMappingProfile>();
-            cfg.AddProfile<CreateEventMappingProfile>();
-            cfg.AddProfile<UpdateEventMappingProfile>();
-
-            // event
-            cfg.AddProfile<GetOddsMappingProfile>();
-            cfg.AddProfile<CreateOddsMappingProfile>();
-            cfg.AddProfile<UpdateOddsMappingProfile>();
+            cfg.AddProfile<GetMatchMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
     }
 

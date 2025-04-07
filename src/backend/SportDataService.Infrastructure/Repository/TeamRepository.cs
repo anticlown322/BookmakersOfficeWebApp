@@ -1,5 +1,5 @@
 ﻿using MongoDB.Driver;
-using SportDataService.Domain.Models;
+using SportDataService.Domain.Models.Tournaments;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
@@ -33,5 +33,11 @@ public sealed class TeamRepository : MongoRepositoryBase<Team>, ITeamRepository
             totalCount,
             teamParameters.PageNumber,
             teamParameters.PageSize);
+    }
+
+    public async Task<Team?> GetByTeamIdAsync(string teamId, CancellationToken ct)
+    {
+        var filter = Builders<Team>.Filter.Eq(t => t.TeamId, teamId);
+        return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 }

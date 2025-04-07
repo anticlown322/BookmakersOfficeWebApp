@@ -4,5 +4,5 @@ namespace SportDataService.Application.Contracts.UseCases.Team;
 
 public interface IGetTeamByIdUseCase
 {
-    Task<TeamGetDto> ExecuteAsync(string teamId, CancellationToken cancellationToken);
+    Task<TeamGetDto> ExecuteAsync(string id, CancellationToken cancellationToken);
 }

@@ -19,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureNLog();
     builder.Services.ConfigureLoggerService();
 
+    builder.Services.ConfigureDataCollectionService();
     builder.Services.ConfigureUseCases();
     builder.Services.AddValidators();
     builder.Services.ConfigureAutoMapper();

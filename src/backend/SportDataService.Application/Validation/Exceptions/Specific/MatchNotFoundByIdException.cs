@@ -4,8 +4,8 @@ namespace SportDataService.Application.Validation.Exceptions.Specific;
 
 public sealed class MatchNotFoundByIdException : NotFoundException
 {
-    public MatchNotFoundByIdException(string leagueId)
-        : base($"The league with id: {leagueId} does not exist in the database.")
+    public MatchNotFoundByIdException(string teamId)
+        : base($"The match with id: {teamId} does not exist in the database.")
     {
     }
 }

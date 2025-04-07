@@ -1,5 +1,4 @@
-﻿using SportDataService.Application.DTO.Match;
-using SportDataService.Application.DTO.Team;
+﻿using SportDataService.Application.DTO.Team;
 using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;
 

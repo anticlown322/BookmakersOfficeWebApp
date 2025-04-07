@@ -12,17 +12,19 @@ public sealed class GetTeamByIdUseCase(
     IMapper mapper)
     : IGetTeamByIdUseCase
 {
-    public async Task<TeamGetDto> ExecuteAsync(string teamId, CancellationToken cancellationToken)
+    public async Task<TeamGetDto> ExecuteAsync(string id, CancellationToken cancellationToken)
     {
-        if (!ObjectId.TryParse(teamId, out _))
+        if (!ObjectId.TryParse(id, out _))
         {
-            throw new ArgumentException("Invalid Team ID format.");
+            throw new ArgumentException("Invalid ID format.");
         }
 
-        var team = await teamRepository.GetByIdAsync(teamId, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var team = await teamRepository.GetByIdAsync(id, cancellationToken);
         if (team == null)
         {
-            throw new TeamNotFoundByIdException(teamId);
+            throw new TeamNotFoundByIdException(id);
         }
 
         return mapper.Map<TeamGetDto>(team);

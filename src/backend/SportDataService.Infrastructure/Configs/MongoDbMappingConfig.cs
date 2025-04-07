@@ -4,6 +4,9 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Bson.Serialization.Serializers;
 using SportDataService.Domain.Models;
+using SportDataService.Domain.Models.Lines;
+using SportDataService.Domain.Models.Markets;
+using SportDataService.Domain.Models.Tournaments;
 
 namespace SportDataService.Infrastructure.Configs;
 
@@ -15,103 +18,14 @@ public static class MongoDbMappingConfig
         {
             new CamelCaseElementNameConvention(),
             new IgnoreExtraElementsConvention(true),
+            new EnumRepresentationConvention(BsonType.String),
+            new ImmutableTypeClassMapConvention(),
         };
         ConventionRegistry.Register("CustomConventions", conventionPack, _ => true);
 
-        ConfigureMatchMapping();
-        ConfigureEventMapping();
-        ConfigureOddsMapping();
-        ConfigureLeaguesMapping();
         ConfigureTeamMapping();
-        ConfigurePlayerMapping();
-    }
-
-    private static void ConfigureMatchMapping()
-    {
-        BsonClassMap.RegisterClassMap<Score>(sm =>
-        {
-            sm.AutoMap();
-            sm.MapProperty(s => s.Home).SetElementName("home");
-            sm.MapProperty(s => s.Away).SetElementName("away");
-        });
-
-        BsonClassMap.RegisterClassMap<Match>(cm =>
-        {
-            cm.AutoMap();
-            cm.MapIdProperty(m => m.Id)
-                .SetIdGenerator(StringObjectIdGenerator.Instance)
-                .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(m => m.LeagueId).SetElementName("leagueId");
-            cm.MapProperty(m => m.HomeTeamId).SetElementName("homeTeamId");
-            cm.MapProperty(m => m.AwayTeamId).SetElementName("awayTeamId");
-            cm.MapProperty(m => m.Status).SetElementName("status");
-            cm.MapProperty(m => m.CurrentScore).SetElementName("currentScore");
-
-            cm.MapProperty(m => m.EventIds)
-                .SetElementName("eventIds")
-                .SetShouldSerializeMethod(obj => ((Match)obj).EventIds?.Any() == true);
-
-            cm.MapProperty(m => m.StartTime)
-                .SetElementName("startTime")
-                .SetSerializer(new DateTimeSerializer(DateTimeKind.Utc));
-
-            cm.MapProperty(m => m.CreatedAt)
-                .SetElementName("createdAt")
-                .SetSerializer(new DateTimeSerializer(DateTimeKind.Utc));
-
-            cm.MapProperty(m => m.UpdatedAt)
-                .SetElementName("updatedAt")
-                .SetSerializer(new DateTimeSerializer(DateTimeKind.Utc));
-        });
-    }
-
-    private static void ConfigureEventMapping()
-    {
-        BsonClassMap.RegisterClassMap<Event>(cm =>
-        {
-            cm.AutoMap();
-            cm.MapIdProperty(e => e.Id)
-                .SetIdGenerator(StringObjectIdGenerator.Instance)
-                .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(e => e.MatchId).SetElementName("matchId");
-            cm.MapProperty(e => e.Type).SetElementName("type");
-            cm.MapProperty(e => e.Minute).SetElementName("minute");
-            cm.MapProperty(e => e.TeamId).SetElementName("teamId");
-            cm.MapProperty(e => e.PlayerId).SetElementName("playerId").SetIgnoreIfNull(true);
-            cm.MapProperty(e => e.AdditionalInfo).SetElementName("additionalInfo").SetIgnoreIfNull(true);
-        });
-    }
-
-    private static void ConfigureOddsMapping()
-    {
-        BsonClassMap.RegisterClassMap<Odds>(cm =>
-        {
-            cm.AutoMap();
-            cm.MapIdProperty(o => o.Id)
-                .SetIdGenerator(StringObjectIdGenerator.Instance)
-                .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(o => o.MatchId).SetElementName("matchId");
-            cm.MapProperty(o => o.MarketType).SetElementName("marketType");
-            cm.MapProperty(o => o.Values).SetElementName("odds");
-            cm.MapProperty(o => o.Timestamp).SetElementName("timestamp");
-            cm.MapProperty(o => o.IsLive).SetElementName("isLive");
-        });
-    }
-
-    private static void ConfigureLeaguesMapping()
-    {
-        BsonClassMap.RegisterClassMap<League>(cm =>
-        {
-            cm.AutoMap();
-            cm.MapIdProperty(l => l.Id)
-                .SetIdGenerator(StringObjectIdGenerator.Instance)
-                .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(l => l.Name).SetElementName("name");
-            cm.MapProperty(l => l.Country).SetElementName("country");
-            cm.MapProperty(l => l.SportType).SetElementName("sportType");
-            cm.MapProperty(l => l.Season).SetElementName("season");
-            cm.MapProperty(l => l.IsActive).SetElementName("isActive");
-        });
+        ConfigureMatchMapping();
+        ConfigureTournamentMapping();
     }
 
     private static void ConfigureTeamMapping()
@@ -119,31 +33,82 @@ public static class MongoDbMappingConfig
         BsonClassMap.RegisterClassMap<Team>(cm =>
         {
             cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+
             cm.MapIdProperty(t => t.Id)
                 .SetIdGenerator(StringObjectIdGenerator.Instance)
                 .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(t => t.Name).SetElementName("name");
-            cm.MapProperty(t => t.ShortName).SetElementName("shortName");
-            cm.MapProperty(t => t.Country).SetElementName("country");
-            cm.MapProperty(t => t.SportType).SetElementName("sportType");
-            cm.MapProperty(t => t.PlayerIds).SetElementName("players");
+            cm.GetMemberMap(c => c.Name).SetElementName("name");
         });
     }
 
-    private static void ConfigurePlayerMapping()
+    private static void ConfigureMatchMapping()
     {
-        BsonClassMap.RegisterClassMap<Player>(cm =>
+        BsonClassMap.RegisterClassMap<Match>(cm =>
         {
             cm.AutoMap();
-            cm.MapIdProperty(p => p.Id)
+            cm.SetIgnoreExtraElements(true);
+
+            cm.MapIdProperty(m => m.Id)
                 .SetIdGenerator(StringObjectIdGenerator.Instance)
                 .SetSerializer(new StringSerializer(BsonType.ObjectId));
-            cm.MapProperty(p => p.Name).SetElementName("name");
-            cm.MapProperty(p => p.TeamId).SetElementName("teamId");
-            cm.MapProperty(p => p.Position).SetElementName("position");
-            cm.MapProperty(p => p.Number).SetElementName("number");
-            cm.MapProperty(p => p.BirthDate).SetElementName("birthDate");
-            cm.MapProperty(p => p.Nationality).SetElementName("nationality");
+            cm.GetMemberMap(c => c.MatchId).SetElementName("matchId");
+            cm.GetMemberMap(c => c.TournamentId).SetElementName("tournamentId");
+            cm.GetMemberMap(c => c.StartTime).SetElementName("startTime");
+
+            cm.GetMemberMap(c => c.Opponent1).SetElementName("opponent1");
+            cm.GetMemberMap(c => c.Opponent2).SetElementName("opponent2");
+
+            cm.GetMemberMap(c => c.MainLine).SetElementName("mainLine");
+            cm.GetMemberMap(c => c.KillsLine).SetElementName("killsLine");
+            cm.GetMemberMap(c => c.MapsLine).SetElementName("mapsLine");
+            cm.GetMemberMap(c => c.SpecialLine).SetElementName("specialLine");
+        });
+
+        BsonClassMap.RegisterClassMap<MainLine>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+        });
+
+        BsonClassMap.RegisterClassMap<KillsLine>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+        });
+
+        BsonClassMap.RegisterClassMap<MapsLine>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+        });
+
+        BsonClassMap.RegisterClassMap<SpecialLine>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+        });
+
+        BsonClassMap.RegisterClassMap<MarketValue>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+        });
+    }
+
+    private static void ConfigureTournamentMapping()
+    {
+        BsonClassMap.RegisterClassMap<Tournament>(cm =>
+        {
+            cm.AutoMap();
+            cm.SetIgnoreExtraElements(true);
+
+            cm.MapIdProperty(t => t.Id)
+                .SetIdGenerator(StringObjectIdGenerator.Instance)
+                .SetSerializer(new StringSerializer(BsonType.ObjectId));
+            cm.GetMemberMap(c => c.TournamentId).SetElementName("tournamentId");
+            cm.GetMemberMap(c => c.Name).SetElementName("name");
+            cm.GetMemberMap(c => c.Matches).SetElementName("matches");
         });
     }
 }
