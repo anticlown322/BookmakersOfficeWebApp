@@ -9,7 +9,8 @@ namespace SportDataService.Presentation.Controllers;
 [ApiController]
 public class TeamController(
     IGetAllTeamsUseCase getAllTeamsUseCase,
-    IGetTeamByIdUseCase getTeamByIdUseCase)
+    IGetTeamByIdUseCase getTeamByIdUseCase,
+    IGetTeamByTeamIdUseCase getTeamByTeamIdUseCase)
     : ControllerBase
 {
     [HttpGet]
@@ -22,11 +23,18 @@ public class TeamController(
         return Ok(pagedResult.teams);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetTeamById(string id, CancellationToken cancellationToken)
     {
         var teamToGet = await getTeamByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(teamToGet);
+    }
+
+    [HttpGet("by-team-id/{teamId}")]
+    public async Task<IActionResult> GetTeamByTeamId(string teamId, CancellationToken ct)
+    {
+        var team = await getTeamByTeamIdUseCase.ExecuteAsync(teamId, ct);
+        return Ok(team);
     }
 }

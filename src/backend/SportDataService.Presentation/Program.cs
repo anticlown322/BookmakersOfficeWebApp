@@ -21,7 +21,6 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.ConfigureDataCollectionService();
     builder.Services.ConfigureUseCases();
-    builder.Services.AddValidators();
     builder.Services.ConfigureAutoMapper();
 
     builder.Services.AddControllers();

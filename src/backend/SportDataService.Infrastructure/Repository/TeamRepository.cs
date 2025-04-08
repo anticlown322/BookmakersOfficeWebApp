@@ -35,7 +35,7 @@ public sealed class TeamRepository : MongoRepositoryBase<Team>, ITeamRepository
             teamParameters.PageSize);
     }
 
-    public async Task<Team?> GetByTeamIdAsync(string teamId, CancellationToken ct)
+    public async Task<Team?> GetTeamByTeamIdAsync(string teamId, CancellationToken ct)
     {
         var filter = Builders<Team>.Filter.Eq(t => t.TeamId, teamId);
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);

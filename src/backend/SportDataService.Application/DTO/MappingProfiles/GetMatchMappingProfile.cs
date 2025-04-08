@@ -11,36 +11,96 @@ public class GetMatchMappingProfile : Profile
 {
     public GetMatchMappingProfile()
     {
-        CreateMap<MarketValue, MarketValueGetDto>();
+        CreateMap<MarketValue, MarketValueGetDto>()
+            .ForMember(dest => dest.Value, opt => opt.Condition(src => src.Value != null));
 
         CreateMap<MainLine, MainLineGetDto>()
-            .ForMember(dest => dest.Opponent1Win, opt => opt.MapFrom(src => src.Opponent1Win))
-            .ForMember(dest => dest.Opponent2Win, opt => opt.MapFrom(src => src.Opponent2Win))
-            .ForMember(dest => dest.Draw, opt => opt.MapFrom(src => src.Draw))
-            .ForMember(dest => dest.Opponent1WinOrDraw, opt => opt.MapFrom(src => src.Opponent1WinOrDraw))
-            .ForMember(dest => dest.Opponent2WinOrDraw, opt => opt.MapFrom(src => src.Opponent2WinOrDraw));
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) =>
+                srcMember != null && !IsEmptyMarketValue(srcMember)));
 
         CreateMap<KillsLine, KillsLineGetDto>()
-            .ForMember(dest => dest.Opponent1KillsMain, opt => opt.MapFrom(src => src.Opponent1KillsMain))
-            .ForMember(dest => dest.Opponent2KillsMain, opt => opt.MapFrom(src => src.Opponent2KillsMain))
-            .ForMember(dest => dest.TotalKillsUnder, opt => opt.MapFrom(src => src.TotalKillsUnder))
-            .ForMember(dest => dest.TotalKillsOver, opt => opt.MapFrom(src => src.TotalKillsOver))
-            .ForMember(dest => dest.Opponent1KillsHandicap, opt => opt.MapFrom(src => src.Opponent1KillsHandicap))
-            .ForMember(dest => dest.Opponent2KillsHandicap, opt => opt.MapFrom(src => src.Opponent2KillsHandicap));
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) =>
+                srcMember != null && !IsEmptyMarketValue(srcMember)));
 
         CreateMap<MapsLine, MapsLineGetDto>()
-            .ForMember(dest => dest.Map1HandicapOpponent1, opt => opt.MapFrom(src => src.Map1HandicapOpponent1))
-            .ForMember(dest => dest.Map1HandicapOpponent2, opt => opt.MapFrom(src => src.Map1HandicapOpponent2))
-            .ForMember(dest => dest.Map2HandicapOpponent1, opt => opt.MapFrom(src => src.Map2HandicapOpponent1))
-            .ForMember(dest => dest.Map2HandicapOpponent2, opt => opt.MapFrom(src => src.Map2HandicapOpponent2));
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) =>
+                srcMember != null && !IsEmptyMarketValue(srcMember)));
 
         CreateMap<SpecialLine, SpecialLineGetDto>()
-            .ForMember(dest => dest.EitherOpponent1OrOpponent2, opt => opt.MapFrom(src => src.EitherOpponent1OrOpponent2));
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) =>
+                srcMember != null && !IsEmptyMarketValue(srcMember)));
 
         CreateMap<Domain.Models.Tournaments.Match, MatchGetDto>()
-            .ForMember(dest => dest.MainLine, opt => opt.MapFrom(src => src.MainLine))
-            .ForMember(dest => dest.KillsLine, opt => opt.MapFrom(src => src.KillsLine))
-            .ForMember(dest => dest.MapsLine, opt => opt.MapFrom(src => src.MapsLine))
-            .ForMember(dest => dest.SpecialLine, opt => opt.MapFrom(src => src.SpecialLine));
+            .ForMember(
+                dest => dest.MainLine,
+                opt => opt.MapFrom(src => !IsEmptyLine(src.MainLine) ? src.MainLine : null))
+            .ForMember(
+                dest => dest.KillsLine,
+                opt => opt.MapFrom(src => !IsEmptyLine(src.KillsLine) ? src.KillsLine : null))
+            .ForMember(
+                dest => dest.MapsLine,
+                opt => opt.MapFrom(src => !IsEmptyLine(src.MapsLine) ? src.MapsLine : null))
+            .ForMember(
+                dest => dest.SpecialLine,
+                opt => opt.MapFrom(src => !IsEmptyLine(src.SpecialLine) ? src.SpecialLine : null))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+    }
+
+    private bool IsEmptyMarketValue(object? value)
+    {
+        return value is MarketValue { Value: null, UpdatedAt: null, IsActive: false };
+    }
+
+    private bool IsEmptyLine(object? line)
+    {
+        return line switch
+        {
+            MainLine mainLine => IsEmptyMainLine(mainLine),
+            KillsLine killsLine => IsEmptyKillsLine(killsLine),
+            MapsLine mapsLine => IsEmptyMapsLine(mapsLine),
+            SpecialLine specialLine => IsEmptySpecialLine(specialLine),
+            _ => true
+        };
+    }
+
+    private bool IsEmptyMainLine(MainLine line)
+    {
+        return line is
+        {
+            Opponent1Win: null,
+            Opponent2Win: null,
+            Draw: null,
+            Opponent1WinOrDraw: null,
+            Opponent2WinOrDraw: null
+        };
+    }
+
+    private bool IsEmptyKillsLine(KillsLine line)
+    {
+        return line is
+        {
+            Opponent1KillsMain: null,
+            Opponent2KillsMain: null,
+            TotalKillsUnder: null,
+            TotalKillsOver: null,
+            Opponent1KillsHandicap: null,
+            Opponent2KillsHandicap: null
+        };
+    }
+
+    private bool IsEmptyMapsLine(MapsLine line)
+    {
+        return line is
+        {
+            Map1HandicapOpponent1: null,
+            Map1HandicapOpponent2: null,
+            Map2HandicapOpponent1: null,
+            Map2HandicapOpponent2: null
+        };
+    }
+
+    private bool IsEmptySpecialLine(SpecialLine line)
+    {
+        return line is { EitherOpponent1OrOpponent2: null };
     }
 }

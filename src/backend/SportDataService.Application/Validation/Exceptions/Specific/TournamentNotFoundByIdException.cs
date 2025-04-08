@@ -4,8 +4,8 @@ namespace SportDataService.Application.Validation.Exceptions.Specific;
 
 public sealed class TournamentNotFoundByIdException : NotFoundException
 {
-    public TournamentNotFoundByIdException(string tournamentId)
-        : base($"The tournament with id: {tournamentId} does not exist in the database.")
+    public TournamentNotFoundByIdException(string id)
+        : base($"The tournament with id: {id} does not exist in the database.")
     {
     }
 }

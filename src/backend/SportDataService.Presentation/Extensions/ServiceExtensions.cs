@@ -60,15 +60,18 @@ public static class ServiceExtensions
         // tournament
         services.AddScoped<IGetAllTournamentsUseCase, GetAllTournamentsUseCase>();
         services.AddScoped<IGetTournamentByIdUseCase, GetTournamentByIdUseCase>();
+        services.AddScoped<IGetTournamentByTournamentIdUseCase, GetTournamentByTournamentIdUseCase>();
         services.AddScoped<IForceTournamentRefresh, ForceTournamentRefresh>();
 
         // team
         services.AddScoped<IGetAllTeamsUseCase, GetAllTeamsUseCase>();
         services.AddScoped<IGetTeamByIdUseCase, GetTeamByIdUseCase>();
+        services.AddScoped<IGetTeamByTeamIdUseCase, GetTeamByTeamIdUseCase>();
 
         // match
         services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
         services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
+        services.AddScoped<IGetMatchByMatchIdUseCase, GetMatchByMatchIdUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -115,10 +118,6 @@ public static class ServiceExtensions
             cfg.AddProfile<GetTeamMappingProfile>();
             cfg.AddProfile<GetMatchMappingProfile>();
         }, AppDomain.CurrentDomain.GetAssemblies());
-    }
-
-    public static void AddValidators(this IServiceCollection services)
-    {
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>

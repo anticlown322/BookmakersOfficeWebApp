@@ -8,5 +8,5 @@ namespace SportDataService.Domain.RepositoryContracts;
 public interface ITeamRepository : IRepositoryBase<Team>
 {
     Task<PagedList<Team>> FindAllTeamsAsync(TeamParameters teamParameters, CancellationToken cancellationToken);
-    Task<Team?> GetByTeamIdAsync(string teamId, CancellationToken ct);
+    Task<Team?> GetTeamByTeamIdAsync(string teamId, CancellationToken ct);
 }

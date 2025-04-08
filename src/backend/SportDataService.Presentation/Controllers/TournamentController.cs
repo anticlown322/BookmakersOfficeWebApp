@@ -10,7 +10,8 @@ namespace SportDataService.Presentation.Controllers;
 public class TournamentController(
     IForceTournamentRefresh forceTournamentRefresh,
     IGetAllTournamentsUseCase getAllTournamentsUseCase,
-    IGetTournamentByIdUseCase getTournamentByIdUseCase)
+    IGetTournamentByIdUseCase getTournamentByIdUseCase,
+    IGetTournamentByTournamentIdUseCase getTournamentByTournamentIdUseCase)
     : ControllerBase
 {
     [HttpPost]
@@ -31,11 +32,18 @@ public class TournamentController(
         return Ok(pagedResult.tournaments);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetTournamentById(string id, CancellationToken cancellationToken)
     {
         var tournamentToGet = await getTournamentByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(tournamentToGet);
+    }
+
+    [HttpGet("by-tournament-id/{tournamentId}")]
+    public async Task<IActionResult> GetTournamentByTournamentId(string tournamentId, CancellationToken ct)
+    {
+        var tournament = await getTournamentByTournamentIdUseCase.ExecuteAsync(tournamentId, ct);
+        return Ok(tournament);
     }
 }

@@ -35,7 +35,7 @@ public sealed class MatchRepository : MongoRepositoryBase<Match>, IMatchReposito
             matchParameters.PageSize);
     }
 
-    public async Task<Match?> GetByMatchIdAsync(string matchId, CancellationToken ct)
+    public async Task<Match?> GetMatchByMatchIdAsync(string matchId, CancellationToken ct)
     {
         var filter = Builders<Match>.Filter.Eq(t => t.MatchId, matchId);
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);

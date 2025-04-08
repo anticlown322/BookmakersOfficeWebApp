@@ -35,7 +35,7 @@ public class TournamentsRepository : MongoRepositoryBase<Tournament>, ITournamen
             tournamentParameters.PageSize);
     }
 
-    public async Task<Tournament?> GetByTournamentIdAsync(string tournamentId, CancellationToken ct)
+    public async Task<Tournament?> GetTournamentByTournamentIdAsync(string tournamentId, CancellationToken ct)
     {
         var filter = Builders<Tournament>.Filter.Eq(t => t.TournamentId, tournamentId);
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);

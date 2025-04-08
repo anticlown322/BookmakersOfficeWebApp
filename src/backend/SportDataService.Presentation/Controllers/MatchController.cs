@@ -9,7 +9,8 @@ namespace SportDataService.Presentation.Controllers;
 [ApiController]
 public class MatchController(
     IGetAllMatchesUseCase getAllMatchesUseCase,
-    IGetMatchByIdUseCase getMatchByIdUseCase)
+    IGetMatchByIdUseCase getMatchByIdUseCase,
+    IGetMatchByMatchIdUseCase getMatchByMatchIdUseCase)
     : ControllerBase
 {
     [HttpGet]
@@ -22,11 +23,18 @@ public class MatchController(
         return Ok(pagedResult.matches);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetMatchById(string id, CancellationToken cancellationToken)
     {
         var matchToGet = await getMatchByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(matchToGet);
+    }
+
+    [HttpGet("by-match-id/{matchId}")]
+    public async Task<IActionResult> GetMatchByMatchId(string matchId, CancellationToken ct)
+    {
+        var match = await getMatchByMatchIdUseCase.ExecuteAsync(matchId, ct);
+        return Ok(match);
     }
 }

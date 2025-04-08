@@ -9,5 +9,5 @@ namespace SportDataService.Domain.RepositoryContracts;
 public interface ITournamentRepository : IRepositoryBase<Tournament>
 {
     Task<PagedList<Tournament>> FindAllTournamentsAsync(TournamentParameters tournamentParameters, CancellationToken cancellationToken);
-    Task<Tournament?> GetByTournamentIdAsync(string tournamentId, CancellationToken ct);
+    Task<Tournament?> GetTournamentByTournamentIdAsync(string tournamentId, CancellationToken ct);
 }

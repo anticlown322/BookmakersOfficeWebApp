@@ -34,7 +34,7 @@ public class ForceTournamentRefresh(
 
             ct.ThrowIfCancellationRequested();
 
-            var existingTournament = await tournamentRepository.GetByTournamentIdAsync(tournament.TournamentId, ct);
+            var existingTournament = await tournamentRepository.GetTournamentByTournamentIdAsync(tournament.TournamentId, ct);
             if (existingTournament != null)
             {
                 ct.ThrowIfCancellationRequested();
@@ -54,12 +54,11 @@ public class ForceTournamentRefresh(
     {
         var allTeams = tournament.Matches
             .SelectMany(m => new[] { m.Opponent1, m.Opponent2 })
-            .DistinctBy(t => t.TeamId)
             .ToList();
 
         foreach (var team in allTeams)
         {
-            var existingTeam = await teamRepository.GetByTeamIdAsync(team.TeamId, ct);
+            var existingTeam = await teamRepository.GetTeamByTeamIdAsync(team.TeamId, ct);
             if (existingTeam != null)
             {
                 ct.ThrowIfCancellationRequested();
@@ -81,7 +80,7 @@ public class ForceTournamentRefresh(
 
         foreach (var match in allMatches)
         {
-            var existingMatch = await matchRepository.GetByMatchIdAsync(match.MatchId, ct);
+            var existingMatch = await matchRepository.GetMatchByMatchIdAsync(match.MatchId, ct);
             if (existingMatch != null)
             {
                 ct.ThrowIfCancellationRequested();

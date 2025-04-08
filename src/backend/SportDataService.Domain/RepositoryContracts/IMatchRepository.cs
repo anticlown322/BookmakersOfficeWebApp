@@ -8,5 +8,5 @@ namespace SportDataService.Domain.RepositoryContracts;
 public interface IMatchRepository : IRepositoryBase<Match>
 {
     public Task<PagedList<Match>> FindAllMatchesAsync(MatchParameters matchParameters, CancellationToken cancellationToken);
-    Task<Match?> GetByMatchIdAsync(string matchId, CancellationToken ct);
+    Task<Match?> GetMatchByMatchIdAsync(string matchId, CancellationToken ct);
 }
