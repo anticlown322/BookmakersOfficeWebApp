@@ -1,6 +1,6 @@
 ﻿namespace SportDataService.Domain.Models.Settings;
 
-public class DatabaseSettings
+public class SportDataDbSettings
 {
     public string ConnectionString { get; set; }
     public string DatabaseName { get; set; }

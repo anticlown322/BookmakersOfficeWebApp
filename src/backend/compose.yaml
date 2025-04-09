@@ -9,14 +9,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "10000:5432"
+      - "10000:10000"
     volumes:
       - user_pg_data:/var/lib/postgresql/data
 
   # Сервис спортивных данных (MongoDB)
-  sportdata-service-mongodb:
+  sport-data-service-mongodb:
     image: mongo:latest
-    container_name: bookmaker-sportdata-mongo
+    container_name: bookmaker-sport-data-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -24,8 +24,22 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - sportdata_mongo_data:/data/db
+      - sport_data_mongo_data:/data/db
+        
+  # Hangfire для сервиса спортивных данных (MongoDB)
+  sport-data-hangfire-mongodb:
+    image: mongo:latest
+    container_name: bookmaker-sport-data-hangfire-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: hangfire_db
+    ports:
+      - "27018:27017"
+    volumes:
+      - sport_data_hangfire_mongo_data:/data/db
 
 volumes:
   user_pg_data:
-  sportdata_mongo_data:
+  sport_data_mongo_data:
+  sport_data_hangfire_mongo_data:

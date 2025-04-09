@@ -1,4 +1,9 @@
 ﻿using System.Text;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.Yaml;
@@ -20,6 +25,7 @@ using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
 using SportDataService.Infrastructure.Services;
 using SportDataService.Infrastructure.Services.DataCollection;
+using SportDataService.Infrastructure.Services.Hangfire;
 using SportDataService.Infrastructure.Utility;
 using SportDataService.Presentation.Utility;
 
@@ -50,9 +56,10 @@ public static class ServiceExtensions
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<SportDataDbSettings>(configuration.GetSection("SportDataDbSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
     }
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
@@ -61,13 +68,19 @@ public static class ServiceExtensions
     public static void ConfigureDataCollectionService(this IServiceCollection services) =>
         services.AddSingleton<IDataCollectionService, DataCollectionService>();
 
+    public static void ConfigureBackgroundJobService(this IServiceCollection services) =>
+        services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
+
+    public static void ConfigureBackgroundJobExecutor(this IServiceCollection services) =>
+        services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
+
     public static void ConfigureUseCases(this IServiceCollection services)
     {
         // tournament
         services.AddScoped<IGetAllTournamentsUseCase, GetAllTournamentsUseCase>();
         services.AddScoped<IGetTournamentByIdUseCase, GetTournamentByIdUseCase>();
         services.AddScoped<IGetTournamentByTournamentIdUseCase, GetTournamentByTournamentIdUseCase>();
-        services.AddScoped<IRefreshTournaments, RefreshTournaments>();
+        services.AddScoped<IRefreshTournamentsUseCase, RefreshTournamentsUseCase>();
 
         // team
         services.AddScoped<IGetAllTeamsUseCase, GetAllTeamsUseCase>();
@@ -89,16 +102,27 @@ public static class ServiceExtensions
     {
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
             var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
             clientSettings.ConnectTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+
             return new MongoClient(clientSettings);
         });
 
+        services.AddSingleton<IMongoClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<HangfireSettings>>().Value;
+
+            return new MongoClient(settings.ConnectionString);
+        });
+    }
+
+    public static void AddSportDataDb(this IServiceCollection services)
+    {
         services.AddSingleton<IMongoDatabase>(sp =>
         {
             var client = sp.GetRequiredService<IMongoClient>();
-            var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
             return client.GetDatabase(settings.DatabaseName);
         });
     }
@@ -161,4 +185,31 @@ public static class ServiceExtensions
             options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
                 policy.RequireRole(UserRoles.Administrator));
         });
+
+    public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
+    {
+        var settings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
+
+        services.AddHangfire(config => config
+            .UseMongoStorage(
+                settings.ConnectionString,
+                settings.DatabaseName,
+                new MongoStorageOptions
+                {
+                    CheckConnection = true,
+                    CheckQueuedJobsStrategy = CheckQueuedJobsStrategy.TailNotificationsCollection,
+                    MigrationOptions = new MongoMigrationOptions
+                    {
+                        MigrationStrategy = new MigrateMongoMigrationStrategy(),
+                        BackupStrategy = new CollectionMongoBackupStrategy(),
+                    },
+                })
+            .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
+
+        services.AddHangfireServer(options => {
+            options.ServerName = "SportData.Background";
+            options.Queues = new[] { "default", "critical" };
+            options.WorkerCount = Environment.ProcessorCount * 2;
+        });
+    }
 }

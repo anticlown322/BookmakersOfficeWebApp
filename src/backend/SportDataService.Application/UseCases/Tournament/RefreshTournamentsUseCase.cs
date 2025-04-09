@@ -7,12 +7,12 @@ using Tournament = Domain.Models.Tournaments.Tournament;
 using Team = Domain.Models.Tournaments.Team;
 using Match = Domain.Models.Tournaments.Match;
 
-public class RefreshTournaments(
+public class RefreshTournamentsUseCase(
     IDataCollectionService dataCollectionService,
     ITournamentRepository tournamentRepository,
     IMatchRepository matchRepository,
     ITeamRepository teamRepository)
-    : IRefreshTournaments
+    : IRefreshTournamentsUseCase
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {

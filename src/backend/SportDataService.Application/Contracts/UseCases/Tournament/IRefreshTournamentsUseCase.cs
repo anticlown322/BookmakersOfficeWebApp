@@ -1,6 +1,6 @@
 ﻿namespace SportDataService.Application.Contracts.UseCases.Tournament;
 
-public interface IRefreshTournaments
+public interface IRefreshTournamentsUseCase
 {
     Task ExecuteAsync(CancellationToken cancellationToken);
 }

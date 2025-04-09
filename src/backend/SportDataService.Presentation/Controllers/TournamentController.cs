@@ -11,17 +11,17 @@ namespace SportDataService.Presentation.Controllers;
 [Route("api/tournaments")]
 [ApiController]
 public class TournamentController(
-    IRefreshTournaments refreshTournaments,
+    IRefreshTournamentsUseCase refreshTournamentsUseCase,
     IGetAllTournamentsUseCase getAllTournamentsUseCase,
     IGetTournamentByIdUseCase getTournamentByIdUseCase,
     IGetTournamentByTournamentIdUseCase getTournamentByTournamentIdUseCase)
     : ControllerBase
 {
     [HttpPost]
-    // [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> RefreshTournaments(CancellationToken cancellationToken)
     {
-        await refreshTournaments.ExecuteAsync(cancellationToken);
+        await refreshTournamentsUseCase.ExecuteAsync(cancellationToken);
 
         return NoContent();
     }
