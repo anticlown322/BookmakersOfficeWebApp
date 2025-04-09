@@ -38,6 +38,9 @@ public class TournamentsRepository : MongoRepositoryBase<Tournament>, ITournamen
     public async Task<Tournament?> GetTournamentByTournamentIdAsync(string tournamentId, CancellationToken ct)
     {
         var filter = Builders<Tournament>.Filter.Eq(t => t.TournamentId, tournamentId);
+
+        ct.ThrowIfCancellationRequested();
+
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 }

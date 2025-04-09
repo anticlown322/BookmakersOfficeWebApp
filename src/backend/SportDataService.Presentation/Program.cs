@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Configuration.AddConfiguration(configuration);
     builder.Services.AddAppSettings(builder.Configuration);
 
+    builder.Services.ConfigureAuth(builder.Configuration);
+    builder.Services.AddAuthorizationPolicies();
+    builder.Services.AddHttpContextAccessor();
+
     builder.Services.ConfigureMongoDbMappings();
     builder.Services.ConfigureMongoDbContext();
     builder.Services.AddHostedService<MongoDbInitializer>();
@@ -32,7 +36,9 @@ var app = builder.Build();
     var logger = app.Services.GetService<ILoggerService>();
     app.ConfigureExceptionHandler(logger);
 
-    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
     app.MapControllers();
 }
 

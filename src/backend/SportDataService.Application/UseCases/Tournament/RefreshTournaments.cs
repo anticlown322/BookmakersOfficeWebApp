@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using SportDataService.Application.Contracts.Services;
+﻿using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Tournament;
 using SportDataService.Domain.RepositoryContracts;
 
@@ -8,12 +7,12 @@ using Tournament = Domain.Models.Tournaments.Tournament;
 using Team = Domain.Models.Tournaments.Team;
 using Match = Domain.Models.Tournaments.Match;
 
-public class ForceTournamentRefresh(
+public class RefreshTournaments(
     IDataCollectionService dataCollectionService,
     ITournamentRepository tournamentRepository,
     IMatchRepository matchRepository,
     ITeamRepository teamRepository)
-    : IForceTournamentRefresh
+    : IRefreshTournaments
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -30,6 +29,9 @@ public class ForceTournamentRefresh(
             ct.ThrowIfCancellationRequested();
 
             await UpdateTeams(tournament, ct);
+
+            ct.ThrowIfCancellationRequested();
+
             await UpdateMatches(tournament, ct);
 
             ct.ThrowIfCancellationRequested();
@@ -114,25 +116,6 @@ public class ForceTournamentRefresh(
             ct.ThrowIfCancellationRequested();
 
             await matchRepository.DeleteAsync(match.Id, ct);
-        }
-
-        foreach (var newMatch in newTournament.Matches)
-        {
-            var existingMatch = existing.Matches.FirstOrDefault(m => m.MatchId == newMatch.MatchId);
-            if (existingMatch != null)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                await matchRepository.UpdateAsync(newMatch, ct);
-            }
-            else
-            {
-                existing.Matches.Add(newMatch);
-
-                ct.ThrowIfCancellationRequested();
-
-                await matchRepository.CreateAsync(newMatch, ct);
-            }
         }
 
         ct.ThrowIfCancellationRequested();

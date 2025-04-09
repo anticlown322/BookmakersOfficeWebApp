@@ -38,6 +38,9 @@ public sealed class MatchRepository : MongoRepositoryBase<Match>, IMatchReposito
     public async Task<Match?> GetMatchByMatchIdAsync(string matchId, CancellationToken ct)
     {
         var filter = Builders<Match>.Filter.Eq(t => t.MatchId, matchId);
+
+        ct.ThrowIfCancellationRequested();
+
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 }

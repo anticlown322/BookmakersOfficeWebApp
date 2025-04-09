@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
@@ -17,6 +20,8 @@ using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
 using SportDataService.Infrastructure.Services;
 using SportDataService.Infrastructure.Services.DataCollection;
+using SportDataService.Infrastructure.Utility;
+using SportDataService.Presentation.Utility;
 
 namespace SportDataService.Presentation.Extensions;
 
@@ -46,6 +51,7 @@ public static class ServiceExtensions
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
     }
 
@@ -61,7 +67,7 @@ public static class ServiceExtensions
         services.AddScoped<IGetAllTournamentsUseCase, GetAllTournamentsUseCase>();
         services.AddScoped<IGetTournamentByIdUseCase, GetTournamentByIdUseCase>();
         services.AddScoped<IGetTournamentByTournamentIdUseCase, GetTournamentByTournamentIdUseCase>();
-        services.AddScoped<IForceTournamentRefresh, ForceTournamentRefresh>();
+        services.AddScoped<IRefreshTournaments, RefreshTournaments>();
 
         // team
         services.AddScoped<IGetAllTeamsUseCase, GetAllTeamsUseCase>();
@@ -113,13 +119,46 @@ public static class ServiceExtensions
     {
         services.AddAutoMapper(
             cfg =>
-        {
-            cfg.AddProfile<GetTournamentMappingProfile>();
-            cfg.AddProfile<GetTeamMappingProfile>();
-            cfg.AddProfile<GetMatchMappingProfile>();
-        }, AppDomain.CurrentDomain.GetAssemblies());
+            {
+                cfg.AddProfile<GetTournamentMappingProfile>();
+                cfg.AddProfile<GetTeamMappingProfile>();
+                cfg.AddProfile<GetMatchMappingProfile>();
+            }, AppDomain.CurrentDomain.GetAssemblies());
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
         services.Configure<ApiBehaviorOptions>(opt => { opt.SuppressModelStateInvalidFilter = true; });
+
+    public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer();
+
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
+        services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
+                ClockSkew = TimeSpan.Zero,
+            };
+        });
+    }
+
+    public static void AddAuthorizationPolicies(this IServiceCollection services) =>
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
+                policy.RequireRole(UserRoles.Administrator));
+        });
 }

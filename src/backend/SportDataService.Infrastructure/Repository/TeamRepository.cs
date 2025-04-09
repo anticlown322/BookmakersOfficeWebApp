@@ -38,6 +38,9 @@ public sealed class TeamRepository : MongoRepositoryBase<Team>, ITeamRepository
     public async Task<Team?> GetTeamByTeamIdAsync(string teamId, CancellationToken ct)
     {
         var filter = Builders<Team>.Filter.Eq(t => t.TeamId, teamId);
+
+        ct.ThrowIfCancellationRequested();
+
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
 }
