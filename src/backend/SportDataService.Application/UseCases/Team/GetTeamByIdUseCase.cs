@@ -16,7 +16,7 @@ public sealed class GetTeamByIdUseCase(
     {
         if (!ObjectId.TryParse(id, out _))
         {
-            throw new ArgumentException("Invalid ID format.");
+            throw new InvalidIdFormatException(id);
         }
 
         cancellationToken.ThrowIfCancellationRequested();

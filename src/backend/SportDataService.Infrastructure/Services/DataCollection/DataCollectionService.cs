@@ -36,17 +36,17 @@ public class DataCollectionService(
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var answer = await JToken.LoadAsync(jsonTextReader, cancellationToken);
+            var rawSportData = await JToken.LoadAsync(jsonTextReader, cancellationToken);
 
-            var tournaments = ParseAllTournaments(answer);
-            var matches = ParseMatchesInfo(answer);
+            var tournaments = ParseAllTournaments(rawSportData);
+            var matches = ParseMatchesInfo(rawSportData);
             LinkMatchesToTournaments(tournaments, matches);
 
             return tournaments;
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
-            Console.WriteLine($"Can't get API response: {ex.Message}");
+            Console.WriteLine("Can't get API response");
             throw;
         }
         catch (Exception ex)
@@ -56,11 +56,11 @@ public class DataCollectionService(
         }
     }
 
-    private List<Tournament> ParseAllTournaments(JToken apiAnswer)
+    private List<Tournament> ParseAllTournaments(JToken sportData)
     {
         var tournaments = new List<Tournament>();
 
-        var sports = apiAnswer.GetList(JsonNodeNames.Sports)
+        var sports = sportData.GetList(JsonNodeNames.Sports)
             .Where(t => t.GetStringValue(JsonNodeNames.ParentId) == JsonNodeNames.CyberSportIdValue);
 
         foreach (var sport in sports)
@@ -84,11 +84,11 @@ public class DataCollectionService(
         return tournaments;
     }
 
-    private List<Match> ParseMatchesInfo(JToken apiAnswer)
+    private List<Match> ParseMatchesInfo(JToken sportData)
     {
         var matches = new List<Match>();
-        var rawFactors = apiAnswer.GetList(JsonNodeNames.CustomFactors);
-        var rawEvents = apiAnswer.GetList(JsonNodeNames.Events);
+        var rawFactors = sportData.GetList(JsonNodeNames.CustomFactors);
+        var rawEvents = sportData.GetList(JsonNodeNames.Events);
 
         var factorsByEventId = rawFactors
             .GroupBy(f => f.GetStringValue(JsonNodeNames.EventId))
