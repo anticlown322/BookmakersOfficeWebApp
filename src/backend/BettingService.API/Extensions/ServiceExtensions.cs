@@ -43,7 +43,7 @@ public static class ServiceExtensions
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
     }
-    
+
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthentication(opt =>
@@ -54,32 +54,38 @@ public static class ServiceExtensions
             .AddJwtBearer();
 
         var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
-        services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.PostConfigure<JwtBearerOptions>(
+            JwtBearerDefaults.AuthenticationScheme,
+            options =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
-                NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-                RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-            };
-        });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
+                    NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
+                    RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+                };
+            });
     }
-    
+
     public static void AddAuthorizationPolicies(this IServiceCollection services) =>
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
-                policy.RequireRole(UserRoles.Administrator));
-            options.AddPolicy(AuthorizationPolicies.GamblerOnly, policy =>
-                policy.RequireRole(UserRoles.Gambler));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Administrator));
+            options.AddPolicy(
+                AuthorizationPolicies.GamblerOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Gambler));
         });
-    
+
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
         services.Configure<ApiBehaviorOptions>(opt => { opt.SuppressModelStateInvalidFilter = true; });
 }

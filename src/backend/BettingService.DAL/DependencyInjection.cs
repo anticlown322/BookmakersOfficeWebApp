@@ -16,11 +16,12 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = configuration.GetSection("DatabaseSettings")["ConnectionString"];
-        
-        services.AddDbContext<RepositoryContext>(options => 
+
+        services.AddDbContext<RepositoryContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         services.AddScoped<IBetRepository, BetRepository>();
+        services.AddScoped<IPayoutRepository, PayoutRepository>();
         return services;
     }
 }

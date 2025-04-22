@@ -1,8 +1,13 @@
 ﻿using BettingService.DAL.Models.Entities;
+using BettingService.DAL.RequestFeatures.Params;
+using UserService.Domain.RequestFeatures;
 
 namespace BettingService.DAL.Contracts.Repository;
 
 public interface IPayoutRepository : IRepositoryBase<Payout>
 {
-    Task<Payout?> GetByBetIdAsync(Guid betId, CancellationToken cancellationToken);
+    Task<Payout?> GetByIdAsync(Guid payoutId, CancellationToken cancellationToken);
+    Task<Payout?> GetByBetIdAsync(Guid payoutId, CancellationToken cancellationToken);
+    Task<PagedList<Payout>> GetAllPayoutsAsync(PayoutParameters payoutParameters, CancellationToken cancellationToken);
+    Task<PagedList<Payout>> GetUserPayoutsAsync(PayoutParameters payoutParameters, string username, CancellationToken cancellationToken);
 }

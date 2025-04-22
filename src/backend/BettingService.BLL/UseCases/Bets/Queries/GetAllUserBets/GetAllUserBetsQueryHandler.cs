@@ -4,19 +4,18 @@ using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.RequestFeatures;
 using MediatR;
 
-namespace BettingService.BLL.UseCases.Bets.Queries.GetAllBets;
+namespace BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
 
-public sealed class GetAllBetsQueryHandler(
-    IBetRepository betRepository, 
+public sealed class GetAllUserBetsQueryHandler(
+    IBetRepository betRepository,
     IMapper mapper)
-    : IRequestHandler<GetAllBetsQuery, PagedResponse<IEnumerable<GetBetDto>>>
+    : IRequestHandler<GetAllUserBetsQuery, PagedResponse<IEnumerable<GetBetDto>>>
 {
     public async Task<PagedResponse<IEnumerable<GetBetDto>>> Handle(
-        GetAllBetsQuery request,
+        GetAllUserBetsQuery request,
         CancellationToken cancellationToken)
     {
-        var betsPagedList = await betRepository
-            .GetAllBetsAsync(request.Parameters, cancellationToken);
+        var betsPagedList = await betRepository.GetUserBetsAsync(request.Parameters, request.Username, cancellationToken);
 
         var betsDto = betsPagedList.Select(mapper.Map<GetBetDto>);
 

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BettingService.DAL.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20250415152618_ChangeIdToUsername")]
-    partial class ChangeIdToUsername
+    [Migration("20250422201918_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,14 +77,21 @@ namespace BettingService.DAL.Migrations
                     b.Property<Guid>("BetId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ErrorReason")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<DateTime>("ProcessedAt")
+                    b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -98,7 +105,7 @@ namespace BettingService.DAL.Migrations
 
             modelBuilder.Entity("BettingService.DAL.Models.Entities.Payout", b =>
                 {
-                    b.HasOne("BettingService.DAL.Models.Entities.Payout", null)
+                    b.HasOne("BettingService.DAL.Models.Entities.Bet", null)
                         .WithOne()
                         .HasForeignKey("BettingService.DAL.Models.Entities.Payout", "BetId")
                         .OnDelete(DeleteBehavior.Cascade)

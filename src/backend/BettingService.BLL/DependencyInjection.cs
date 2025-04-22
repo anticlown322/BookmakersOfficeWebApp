@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.DTO.MappingProfiles;
+using BettingService.BLL.DTO.Payout;
 using BettingService.BLL.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,17 +13,18 @@ public static class DependencyInjection
     {
         services.AddSingleton<ILoggerService, LoggerService>();
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
-        
-        services.AddMediatR(cfg => 
+
+        services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        
-        
+
         services.AddAutoMapper(
             cfg =>
             {
                 cfg.AddProfile<GetBetMappingProfile>();
-            }, AppDomain.CurrentDomain.GetAssemblies());
-        
+                cfg.AddProfile<GetPayoutMappingProfile>();
+            },
+            AppDomain.CurrentDomain.GetAssemblies());
+
         return services;
     }
 }

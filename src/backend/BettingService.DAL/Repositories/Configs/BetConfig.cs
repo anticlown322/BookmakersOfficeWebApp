@@ -12,22 +12,22 @@ public class BetConfig : IEntityTypeConfiguration<Bet>
 
         builder.Property(b => b.Id)
             .IsRequired()
-            .ValueGeneratedOnAdd(); 
+            .ValueGeneratedOnAdd();
 
         builder.Property(b => b.Username)
             .IsRequired();
 
         builder.Property(b => b.MatchId)
             .IsRequired()
-            .HasMaxLength(50); 
+            .HasMaxLength(50);
 
         builder.Property(b => b.Amount)
             .IsRequired()
-            .HasColumnType("decimal(18, 2)"); 
+            .HasColumnType("decimal(18, 2)");
 
         builder.Property(b => b.Odds)
             .IsRequired()
-            .HasColumnType("decimal(8, 2)"); 
+            .HasColumnType("decimal(8, 2)");
 
         builder.Property(b => b.Status)
             .IsRequired()
@@ -39,7 +39,7 @@ public class BetConfig : IEntityTypeConfiguration<Bet>
         builder.Property(b => b.SettledAt)
             .IsRequired(false);
 
-        builder.HasIndex(b => b.Username); 
-        builder.HasIndex(b => b.MatchId); 
+        builder.HasIndex(b => b.Username);
+        builder.HasIndex(b => b.MatchId);
     }
 }

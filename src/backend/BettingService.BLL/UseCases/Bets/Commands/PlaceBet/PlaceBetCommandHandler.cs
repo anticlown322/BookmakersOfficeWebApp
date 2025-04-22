@@ -5,7 +5,7 @@ using MediatR;
 namespace BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 
 public sealed class PlaceBetCommandHandler(
-    IBetRepository betRepository) 
+    IBetRepository betRepository)
     : IRequestHandler<PlaceBetCommand>
 {
     public async Task Handle(PlaceBetCommand request, CancellationToken cancellationToken)
@@ -20,11 +20,11 @@ public sealed class PlaceBetCommandHandler(
             Status = BetStatus.Active,
             CreatedAt = DateTime.UtcNow.ToUniversalTime(),
         };
-        
+
         betRepository.Create(bet);
 
         cancellationToken.ThrowIfCancellationRequested();
-        
+
         await betRepository.SaveAsync(cancellationToken);
     }
 }

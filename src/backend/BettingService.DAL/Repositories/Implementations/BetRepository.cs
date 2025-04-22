@@ -31,10 +31,27 @@ public class BetRepository(
             betParameters.PageNumber,
             betParameters.PageSize);
     }
-    
-    public async Task<IEnumerable<Bet>> GetUserBetsAsync(string username, CancellationToken cancellationToken)
+
+    public async Task<PagedList<Bet>> GetUserBetsAsync(BetParameters betParameters, string username, CancellationToken cancellationToken)
     {
-        return await FindByConditionAsync(b => b.Username == username, trackChanges: false, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var bets = await FindByConditionAsync(b => b.Username == username, trackChanges: false, cancellationToken);
+
+        var orderedBets = bets.OrderBy(p => p.CreatedAt);
+
+        var pagedBets = orderedBets
+            .Skip((betParameters.PageNumber - 1) * betParameters.PageSize)
+            .Take(betParameters.PageSize)
+            .ToList();
+
+        var totalCount = orderedBets.Count();
+
+        return new PagedList<Bet>(
+            pagedBets,
+            totalCount,
+            betParameters.PageNumber,
+            betParameters.PageSize);
     }
 
     public async Task<Bet?> GetByIdAsync(Guid betId, CancellationToken cancellationToken)

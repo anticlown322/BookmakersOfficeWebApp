@@ -6,7 +6,7 @@ namespace BettingService.DAL.Contracts.Repository;
 
 public interface IBetRepository : IRepositoryBase<Bet>
 {
-    public Task<PagedList<Bet>> GetAllBetsAsync(BetParameters betParameters, CancellationToken cancellationToken);
-    Task<IEnumerable<Bet>> GetUserBetsAsync(string username, CancellationToken cancellationToken);
+    Task<PagedList<Bet>> GetAllBetsAsync(BetParameters betParameters, CancellationToken cancellationToken);
+    Task<PagedList<Bet>> GetUserBetsAsync(BetParameters betParameters, string username, CancellationToken cancellationToken);
     Task<Bet?> GetByIdAsync(Guid betId, CancellationToken cancellationToken);
 }

@@ -2,7 +2,7 @@
 
 public enum PayoutStatus
 {
-    Pending,   
-    Completed, 
-    Failed     
+    Pending,
+    Completed,
+    Failed,
 }

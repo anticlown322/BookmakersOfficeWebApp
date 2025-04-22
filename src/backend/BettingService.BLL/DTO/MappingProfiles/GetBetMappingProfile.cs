@@ -7,7 +7,7 @@ public class GetBetMappingProfile : Profile
 {
     public GetBetMappingProfile()
     {
-        CreateMap<DAL.Models.Entities.Bet, BetDto>()
+        CreateMap<DAL.Models.Entities.Bet, GetBetDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
             .ForMember(dest => dest.MatchId, opt => opt.MapFrom(src => src.MatchId))

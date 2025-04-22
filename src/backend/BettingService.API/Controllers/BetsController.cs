@@ -1,4 +1,8 @@
-﻿using System.Security.Claims;
+﻿using BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
+
+namespace BettingService.API.Controllers;
+
+using System.Security.Claims;
 using System.Text.Json;
 using BettingService.API.Utility;
 using BettingService.BLL.DTO.Bet;
@@ -10,12 +14,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BettingService.API.Controllers;
-
 [ApiController]
 [Route("api/bets")]
 public class BetsController(
-    IMediator mediator) 
+    IMediator mediator)
     : ControllerBase
 {
     [HttpPost]
@@ -28,10 +30,12 @@ public class BetsController(
 
         return Created();
     }
-    
+
     [HttpGet]
     // [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
-    public async Task<IActionResult> GetAllBets([FromQuery] BetParameters betParameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllBets(
+        [FromQuery] BetParameters betParameters,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllBetsQuery(betParameters), cancellationToken);
 
@@ -39,7 +43,22 @@ public class BetsController(
 
         return Ok(result.Data);
     }
-    
+
+    [HttpGet("my")]
+    [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
+    public async Task<IActionResult> GetAllUserBets(
+        [FromQuery] BetParameters betParameters,
+        CancellationToken cancellationToken)
+    {
+        var username = GetUsernameFromToken();
+        var query = new GetAllUserBetsQuery(betParameters, username);
+        var result = await mediator.Send(query, cancellationToken);
+
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(result.MetaData));
+
+        return Ok(result.Data);
+    }
+
     [HttpGet]
     [Route("{betId:guid}")]
     public async Task<IActionResult> GetBetById([FromRoute] Guid betId, CancellationToken cancellationToken)
@@ -48,10 +67,10 @@ public class BetsController(
 
         return Ok(result);
     }
-    
+
     private string GetUsernameFromToken()
     {
-        var usernameClaim = User.FindFirst(ClaimTypes.Name) ?? 
+        var usernameClaim = User.FindFirst(ClaimTypes.Name) ??
                             User.FindFirst("name") ??
                             User.FindFirst("username");
 

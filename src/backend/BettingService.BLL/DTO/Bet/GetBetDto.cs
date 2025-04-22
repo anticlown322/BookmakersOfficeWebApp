@@ -2,7 +2,7 @@
 
 namespace BettingService.BLL.DTO.Bet;
 
-public record BetDto(
+public record GetBetDto(
     Guid Id,
     string Username,
     string MatchId,

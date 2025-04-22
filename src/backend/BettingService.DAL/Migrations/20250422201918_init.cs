@@ -16,7 +16,7 @@ namespace BettingService.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
                     MatchId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     Odds = table.Column<decimal>(type: "numeric(8,2)", nullable: false),
@@ -35,18 +35,20 @@ namespace BettingService.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     BetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
-                    ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ErrorReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Payouts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payouts_Payouts_BetId",
+                        name: "FK_Payouts_Bets_BetId",
                         column: x => x.BetId,
-                        principalTable: "Payouts",
+                        principalTable: "Bets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -57,9 +59,9 @@ namespace BettingService.DAL.Migrations
                 column: "MatchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bets_UserId",
+                name: "IX_Bets_Username",
                 table: "Bets",
-                column: "UserId");
+                column: "Username");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payouts_BetId",
@@ -72,10 +74,10 @@ namespace BettingService.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Bets");
+                name: "Payouts");
 
             migrationBuilder.DropTable(
-                name: "Payouts");
+                name: "Bets");
         }
     }
 }

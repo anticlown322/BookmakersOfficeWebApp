@@ -25,13 +25,16 @@ public class PayoutConfig : IEntityTypeConfiguration<Payout>
             .IsRequired()
             .HasConversion<string>();
 
-        builder.Property(p => p.ProcessedAt)
+        builder.Property(p => p.CreatedAt)
             .IsRequired();
+
+        builder.Property(p => p.ProcessedAt)
+            .IsRequired(false);
 
         builder.Property(p => p.ErrorReason)
             .HasMaxLength(500);
 
-        builder.HasOne<Payout>()
+        builder.HasOne<Bet>()
             .WithOne()
             .HasForeignKey<Payout>(p => p.BetId)
             .OnDelete(DeleteBehavior.Cascade);
