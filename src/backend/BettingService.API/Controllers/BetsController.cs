@@ -1,0 +1,65 @@
+﻿using System.Security.Claims;
+using System.Text.Json;
+using BettingService.API.Utility;
+using BettingService.BLL.DTO.Bet;
+using BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
+using BettingService.BLL.UseCases.Bets.Queries.GetAllBets;
+using BettingService.BLL.UseCases.Bets.Queries.GetBetById;
+using BettingService.DAL.RequestFeatures.Params;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BettingService.API.Controllers;
+
+[ApiController]
+[Route("api/bets")]
+public class BetsController(
+    IMediator mediator) 
+    : ControllerBase
+{
+    [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
+    public async Task<IActionResult> PlaceBet([FromBody] PlaceBetDto placeBetDto, CancellationToken cancellationToken)
+    {
+        var username = GetUsernameFromToken();
+        var command = new PlaceBetCommand(username, placeBetDto);
+        await mediator.Send(command, cancellationToken);
+
+        return Created();
+    }
+    
+    [HttpGet]
+    // [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    public async Task<IActionResult> GetAllBets([FromQuery] BetParameters betParameters, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetAllBetsQuery(betParameters), cancellationToken);
+
+        Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(result.MetaData));
+
+        return Ok(result.Data);
+    }
+    
+    [HttpGet]
+    [Route("{betId:guid}")]
+    public async Task<IActionResult> GetBetById([FromRoute] Guid betId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetBetByIdQuery(betId), cancellationToken);
+
+        return Ok(result);
+    }
+    
+    private string GetUsernameFromToken()
+    {
+        var usernameClaim = User.FindFirst(ClaimTypes.Name) ?? 
+                            User.FindFirst("name") ??
+                            User.FindFirst("username");
+
+        if (usernameClaim == null || string.IsNullOrWhiteSpace(usernameClaim.Value))
+        {
+            throw new InvalidOperationException("Username claim not found in token");
+        }
+
+        return usernameClaim.Value;
+    }
+}

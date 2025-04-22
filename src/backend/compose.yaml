@@ -1,5 +1,18 @@
 ﻿
 services:
+  # Сервис ставок (PostgreSQL)
+  betting-service-postgres:
+    image: postgres:latest
+    container_name: bookmaker-betting-postgres
+    environment:
+      POSTGRES_DB: betting_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "9000:5432"
+    volumes:
+      - betting_pg_data:/var/lib/postgresql/data
+  
   # Сервис пользователей (PostgreSQL)
   user-service-postgres:
     image: postgres:latest
@@ -40,6 +53,7 @@ services:
       - sport_data_hangfire_mongo_data:/data/db
 
 volumes:
+  betting_pg_data:
   user_pg_data:
   sport_data_mongo_data:
   sport_data_hangfire_mongo_data:
