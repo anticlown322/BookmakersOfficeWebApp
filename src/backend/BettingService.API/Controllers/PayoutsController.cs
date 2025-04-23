@@ -7,6 +7,7 @@ using BettingService.BLL.UseCases.Payments.Queries.GetAllUserPayouts;
 using BettingService.BLL.UseCases.Payments.Queries.GetPayoutByBetId;
 using BettingService.BLL.UseCases.Payments.Queries.GetPayoutById;
 using BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
+using BettingService.BLL.Validation;
 using BettingService.DAL.RequestFeatures.Params;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +23,7 @@ public class PayoutsController(
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
+    [ValidationFilter<CreatePayoutDto>]
     public async Task<IActionResult> RequestPayout([FromBody] CreatePayoutDto payoutDto, CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
@@ -32,7 +34,7 @@ public class PayoutsController(
     }
 
     [HttpGet]
-    // [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetAllPayouts(
         [FromQuery] PayoutParameters payoutParameters,
         CancellationToken cancellationToken)
@@ -61,6 +63,7 @@ public class PayoutsController(
 
     [HttpGet]
     [Route("{payoutId:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetPayoutById([FromRoute] Guid payoutId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetPayoutByIdQuery(payoutId), cancellationToken);
@@ -70,6 +73,7 @@ public class PayoutsController(
 
     [HttpGet]
     [Route("by-bet-id/{betId:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetPayoutByBetId([FromRoute] Guid betId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetPayoutByBetIdQuery(betId), cancellationToken);

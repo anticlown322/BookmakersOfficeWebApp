@@ -2,6 +2,13 @@
 
 internal static class ValidationUtils
 {
+    public const decimal MinAmount = 1m;
+    public const decimal MaxAmount = 10000000m;
+    public const decimal MinOdds = 1.01m;
+    public const decimal MaxOdds = 1000m;
+    public const int MatchIdMinLength = 1;
+    public const int MatchIdMaxLength = 50;
+
     internal static string EmptyParamMessage(string paramName)
     {
         return $"{paramName} can't be empty.";

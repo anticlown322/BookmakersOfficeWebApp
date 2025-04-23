@@ -1,4 +1,6 @@
 ﻿using BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
+using BettingService.BLL.Validation;
+using BettingService.BLL.Validation.Validators;
 
 namespace BettingService.API.Controllers;
 
@@ -22,6 +24,7 @@ public class BetsController(
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
+    [ValidationFilter<PlaceBetDtoValidator>]
     public async Task<IActionResult> PlaceBet([FromBody] PlaceBetDto placeBetDto, CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
@@ -32,7 +35,7 @@ public class BetsController(
     }
 
     [HttpGet]
-    // [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetAllBets(
         [FromQuery] BetParameters betParameters,
         CancellationToken cancellationToken)
@@ -61,6 +64,7 @@ public class BetsController(
 
     [HttpGet]
     [Route("{betId:guid}")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetBetById([FromRoute] Guid betId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetBetByIdQuery(betId), cancellationToken);

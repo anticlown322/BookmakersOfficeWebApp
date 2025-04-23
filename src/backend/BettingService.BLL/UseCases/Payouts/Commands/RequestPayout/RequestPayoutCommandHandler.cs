@@ -1,4 +1,5 @@
 ﻿using BettingService.BLL.Exceptions.Specific;
+using BettingService.BLL.UseCases.Bets;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
 using MediatR;
@@ -16,6 +17,19 @@ public sealed class PlacePayoutCommandHandler(
         if (bet is null)
         {
             throw new BetNotFoundByIdException(request.CreatePayoutDto.BetId);
+        }
+
+        if (!(bet.Status == BetStatus.Won))
+        {
+            throw new InvalidBetStatusForPayoutException(bet.Id, bet.Status);
+        }
+
+        var expectedAmount = Math.Round(bet.Amount * bet.Odds, BetConstants.CalculationScale);
+        var roundedRequested = Math.Round(request.CreatePayoutDto.Amount, BetConstants.CalculationScale);
+
+        if (expectedAmount != roundedRequested )
+        {
+            throw new InvalidAmountForPayoutException(bet.Id, request.CreatePayoutDto.Amount);
         }
 
         var payout = new Payout
