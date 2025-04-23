@@ -1,5 +1,3 @@
-﻿using UserService.Domain.RequestFeatures;
-
-namespace BettingService.DAL.RequestFeatures.Params;
+﻿namespace BettingService.DAL.RequestFeatures.Params;
 
 public class BetParameters : RequestParameters;

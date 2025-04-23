@@ -1,10 +1,9 @@
 ﻿using BettingService.BLL.Exceptions.Specific;
-using BettingService.BLL.UseCases.Payments.Queries.GetPayoutById;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
 using MediatR;
 
-namespace BettingService.BLL.UseCases.Payments.Queries.GetPayoutByBetId;
+namespace BettingService.BLL.UseCases.Payouts.Queries.GetPayoutByBetId;
 
 public sealed class GetPayoutByBetIdQueryHandler(
     IPayoutRepository payoutRepository,

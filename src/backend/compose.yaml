@@ -51,9 +51,23 @@ services:
       - "27018:27017"
     volumes:
       - sport_data_hangfire_mongo_data:/data/db
+        
+  # Hangfire для сервиса ставок (MongoDB)
+  betting-hangfire-mongodb:
+    image: mongo:latest
+    container_name: bookmaker-betting-hangfire-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: hangfire_db
+    ports:
+      - "27019:27017"
+    volumes:
+      - betting_hangfire_mongo_data:/data/db
 
 volumes:
   betting_pg_data:
   user_pg_data:
   sport_data_mongo_data:
+  betting_hangfire_mongo_data:
   sport_data_hangfire_mongo_data:

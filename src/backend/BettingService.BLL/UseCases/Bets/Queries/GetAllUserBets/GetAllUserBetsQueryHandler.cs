@@ -15,7 +15,11 @@ public sealed class GetAllUserBetsQueryHandler(
         GetAllUserBetsQuery request,
         CancellationToken cancellationToken)
     {
-        var betsPagedList = await betRepository.GetUserBetsAsync(request.Parameters, request.Username, cancellationToken);
+        // TODO: add validation for user when grpc is implemented
+        var betsPagedList = await betRepository.GetUserBetsAsync(
+            request.Parameters,
+            request.Username,
+            cancellationToken);
 
         var betsDto = betsPagedList.Select(mapper.Map<GetBetDto>);
 

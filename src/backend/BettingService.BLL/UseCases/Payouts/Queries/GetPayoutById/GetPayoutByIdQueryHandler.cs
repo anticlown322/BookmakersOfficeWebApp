@@ -3,10 +3,9 @@ using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
 using MediatR;
 
-namespace BettingService.BLL.UseCases.Payments.Queries.GetPayoutById;
+namespace BettingService.BLL.UseCases.Payouts.Queries.GetPayoutById;
 
-public sealed class GetPayoutByIdQueryHandler(
-    IPayoutRepository payoutRepository)
+public sealed class GetPayoutByIdQueryHandler(IPayoutRepository payoutRepository)
     : IRequestHandler<GetPayoutByIdQuery, Payout>
 {
     public async Task<Payout> Handle(GetPayoutByIdQuery request, CancellationToken cancellationToken)

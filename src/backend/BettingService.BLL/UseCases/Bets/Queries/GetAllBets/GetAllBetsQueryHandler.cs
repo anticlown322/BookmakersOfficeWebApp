@@ -7,7 +7,7 @@ using MediatR;
 namespace BettingService.BLL.UseCases.Bets.Queries.GetAllBets;
 
 public sealed class GetAllBetsQueryHandler(
-    IBetRepository betRepository, 
+    IBetRepository betRepository,
     IMapper mapper)
     : IRequestHandler<GetAllBetsQuery, PagedResponse<IEnumerable<GetBetDto>>>
 {

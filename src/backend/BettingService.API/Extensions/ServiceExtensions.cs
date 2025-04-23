@@ -3,6 +3,7 @@ using System.Text;
 using BettingService.API.Utility;
 using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.Services;
+using BettingService.BLL.Utility;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Settings;
 using BettingService.DAL.Repositories;
@@ -42,6 +43,8 @@ public static class ServiceExtensions
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
     }
 
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)

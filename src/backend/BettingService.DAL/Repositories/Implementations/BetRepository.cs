@@ -1,16 +1,17 @@
 ﻿using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
+using BettingService.DAL.RequestFeatures;
 using BettingService.DAL.RequestFeatures.Params;
-using UserService.Domain.RequestFeatures;
 
 namespace BettingService.DAL.Repositories.Implementations;
 
-public class BetRepository(
-    RepositoryContext context) 
-    : RepositoryBase<Bet>(context), 
+public class BetRepository(RepositoryContext context)
+    : RepositoryBase<Bet>(context),
         IBetRepository
 {
-    public async Task<PagedList<Bet>> GetAllBetsAsync(BetParameters betParameters, CancellationToken cancellationToken = default)
+    public async Task<PagedList<Bet>> GetAllBetsAsync(
+        BetParameters betParameters,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -32,7 +33,10 @@ public class BetRepository(
             betParameters.PageSize);
     }
 
-    public async Task<PagedList<Bet>> GetUserBetsAsync(BetParameters betParameters, string username, CancellationToken cancellationToken)
+    public async Task<PagedList<Bet>> GetUserBetsAsync(
+        BetParameters betParameters,
+        string username,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BettingService.BLL.Validation;
 
-
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class ValidationFilterAttribute<T> : Attribute, IAsyncActionFilter
     where T : class
 {
     public ValidationFilterAttribute()
-    { }
+    {
+    }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {

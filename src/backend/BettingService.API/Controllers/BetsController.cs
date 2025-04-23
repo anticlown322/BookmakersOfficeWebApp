@@ -18,8 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/bets")]
-public class BetsController(
-    IMediator mediator)
+public class BetsController(IMediator mediator)
     : ControllerBase
 {
     [HttpPost]

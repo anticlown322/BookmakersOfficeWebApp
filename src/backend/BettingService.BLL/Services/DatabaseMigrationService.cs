@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BettingService.BLL.Services;
 
-public class DatabaseMigrationService(
-    RepositoryContext dbContext) 
+public class DatabaseMigrationService(RepositoryContext dbContext)
     : IDatabaseMigrationService
 {
     public async Task MigrateAsync(CancellationToken cancellationToken = default)

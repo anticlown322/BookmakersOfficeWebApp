@@ -1,12 +1,11 @@
 ﻿using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
+using BettingService.DAL.RequestFeatures;
 using BettingService.DAL.RequestFeatures.Params;
-using UserService.Domain.RequestFeatures;
 
 namespace BettingService.DAL.Repositories.Implementations;
 
-public class PayoutRepository(
-    RepositoryContext context)
+public class PayoutRepository(RepositoryContext context)
     : RepositoryBase<Payout>(context),
         IPayoutRepository
 {
@@ -24,7 +23,9 @@ public class PayoutRepository(
         return payout.SingleOrDefault();
     }
 
-    public async Task<PagedList<Payout>> GetAllPayoutsAsync(PayoutParameters payoutParameters, CancellationToken cancellationToken)
+    public async Task<PagedList<Payout>> GetAllPayoutsAsync(
+        PayoutParameters payoutParameters,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -46,7 +47,10 @@ public class PayoutRepository(
             payoutParameters.PageSize);
     }
 
-    public async Task<PagedList<Payout>> GetUserPayoutsAsync(PayoutParameters payoutParameters, string username, CancellationToken cancellationToken)
+    public async Task<PagedList<Payout>> GetUserPayoutsAsync(
+        PayoutParameters payoutParameters,
+        string username,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 

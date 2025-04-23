@@ -19,7 +19,7 @@ public class RepositoryContextFactory : IDesignTimeDbContextFactory<RepositoryCo
 
         var yamlContent = File.ReadAllText(yamlPath);
         var deserializer = new DeserializerBuilder().Build();
-        
+
         var databaseSettings = deserializer.Deserialize<RootSettings>(yamlContent).DatabaseSettings;
         var connectionString = databaseSettings.ConnectionString;
         if (string.IsNullOrEmpty(connectionString))

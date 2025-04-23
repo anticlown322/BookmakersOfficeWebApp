@@ -29,11 +29,12 @@ public static class ExceptionMiddleware
 
                     logger.LogError($"Something went wrong: {contextFeature.Error}");
 
-                    await context.Response.WriteAsync(new ErrorDetails
-                    {
-                        StatusCode = context.Response.StatusCode,
-                        Message = contextFeature.Error.Message,
-                    }.ToString());
+                    await context.Response.WriteAsync(
+                        new ErrorDetails
+                        {
+                            StatusCode = context.Response.StatusCode,
+                            Message = contextFeature.Error.Message,
+                        }.ToString());
                 }
             });
         });

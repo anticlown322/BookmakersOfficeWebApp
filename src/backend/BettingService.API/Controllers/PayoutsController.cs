@@ -2,11 +2,11 @@
 using System.Text.Json;
 using BettingService.API.Utility;
 using BettingService.BLL.DTO.Payout;
-using BettingService.BLL.UseCases.Payments.Queries.GetAllPayouts;
-using BettingService.BLL.UseCases.Payments.Queries.GetAllUserPayouts;
-using BettingService.BLL.UseCases.Payments.Queries.GetPayoutByBetId;
-using BettingService.BLL.UseCases.Payments.Queries.GetPayoutById;
 using BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
+using BettingService.BLL.UseCases.Payouts.Queries.GetAllPayouts;
+using BettingService.BLL.UseCases.Payouts.Queries.GetAllUserPayouts;
+using BettingService.BLL.UseCases.Payouts.Queries.GetPayoutByBetId;
+using BettingService.BLL.UseCases.Payouts.Queries.GetPayoutById;
 using BettingService.BLL.Validation;
 using BettingService.DAL.RequestFeatures.Params;
 using MediatR;
@@ -17,14 +17,15 @@ namespace BettingService.API.Controllers;
 
 [ApiController]
 [Route("api/payouts")]
-public class PayoutsController(
-    IMediator mediator)
+public class PayoutsController(IMediator mediator)
     : ControllerBase
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
     [ValidationFilter<CreatePayoutDto>]
-    public async Task<IActionResult> RequestPayout([FromBody] CreatePayoutDto payoutDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> RequestPayout(
+        [FromBody] CreatePayoutDto payoutDto,
+        CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
         var command = new RequestPayoutCommand(username, payoutDto);

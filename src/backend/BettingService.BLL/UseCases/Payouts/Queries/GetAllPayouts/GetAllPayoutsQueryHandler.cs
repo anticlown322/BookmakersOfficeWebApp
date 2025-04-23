@@ -4,7 +4,7 @@ using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.RequestFeatures;
 using MediatR;
 
-namespace BettingService.BLL.UseCases.Payments.Queries.GetAllPayouts;
+namespace BettingService.BLL.UseCases.Payouts.Queries.GetAllPayouts;
 
 public sealed class GetAllPayoutsQueryHandler(
     IPayoutRepository payoutRepository,

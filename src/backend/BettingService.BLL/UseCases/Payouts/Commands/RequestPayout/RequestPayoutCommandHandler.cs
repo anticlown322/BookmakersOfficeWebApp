@@ -27,11 +27,12 @@ public sealed class PlacePayoutCommandHandler(
         var expectedAmount = Math.Round(bet.Amount * bet.Odds, BetConstants.CalculationScale);
         var roundedRequested = Math.Round(request.CreatePayoutDto.Amount, BetConstants.CalculationScale);
 
-        if (expectedAmount != roundedRequested )
+        if (expectedAmount != roundedRequested)
         {
             throw new InvalidAmountForPayoutException(bet.Id, request.CreatePayoutDto.Amount);
         }
 
+        // TODO: add validation for user when grpc is implemented
         var payout = new Payout
         {
             Id = Guid.NewGuid(),

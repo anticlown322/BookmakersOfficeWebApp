@@ -4,7 +4,7 @@ using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.RequestFeatures;
 using MediatR;
 
-namespace BettingService.BLL.UseCases.Payments.Queries.GetAllUserPayouts;
+namespace BettingService.BLL.UseCases.Payouts.Queries.GetAllUserPayouts;
 
 public sealed class GetAllUserPayoutsQueryHandler(
     IPayoutRepository payoutRepository,
@@ -15,7 +15,12 @@ public sealed class GetAllUserPayoutsQueryHandler(
         GetAllUserPayoutsQuery request,
         CancellationToken cancellationToken)
     {
-        var payoutsPagedList = await payoutRepository.GetUserPayoutsAsync(request.Parameters, request.Username, cancellationToken);
+        // TODO: add validation for user when grpc is implemented
+
+        var payoutsPagedList = await payoutRepository.GetUserPayoutsAsync(
+            request.Parameters,
+            request.Username,
+            cancellationToken);
 
         var payoutsDto = payoutsPagedList.Select(mapper.Map<GetPayoutDto>);
 

@@ -1,4 +1,4 @@
-﻿namespace BettingService.API.Utility;
+﻿namespace BettingService.BLL.Utility;
 
 public static class UserRoles
 {
