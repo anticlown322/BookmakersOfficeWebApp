@@ -35,6 +35,6 @@ Desktop.ini
 *.log
 /src/backend/UserService.Presentation/Logs/
 /src/backend/SportDataService.Presentation/Logs/
-/src/backend/BookingService.Presentation/Logs/
+/src/backend/BettingService.API/Logs/
 publish/
 secrets.yaml
