@@ -5,6 +5,7 @@ using BettingService.BLL.DTO.MappingProfiles;
 using BettingService.BLL.DTO.Payout;
 using BettingService.BLL.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 using BettingService.DAL.Models.Settings;
 using FluentValidation;
@@ -12,6 +13,7 @@ using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,7 +29,10 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
 
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
 
         services.AddAutoMapper(
             cfg =>
@@ -37,8 +42,7 @@ public static class DependencyInjection
             },
             AppDomain.CurrentDomain.GetAssemblies());
 
-        services.AddTransient<IValidator<CreatePayoutDto>, CreatePayoutDtoValidator>();
-        services.AddTransient<IValidator<PlaceBetDto>, PlaceBetDtoValidator>();
+        services.AddValidatorsFromAssembly(typeof(PlaceBetCommandValidator).Assembly);
 
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();

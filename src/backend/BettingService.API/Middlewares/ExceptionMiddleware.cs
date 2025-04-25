@@ -21,11 +21,19 @@ public static class ExceptionMiddleware
                 {
                     context.Response.StatusCode = contextFeature.Error switch
                     {
+                        ValidationAppException => StatusCodes.Status422UnprocessableEntity,
                         NotFoundException => StatusCodes.Status404NotFound,
                         BadRequestException => StatusCodes.Status400BadRequest,
                         UnauthorizedException => StatusCodes.Status401Unauthorized,
                         _ => StatusCodes.Status500InternalServerError
                     };
+
+                    if (contextFeature.Error is ValidationAppException validationException)
+                    {
+                        await context.Response.WriteAsJsonAsync(new { validationException.ValidationErrors });
+
+                        return;
+                    }
 
                     logger.LogError($"Something went wrong: {contextFeature.Error}");
 

@@ -23,7 +23,6 @@ public class BetsController(IMediator mediator)
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
-    [ValidationFilter<PlaceBetDtoValidator>]
     public async Task<IActionResult> PlaceBet([FromBody] PlaceBetDto placeBetDto, CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();

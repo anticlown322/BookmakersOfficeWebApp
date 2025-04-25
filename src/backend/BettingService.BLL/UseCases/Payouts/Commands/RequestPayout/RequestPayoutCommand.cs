@@ -5,5 +5,5 @@ namespace BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
 
 public sealed record RequestPayoutCommand(
     string Username,
-    CreatePayoutDto CreatePayoutDto)
-    : IRequest;
+    RequestPayoutDto RequestPayoutDto)
+    : IRequest<Unit>;

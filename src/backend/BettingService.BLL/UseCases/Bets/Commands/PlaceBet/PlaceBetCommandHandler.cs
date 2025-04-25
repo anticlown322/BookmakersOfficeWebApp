@@ -5,9 +5,9 @@ using MediatR;
 namespace BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 
 public sealed class PlaceBetCommandHandler(IBetRepository betRepository)
-    : IRequestHandler<PlaceBetCommand>
+    : IRequestHandler<PlaceBetCommand, Unit>
 {
-    public async Task Handle(PlaceBetCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(PlaceBetCommand request, CancellationToken cancellationToken)
     {
         // TODO: add validation for user, match and odds when grpc is implemented
         var bet = new Bet
@@ -26,5 +26,7 @@ public sealed class PlaceBetCommandHandler(IBetRepository betRepository)
         cancellationToken.ThrowIfCancellationRequested();
 
         await betRepository.SaveAsync(cancellationToken);
+
+        return Unit.Value;
     }
 }

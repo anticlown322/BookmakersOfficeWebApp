@@ -22,9 +22,8 @@ public class PayoutsController(IMediator mediator)
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
-    [ValidationFilter<CreatePayoutDto>]
     public async Task<IActionResult> RequestPayout(
-        [FromBody] CreatePayoutDto payoutDto,
+        [FromBody] RequestPayoutDto payoutDto,
         CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();

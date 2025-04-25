@@ -7,6 +7,7 @@ public class GetPayoutMappingProfile : Profile
 {
     public GetPayoutMappingProfile()
     {
-        CreateMap<DAL.Models.Entities.Payout, GetPayoutDto>();
+        CreateMap<DAL.Models.Entities.Payout, GetPayoutDto>()
+            .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null)); ;
     }
 }

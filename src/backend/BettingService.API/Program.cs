@@ -3,7 +3,9 @@ using BettingService.API.Middlewares;
 using BettingService.BLL;
 using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 using BettingService.DAL;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 {

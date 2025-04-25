@@ -1,5 +1,5 @@
 ﻿namespace BettingService.BLL.DTO.Payout;
 
-public record CreatePayoutDto(
+public record RequestPayoutDto(
     Guid BetId,
     decimal Amount);
