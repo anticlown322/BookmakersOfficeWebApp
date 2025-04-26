@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
-using SportDataService.Domain.Models;
-using SportDataService.Domain.Models.Tournaments;
+using SportDataService.Domain.Models.Common;
+using SportDataService.Domain.Models.Prematch;
+using SportDataService.Domain.Models.Results;
 
 namespace SportDataService.Infrastructure.Configs;
 
@@ -11,6 +12,8 @@ public class MongoDbIndexesConfig(IMongoDatabase database)
         await CreateTeamIndexes();
         await CreateMatchIndexes();
         await CreateTournamentIndexes();
+        await CreateMatchResultIndexes();
+        await CreateTournamentResultIndexes();
     }
 
     private async Task CreateTeamIndexes()
@@ -20,10 +23,10 @@ public class MongoDbIndexesConfig(IMongoDatabase database)
             Builders<Team>.IndexKeys.Ascending(x => x.TeamId),
             new CreateIndexOptions { Unique = true });
 
-        var nameIndexModel = new CreateIndexModel<Team>(
-            Builders<Team>.IndexKeys.Text(x => x.Name));
+        var nameIndexModel = new CreateIndexModel<Team>(Builders<Team>.IndexKeys.Text(x => x.Name));
 
-        await collection.Indexes.CreateManyAsync([
+        await collection.Indexes.CreateManyAsync(
+        [
             teamIdIndexModel,
             nameIndexModel
         ]);
@@ -39,8 +42,8 @@ public class MongoDbIndexesConfig(IMongoDatabase database)
             new (Builders<Match>.IndexKeys.Ascending(m => m.TournamentId)),
             new (Builders<Match>.IndexKeys.Ascending(m => m.StartTime)),
             new (Builders<Match>.IndexKeys.Combine(
-                Builders<Match>.IndexKeys.Ascending(m => m.Opponent1.Id),
-                Builders<Match>.IndexKeys.Ascending(m => m.Opponent2.Id))),
+                    Builders<Match>.IndexKeys.Ascending(m => m.Opponent1.Id),
+                    Builders<Match>.IndexKeys.Ascending(m => m.Opponent2.Id))),
         };
 
         await collection.Indexes.CreateManyAsync(indexes);
@@ -52,11 +55,38 @@ public class MongoDbIndexesConfig(IMongoDatabase database)
 
         var indexes = new List<CreateIndexModel<Tournament>>
         {
-            new (Builders<Tournament>.IndexKeys.Ascending(t => t.TournamentId), new CreateIndexOptions { Unique = true }),
+            new (
+                Builders<Tournament>.IndexKeys.Ascending(t => t.TournamentId),
+                new CreateIndexOptions { Unique = true }),
             new (Builders<Tournament>.IndexKeys.Ascending(t => t.Name)),
             new (Builders<Tournament>.IndexKeys.Ascending("matches.matchId")),
         };
 
         await collection.Indexes.CreateManyAsync(indexes);
+    }
+
+    private async Task CreateMatchResultIndexes()
+    {
+        var collection = database.GetCollection<MatchResult>("matchResults");
+
+        var indexes = new List<CreateIndexModel<MatchResult>>
+        {
+            new (Builders<MatchResult>.IndexKeys.Ascending(x => x.TournamentId)),
+            new (Builders<MatchResult>.IndexKeys.Ascending(x => x.MatchResultId)),
+            new (Builders<MatchResult>.IndexKeys.Descending(x => x.ResultTime)),
+        };
+
+        await collection.Indexes.CreateManyAsync(indexes);
+    }
+
+    private async Task CreateTournamentResultIndexes()
+    {
+        var collection = database.GetCollection<TournamentResult>("tournamentResults");
+
+        var tournamentIdIndexModel = new CreateIndexModel<TournamentResult>(
+            Builders<TournamentResult>.IndexKeys.Ascending(x => x.TournamentId),
+            new CreateIndexOptions { Name = "tournamentId_index", });
+
+        await collection.Indexes.CreateOneAsync(tournamentIdIndexModel);
     }
 }
