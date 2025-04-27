@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SportDataService.Application.Contracts.UseCases.Match;
-using SportDataService.Application.DTO.Match;
+using SportDataService.Application.DTO.Prematch;
 using SportDataService.Application.Validation.Exceptions.Specific;
 using SportDataService.Domain.RepositoryContracts;
 

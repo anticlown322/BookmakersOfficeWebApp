@@ -3,9 +3,10 @@ using SportDataService.Application.Contracts.UseCases.Tournament;
 using SportDataService.Domain.RepositoryContracts;
 
 namespace SportDataService.Application.UseCases.Tournament;
-using Tournament = Domain.Models.Tournaments.Tournament;
-using Team = Domain.Models.Tournaments.Team;
-using Match = Domain.Models.Tournaments.Match;
+
+using Tournament = Domain.Models.Prematch.Tournament;
+using Team = Domain.Models.Common.Team;
+using Match = Domain.Models.Prematch.Match;
 
 public class RefreshTournamentsUseCase(
     IDataCollectionService dataCollectionService,
@@ -36,7 +37,8 @@ public class RefreshTournamentsUseCase(
 
             ct.ThrowIfCancellationRequested();
 
-            var existingTournament = await tournamentRepository.GetTournamentByTournamentIdAsync(tournament.TournamentId, ct);
+            var existingTournament =
+                await tournamentRepository.GetTournamentByTournamentIdAsync(tournament.TournamentId, ct);
             if (existingTournament != null)
             {
                 ct.ThrowIfCancellationRequested();
@@ -82,17 +84,25 @@ public class RefreshTournamentsUseCase(
 
         foreach (var match in allMatches)
         {
+            var team1 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent1.TeamId, ct);
+            var team2 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent2.TeamId, ct);
+
+            match.Opponent1.Id = team1?.Id;
+            match.Opponent2.Id = team2?.Id;
+
             var existingMatch = await matchRepository.GetMatchByMatchIdAsync(match.MatchId, ct);
             if (existingMatch != null)
             {
                 ct.ThrowIfCancellationRequested();
+
+                match.Opponent1.Id = existingMatch.Opponent1.Id ?? team1?.Id;
+                match.Opponent2.Id = existingMatch.Opponent2.Id ?? team2?.Id;
 
                 await UpdateExistingMatch(existingMatch, match, ct);
             }
             else
             {
                 ct.ThrowIfCancellationRequested();
-
                 await matchRepository.CreateAsync(match, ct);
             }
         }

@@ -16,8 +16,8 @@ public class MatchResult
 
     public int Team1TotalScore { get; set; }
     public int Team2TotalScore { get; set; }
-    public List<SubScore> SubScores { get; set; } = new();
-    public List<MatchEventResult> EventResults { get; set; } = new();
+    public List<SubScore>? SubScores { get; set; } = new();
+    public List<MatchEventResult>? EventResults { get; set; } = new();
 
     public ResultStatus Status { get; set; }
 }

@@ -325,7 +325,7 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
                                 "eventResults", new BsonDocument
                                 {
                                     { "bsonType", "array" },
-                                    { "items", ConfigureMatchEventResultValidationSchema()["$jsonSchema"] },
+                                    { "items", ConfigureMatchEventResultValidationSchema() },
                                 }
                             },
                         }
@@ -339,50 +339,23 @@ public class MongoDbValidatorsConfig(IMongoDatabase database)
     {
         return new BsonDocument
         {
+            { "bsonType", "object" },
+            { "required", new BsonArray { "matchEventResultId", "parentMatchResultId", "status", "team1TotalScore", "team2TotalScore" } },
             {
-                "$jsonSchema", new BsonDocument
+                "properties", new BsonDocument
                 {
-                    { "bsonType", "array" },
+                    { "_id", new BsonDocument { { "bsonType", "objectId" } } },
+                    { "matchEventResultId", new BsonDocument { { "bsonType", "string" } } },
+                    { "parentMatchResultId", new BsonDocument { { "bsonType", "string" } } },
+                    { "eventName", new BsonDocument { { "bsonType", "string" } } },
+                    { "status", new BsonDocument { { "enum", new BsonArray(Enum.GetNames(typeof(ResultStatus))) } } },
+                    { "team1TotalScore", new BsonDocument { { "bsonType", "int" } } },
+                    { "team2TotalScore", new BsonDocument { { "bsonType", "int" } } },
                     {
-                        "items", new BsonDocument
+                        "subScores", new BsonDocument
                         {
-                            { "bsonType", "object" },
-                            {
-                                "required",
-                                new BsonArray
-                                {
-                                    "matchEventResultId", "parentMatchResultId", "status", "team1TotalScore",
-                                    "team2TotalScore",
-                                }
-                            },
-                            {
-                                "properties", new BsonDocument
-                                {
-                                    { "_id", new BsonDocument { { "bsonType", "objectId" } } },
-                                    { "matchEventResultId", new BsonDocument { { "bsonType", "string" } } },
-                                    { "parentMatchResultId", new BsonDocument { { "bsonType", "string" } } },
-                                    { "eventName", new BsonDocument { { "bsonType", "string" } } },
-                                    {
-                                        "status",
-                                        new BsonDocument
-                                        {
-                                            {
-                                                "enum",
-                                                new BsonArray(Enum.GetNames(typeof(ResultStatus)))
-                                            },
-                                        }
-                                    },
-                                    { "team1TotalScore", new BsonDocument { { "bsonType", "int" } } },
-                                    { "team2TotalScore", new BsonDocument { { "bsonType", "int" } } },
-                                    {
-                                        "subScores", new BsonDocument
-                                        {
-                                            { "bsonType", "array" },
-                                            { "items", ConfigureSubScoreValidationSchema() },
-                                        }
-                                    },
-                                }
-                            },
+                            { "bsonType", "array" },
+                            { "items", ConfigureSubScoreValidationSchema() },
                         }
                     },
                 }

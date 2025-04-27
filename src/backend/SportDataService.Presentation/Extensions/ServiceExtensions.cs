@@ -13,12 +13,16 @@ using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Match;
+using SportDataService.Application.Contracts.UseCases.MatchResult;
 using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.Contracts.UseCases.Tournament;
+using SportDataService.Application.Contracts.UseCases.TournamentResult;
 using SportDataService.Application.DTO.MappingProfiles;
 using SportDataService.Application.UseCases.Match;
+using SportDataService.Application.UseCases.MatchResult;
 using SportDataService.Application.UseCases.Team;
 using SportDataService.Application.UseCases.Tournament;
+using SportDataService.Application.UseCases.TournamentResult;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Infrastructure.Configs;
@@ -91,6 +95,19 @@ public static class ServiceExtensions
         services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
         services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
         services.AddScoped<IGetMatchByMatchIdUseCase, GetMatchByMatchIdUseCase>();
+
+        // tournament results
+        services.AddScoped<IGetAllTournamentResultsUseCase, GetAllTournamentResultsUseCase>();
+        services.AddScoped<IGetTournamentResultByIdUseCase, GetTournamentResultByIdUseCase>();
+        services
+            .AddScoped<IGetTournamentResultByResultIdUseCase,
+                GetTournamentResultByResultIdUseCase>();
+        services.AddScoped<IRefreshTournamentResultsUseCase, RefreshTournamentResultsUseCase>();
+
+        // match results
+        services.AddScoped<IGetAllMatchResultsUseCase, GetAllMatchResultsUseCase>();
+        services.AddScoped<IGetMatchResultByIdUseCase, GetMatchResultByIdUseCase>();
+        services.AddScoped<IGetMatchResultByResultIdUseCase, GetMatchResultByResultIdUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -137,6 +154,12 @@ public static class ServiceExtensions
 
         services.AddScoped<IMatchRepository>(sp =>
             new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
+
+        services.AddScoped<ITournamentResultRepository>(sp =>
+            new TournamentResultsRepository(sp.GetRequiredService<IMongoDatabase>()));
+
+        services.AddScoped<IMatchResultRepository>(sp =>
+            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
@@ -147,7 +170,12 @@ public static class ServiceExtensions
                 cfg.AddProfile<GetTournamentMappingProfile>();
                 cfg.AddProfile<GetTeamMappingProfile>();
                 cfg.AddProfile<GetMatchMappingProfile>();
-            }, AppDomain.CurrentDomain.GetAssemblies());
+                cfg.AddProfile<GetSubScoreMappingProfile>();
+                cfg.AddProfile<GetMatchResultMappingProfile>();
+                cfg.AddProfile<GetMatchEventResultMappingProfile>();
+                cfg.AddProfile<GetTournamentResultMappingProfile>();
+            },
+            AppDomain.CurrentDomain.GetAssemblies());
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
@@ -163,27 +191,30 @@ public static class ServiceExtensions
             .AddJwtBearer();
 
         var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
-        services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.PostConfigure<JwtBearerOptions>(
+            JwtBearerDefaults.AuthenticationScheme,
+            options =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
-                ClockSkew = TimeSpan.Zero,
-            };
-        });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
+                    ClockSkew = TimeSpan.Zero,
+                };
+            });
     }
 
     public static void AddAuthorizationPolicies(this IServiceCollection services) =>
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
-                policy.RequireRole(UserRoles.Administrator));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOnly,
+                policy => policy.RequireRole(UserRoles.Administrator));
         });
 
     public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
@@ -206,7 +237,8 @@ public static class ServiceExtensions
                 })
             .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
-        services.AddHangfireServer(options => {
+        services.AddHangfireServer(options =>
+        {
             options.ServerName = "SportData.Background";
             options.Queues = new[] { "default", "critical" };
             options.WorkerCount = Environment.ProcessorCount * 2;

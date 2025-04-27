@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using SportDataService.Application.Contracts.UseCases.Team;
-using SportDataService.Application.DTO.Team;
-using SportDataService.Application.DTO.Team;
+using SportDataService.Application.DTO.Common;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;

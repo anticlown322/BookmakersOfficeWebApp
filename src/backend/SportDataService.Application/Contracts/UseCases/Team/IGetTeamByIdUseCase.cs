@@ -1,4 +1,4 @@
-﻿using SportDataService.Application.DTO.Team;
+﻿using SportDataService.Application.DTO.Common;
 
 namespace SportDataService.Application.Contracts.UseCases.Team;
 

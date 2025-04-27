@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using SportDataService.Application.Contracts.UseCases.Tournament;
-using SportDataService.Application.DTO.Tournament;
-using SportDataService.Application.DTO.Tournament;
+using SportDataService.Application.DTO.Prematch;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;

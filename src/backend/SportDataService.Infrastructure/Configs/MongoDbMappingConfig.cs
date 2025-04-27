@@ -169,11 +169,7 @@ public static class MongoDbMappingConfig
             cm.AutoMap();
             cm.SetIgnoreExtraElements(true);
 
-            cm.MapIdProperty(t => t.Id)
-                .SetIdGenerator(StringObjectIdGenerator.Instance)
-                .SetSerializer(new StringSerializer(BsonType.ObjectId));
-
-            cm.MapIdMember(x => x.MatchEventResultId).SetElementName("matchEventResultId");
+            cm.MapMember(x => x.MatchEventResultId).SetElementName("matchEventResultId");
             cm.MapMember(x => x.ParentMatchResultId).SetElementName("parentMatchResultId");
             cm.MapMember(x => x.EventName).SetElementName("eventName");
             cm.MapMember(x => x.Status).SetElementName("status")

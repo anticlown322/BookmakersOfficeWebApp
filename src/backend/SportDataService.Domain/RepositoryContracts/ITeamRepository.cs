@@ -1,5 +1,4 @@
-﻿using SportDataService.Domain.Models;
-using SportDataService.Domain.Models.Tournaments;
+﻿using SportDataService.Domain.Models.Common;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
 
