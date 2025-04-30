@@ -11,20 +11,20 @@ public class RepositoryContextFactory : IDesignTimeDbContextFactory<RepositoryCo
     {
         var basePath = Directory.GetCurrentDirectory();
         var apiPath = Path.GetFullPath(Path.Combine(basePath, @"..\BettingService.API\Properties"));
-        var yamlPath = Path.Combine(apiPath, "secrets.yaml");
-        if (!File.Exists(yamlPath))
+        var jsonFilePath = Path.Combine(apiPath, "secrets.json");
+        if (!File.Exists(jsonFilePath))
         {
-            throw new FileNotFoundException($"secrets.yaml not found at: {yamlPath}");
+            throw new FileNotFoundException($"secrets.json not found at: {jsonFilePath}");
         }
 
-        var yamlContent = File.ReadAllText(yamlPath);
+        var settings = File.ReadAllText(jsonFilePath);
         var deserializer = new DeserializerBuilder().Build();
 
-        var databaseSettings = deserializer.Deserialize<RootSettings>(yamlContent).DatabaseSettings;
+        var databaseSettings = deserializer.Deserialize<RootSettings>(settings).DatabaseSettings;
         var connectionString = databaseSettings.ConnectionString;
         if (string.IsNullOrEmpty(connectionString))
         {
-            throw new InvalidOperationException("Connection string is missing in secrets.yaml");
+            throw new InvalidOperationException("Connection string is missing in secrets.json");
         }
 
         var optionsBuilder = new DbContextOptionsBuilder<RepositoryContext>();

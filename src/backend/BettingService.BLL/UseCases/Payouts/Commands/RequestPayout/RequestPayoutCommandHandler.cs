@@ -2,13 +2,15 @@
 using BettingService.BLL.UseCases.Bets;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
+using BettingService.Protos;
 using MediatR;
 
 namespace BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
 
 public sealed class PlacePayoutCommandHandler(
     IPayoutRepository payoutRepository,
-    IBetRepository betRepository)
+    IBetRepository betRepository,
+    UserGrpcService.UserGrpcServiceClient userClient)
     : IRequestHandler<RequestPayoutCommand, Unit>
 {
     public async Task<Unit> Handle(RequestPayoutCommand request, CancellationToken cancellationToken)
@@ -19,10 +21,18 @@ public sealed class PlacePayoutCommandHandler(
             throw new BetNotFoundByIdException(request.RequestPayoutDto.BetId);
         }
 
-        // if (!(bet.Status == BetStatus.Won))
-        // {
-        //     throw new InvalidBetStatusForPayoutException(bet.Id, bet.Status);
-        // }
+        if (!(bet.Status == BetStatus.Won))
+        {
+            throw new InvalidBetStatusForPayoutException(bet.Id, bet.Status);
+        }
+
+        var existingPayout = await payoutRepository.GetByBetIdAsync(request.RequestPayoutDto.BetId, cancellationToken);
+        if (existingPayout is not null &&
+            (existingPayout.Status == PayoutStatus.Pending
+             || existingPayout.Status == PayoutStatus.Completed))
+        {
+            throw new PayoutAlreadyExistsException(request.RequestPayoutDto.BetId, existingPayout.Status);
+        }
 
         var expectedAmount = Math.Round(bet.Amount * bet.Odds, BetConstants.CalculationScale);
         var roundedRequested = Math.Round(request.RequestPayoutDto.Amount, BetConstants.CalculationScale);
@@ -32,16 +42,14 @@ public sealed class PlacePayoutCommandHandler(
             throw new InvalidAmountForPayoutException(bet.Id, request.RequestPayoutDto.Amount);
         }
 
-        var existingPayout = await payoutRepository.GetByBetIdAsync(request.RequestPayoutDto.BetId, cancellationToken);
-
-        if (existingPayout is not null &&
-            (existingPayout.Status == PayoutStatus.Pending
-             || existingPayout.Status == PayoutStatus.Completed))
+        var balanceResponse = await userClient.GetUserBalanceAsync(
+            new GetUserBalanceRequest { Username = request.Username },
+            cancellationToken: cancellationToken);
+        if (!balanceResponse.UserExists)
         {
-            throw new PayoutAlreadyExistsException(request.RequestPayoutDto.BetId, existingPayout.Status);
+            throw new UserNotFoundByNameException(request.Username);
         }
 
-        // TODO: add validation for user when grpc is implemented
         var payout = new Payout
         {
             Id = Guid.NewGuid(),

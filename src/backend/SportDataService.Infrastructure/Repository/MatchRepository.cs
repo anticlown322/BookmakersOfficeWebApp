@@ -43,4 +43,9 @@ public sealed class MatchRepository : MongoRepositoryBase<Match>, IMatchReposito
 
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
     }
+
+    public async Task<List<Match>> GetMatchesStartedBeforeAsync(DateTime cutoffTime, CancellationToken ct)
+    {
+        return (await FindByConditionAsync(m => m.StartTime != null && m.StartTime < cutoffTime, ct)).ToList();
+    }
 }

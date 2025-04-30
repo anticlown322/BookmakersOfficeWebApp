@@ -3,27 +3,26 @@ using BettingService.API.Middlewares;
 using BettingService.BLL;
 using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.Services.Hangfire;
-using BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 using BettingService.DAL;
-using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var configuration = new ConfigurationBuilder()
-        .AddSecretsYaml()
-        .Build();
+    builder.Configuration
+        .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Properties"))
+        .AddJsonFile("secrets.json", optional: true, reloadOnChange: false);
 
-    builder.Configuration.AddConfiguration(configuration);
     builder.Services.AddAppSettings(builder.Configuration);
 
     builder.Services.ConfigureNLog();
 
-    builder.Services.AddDataAccessLayer(configuration);
-    builder.Services.AddBusinessLogicLayer(configuration);
+    builder.Services.AddDataAccessLayer(builder.Configuration);
+    builder.Services.AddBusinessLogicLayer(builder.Configuration );
 
     builder.Services.ConfigureAuth(builder.Configuration);
     builder.Services.AddAuthorizationPolicies();
     builder.Services.AddHttpContextAccessor();
+
+    builder.Services.AddGrpcClients(builder.Configuration);
 
     builder.Services.AddHostedService<HangfireJobScheduler>();
 

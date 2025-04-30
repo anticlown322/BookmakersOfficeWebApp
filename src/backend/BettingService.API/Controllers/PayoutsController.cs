@@ -2,6 +2,7 @@
 using System.Text.Json;
 using BettingService.API.Utility;
 using BettingService.BLL.DTO.Payout;
+using BettingService.BLL.UseCases.Payouts.Commands.ProcessPayouts;
 using BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
 using BettingService.BLL.UseCases.Payouts.Queries.GetAllPayouts;
 using BettingService.BLL.UseCases.Payouts.Queries.GetAllUserPayouts;
@@ -29,6 +30,15 @@ public class PayoutsController(IMediator mediator)
         var username = GetUsernameFromToken();
         var command = new RequestPayoutCommand(username, payoutDto);
         await mediator.Send(command, cancellationToken);
+
+        return Created();
+    }
+
+    [HttpPost("not-completed")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    public async Task<IActionResult> ProcessPayouts(CancellationToken cancellationToken)
+    {
+        await mediator.Send(new ProcessPayoutsCommand(), cancellationToken);
 
         return Created();
     }

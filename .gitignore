@@ -38,3 +38,4 @@ Desktop.ini
 /src/backend/BettingService.API/Logs/
 publish/
 secrets.yaml
+secrets.json

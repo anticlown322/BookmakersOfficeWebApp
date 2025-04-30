@@ -8,6 +8,7 @@ using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Settings;
 using BettingService.DAL.Repositories;
 using BettingService.DAL.Repositories.Implementations;
+using BettingService.Protos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,15 +20,6 @@ namespace BettingService.API.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
-    {
-        var path = Directory.GetCurrentDirectory() + @"\Properties";
-
-        return configurationBuilder
-            .SetBasePath(path)
-            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
-    }
-
     public static void ConfigureNLog(this IServiceCollection services)
     {
         var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
@@ -45,6 +37,7 @@ public static class ServiceExtensions
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+        services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
     }
 
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
@@ -88,6 +81,19 @@ public static class ServiceExtensions
                 policy =>
                     policy.RequireRole(UserRoles.Gambler));
         });
+
+    public static void AddGrpcClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
+        {
+            o.Address = new Uri("http://localhost:50023");
+        });
+
+        services.AddGrpcClient<SportDataService.SportDataServiceClient>(o =>
+        {
+            o.Address = new Uri("http://localhost:50022");
+        });
+    }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
         services.Configure<ApiBehaviorOptions>(opt => { opt.SuppressModelStateInvalidFilter = true; });

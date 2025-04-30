@@ -8,6 +8,7 @@ using BettingService.BLL.Services.Hangfire;
 using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 using BettingService.DAL.Models.Settings;
+using BettingService.Protos;
 using FluentValidation;
 using Hangfire;
 using Hangfire.Mongo;
@@ -47,11 +48,11 @@ public static class DependencyInjection
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
 
-        var settings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
+        var hangfireSettings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
         services.AddHangfire(config => config
             .UseMongoStorage(
-                settings.ConnectionString,
-                settings.DatabaseName,
+                hangfireSettings.ConnectionString,
+                hangfireSettings.DatabaseName,
                 new MongoStorageOptions
                 {
                     CheckConnection = true,
@@ -69,6 +70,25 @@ public static class DependencyInjection
             options.ServerName = "Betting.Background";
             options.Queues = new[] { "default", "critical" };
             options.WorkerCount = Environment.ProcessorCount * 2;
+        });
+
+        var grpcSettings = configuration.GetSection("GrpcSettings").Get<GrpcSettings>()!;
+        services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
+            {
+                o.Address = new Uri(grpcSettings.UserService);
+            })
+            .ConfigureChannel(opts =>
+            {
+                opts.HttpHandler = new SocketsHttpHandler
+                {
+                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                };
+            });
+
+        services.AddGrpcClient<SportDataService.SportDataServiceClient>(o =>
+        {
+            o.Address = new Uri(grpcSettings.SportDataService);
         });
 
         return services;

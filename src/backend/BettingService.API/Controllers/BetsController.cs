@@ -1,4 +1,6 @@
-﻿using BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
+﻿using BettingService.BLL.UseCases.Bets.Commands.UpdateActiveBets;
+using BettingService.BLL.UseCases.Bets.Commands.UpdatePendingBets;
+using BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
 using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 
@@ -30,6 +32,24 @@ public class BetsController(IMediator mediator)
         await mediator.Send(command, cancellationToken);
 
         return Created();
+    }
+
+    [HttpPost("pending")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    public async Task<IActionResult> UpdatePendingBets(CancellationToken cancellationToken)
+    {
+        await mediator.Send(new UpdatePendingBetsCommand(), cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpPost("active")]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
+    public async Task<IActionResult> UpdateActiveBets(CancellationToken cancellationToken)
+    {
+        await mediator.Send(new UpdateActiveBetsCommand(), cancellationToken);
+
+        return Ok();
     }
 
     [HttpGet]

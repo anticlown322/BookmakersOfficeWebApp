@@ -8,4 +8,5 @@ public interface IMatchRepository : IRepositoryBase<Match>
 {
     public Task<PagedList<Match>> FindAllMatchesAsync(MatchParameters matchParameters, CancellationToken cancellationToken);
     Task<Match?> GetMatchByMatchIdAsync(string matchId, CancellationToken ct);
+    Task<List<Match>> GetMatchesStartedBeforeAsync(DateTime cutoffTime, CancellationToken ct);
 }

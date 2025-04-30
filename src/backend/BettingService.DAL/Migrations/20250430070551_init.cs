@@ -18,11 +18,15 @@ namespace BettingService.DAL.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Username = table.Column<string>(type: "text", nullable: false),
                     MatchId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    LineType = table.Column<int>(type: "integer", nullable: false),
+                    MarketSelection = table.Column<string>(type: "text", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     Odds = table.Column<decimal>(type: "numeric(8,2)", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    SettledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    AcceptedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    SettledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {

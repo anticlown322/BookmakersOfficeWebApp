@@ -39,6 +39,7 @@ public class RefreshTournamentsUseCase(
 
             var existingTournament =
                 await tournamentRepository.GetTournamentByTournamentIdAsync(tournament.TournamentId, ct);
+
             if (existingTournament != null)
             {
                 ct.ThrowIfCancellationRequested();
@@ -52,6 +53,10 @@ public class RefreshTournamentsUseCase(
                 await tournamentRepository.CreateAsync(tournament, ct);
             }
         }
+
+        ct.ThrowIfCancellationRequested();
+
+        await RemoveStartedMatches(ct);
     }
 
     private async Task UpdateTeams(Tournament tournament, CancellationToken ct)
@@ -160,5 +165,17 @@ public class RefreshTournamentsUseCase(
         newMatch.Id = existing.Id;
 
         await matchRepository.UpdateAsync(newMatch, ct);
+    }
+
+    private async Task RemoveStartedMatches(CancellationToken ct)
+    {
+        var currentTime = DateTime.UtcNow.ToUniversalTime();
+        var startedMatches = await matchRepository.GetMatchesStartedBeforeAsync(currentTime, ct);
+
+        foreach (var match in startedMatches)
+        {
+            ct.ThrowIfCancellationRequested();
+            await matchRepository.DeleteAsync(match.Id, ct);
+        }
     }
 }
