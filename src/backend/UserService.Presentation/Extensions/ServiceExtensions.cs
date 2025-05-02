@@ -58,11 +58,7 @@ public static class ServiceExtensions
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<DatabaseSettings>(options =>
-        {
-            options.ConnectionString = configuration.GetConnectionString("DbConnection");
-            options.Timeout = configuration.GetValue<int>("DatabaseSettings:Timeout");
-        });
+        services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
     }

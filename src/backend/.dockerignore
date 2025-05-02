@@ -22,5 +22,6 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/values.yaml
+deploy/*
 LICENSE
 README.md

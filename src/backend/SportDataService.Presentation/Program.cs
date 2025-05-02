@@ -52,8 +52,6 @@ var app = builder.Build();
 
     app.ConfigureHangfireDashboard();
 
-    app.MapGet("/hangfire-settings", (IOptions<HangfireSettings> settings) => settings.Value);
-
     app.MapControllers();
 }
 

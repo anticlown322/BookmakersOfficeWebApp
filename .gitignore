@@ -37,5 +37,7 @@ Desktop.ini
 /src/backend/SportDataService.Presentation/Logs/
 /src/backend/BettingService.API/Logs/
 publish/
-secrets.yaml
-secrets.json
+
+# Docker
+src/backend/.env
+/src/backend/deploy

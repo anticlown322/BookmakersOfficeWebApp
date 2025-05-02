@@ -49,23 +49,10 @@ public static class ServiceExtensions
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<SportDataDbSettings>(options =>
-        {
-            options.DatabaseName = configuration.GetValue<string>("DatabaseSettings:DatabaseName");
-            options.TimeoutSeconds = configuration.GetValue<int>("DatabaseSettings:TimeoutSeconds");
-        });
-
+        services.Configure<SportDataDbSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
-
-        services.Configure<HangfireSettings>(options =>
-        {
-            options.DatabaseName = configuration.GetValue<string>("HangfireSettings:DatabaseName");
-            options.DashboardPath = configuration.GetValue<string>("HangfireSettings:DashboardPath");
-            options.EnableDashboard = configuration.GetValue<bool>("HangfireSettings:EnableDashboard");
-            options.RecurringJobs =
-                configuration.GetValue<Dictionary<string, string>>("HangfireSettings:RecurringJobs");
-        });
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
     }
 
     public static void ConfigureNLog(this IServiceCollection services)

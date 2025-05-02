@@ -34,20 +34,9 @@ public static class ServiceExtensions
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<DatabaseSettings>(options =>
-        {
-            options.ConnectionString = configuration.GetConnectionString("DbConnection");
-            options.Timeout = configuration.GetValue<int>("DatabaseSettings:Timeout");
-        });
-
+        services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        services.Configure<HangfireSettings>(options =>
-        {
-            options.DatabaseName = configuration.GetValue<string>("HangfireSettings:DatabaseName");
-            options.DashboardPath = configuration.GetValue<string>("HangfireSettings:DashboardPath");
-            options.EnableDashboard = configuration.GetValue<bool>("HangfireSettings:EnableDashboard");
-            options.RecurringJobs = configuration.GetValue<Dictionary<string, string>>("HangfireSettings:RecurringJobs");
-        });
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
         services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
     }
 
