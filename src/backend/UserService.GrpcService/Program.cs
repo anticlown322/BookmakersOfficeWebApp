@@ -6,21 +6,13 @@ using UserService.GrpcService.Services;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Configuration
-        .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Properties"))
-        .AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddDockerSecrets();
 
     builder.WebHost.ConfigureKestrel(options =>
     {
-        options.Listen(
-            IPAddress.Any,
-            50023,
-            listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http2;
-
-                // Для HTTP:
-                // listenOptions.UseHttps(); // Закомментируйте для HTTP
-            });
+        options.Listen(IPAddress.Any, 50023, listenOptions => { listenOptions.Protocols = HttpProtocols.Http2; });
     });
 
     builder.Services.ConfigureDbContext(builder.Configuration);

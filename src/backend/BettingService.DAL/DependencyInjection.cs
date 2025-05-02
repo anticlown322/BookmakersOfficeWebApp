@@ -15,10 +15,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetSection("DatabaseSettings")["ConnectionString"];
+        var connectionString = configuration.GetConnectionString("DbConnection");
 
-        services.AddDbContext<RepositoryContext>(options =>
-            options.UseNpgsql(connectionString));
+        services.AddDbContext<RepositoryContext>(options => options.UseNpgsql(connectionString));
 
         services.AddScoped<IBetRepository, BetRepository>();
         services.AddScoped<IPayoutRepository, PayoutRepository>();

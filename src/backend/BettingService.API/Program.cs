@@ -8,15 +8,17 @@ using BettingService.DAL;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Configuration
-        .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Properties"))
-        .AddJsonFile("secrets.json", optional: true, reloadOnChange: false);
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddJsonFile("/app/Properties/secrets.json", optional: true)
+        .AddDockerSecrets();
 
     builder.Services.AddAppSettings(builder.Configuration);
 
     builder.Services.ConfigureNLog();
 
     builder.Services.AddDataAccessLayer(builder.Configuration);
-    builder.Services.AddBusinessLogicLayer(builder.Configuration );
+    builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
     builder.Services.ConfigureAuth(builder.Configuration);
     builder.Services.AddAuthorizationPolicies();

@@ -8,11 +8,12 @@ using SportDataService.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var configuration = new ConfigurationBuilder()
-        .AddSecretsYaml()
-        .Build();
+    builder.Configuration
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddJsonFile("/app/Properties/secrets.json", optional: true)
+        .AddDockerSecrets();
 
-    builder.Configuration.AddConfiguration(configuration);
     builder.Services.AddAppSettings(builder.Configuration);
 
     builder.Services.ConfigureAuth(builder.Configuration);
@@ -20,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddHttpContextAccessor();
 
     builder.Services.ConfigureMongoDbMappings();
-    builder.Services.ConfigureMongoDbContext();
+    builder.Services.ConfigureMongoDbContext(builder.Configuration);
     builder.Services.AddSportDataDb();
     builder.Services.AddHostedService<MongoDbInitializer>();
     builder.Services.AddRepositories();
@@ -50,6 +51,8 @@ var app = builder.Build();
     app.UseAuthorization();
 
     app.ConfigureHangfireDashboard();
+
+    app.MapGet("/hangfire-settings", (IOptions<HangfireSettings> settings) => settings.Value);
 
     app.MapControllers();
 }

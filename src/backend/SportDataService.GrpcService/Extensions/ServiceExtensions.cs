@@ -13,6 +13,27 @@ namespace SportDataService.GrpcService.Extensions;
 
 public static class ServiceExtensions
 {
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
+    {
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
+        {
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
+        }
+    }
+
+    public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<SportDataDbSettings>(options =>
+        {
+            options.DatabaseName = configuration.GetValue<string>("DatabaseSettings:DatabaseName");
+            options.TimeoutSeconds = configuration.GetValue<int>("DatabaseSettings:TimeoutSeconds");
+        });
+    }
+    
     public static void ConfigureGrpc(this IServiceCollection services)
     {
         services.AddGrpc(options =>
@@ -27,13 +48,16 @@ public static class ServiceExtensions
         MongoDbMappingConfig.ConfigureMappings();
     }
 
-    public static void ConfigureMongoDbContext(this IServiceCollection services)
+    public static void ConfigureMongoDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
-            var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+            var connectionString = configuration.GetConnectionString("DbConnection");
+            
+            var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+            var settings = configuration.GetSection("SportDataDbSettings").Get<SportDataDbSettings>()!;
             clientSettings.ConnectTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+            
             return new MongoClient(clientSettings);
         });
     }

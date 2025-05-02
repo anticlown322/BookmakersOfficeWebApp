@@ -1,69 +1,234 @@
-﻿
-services:
-  # Сервис ставок (PostgreSQL)
+﻿services:
+  # БД сервиса ставок (PostgreSQL)
   betting-service-postgres:
     image: postgres:latest
     container_name: bookmaker-betting-postgres
     environment:
       POSTGRES_DB: betting_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     ports:
-      - "9000:5432"
+      - "5432:5432"
     volumes:
       - betting_pg_data:/var/lib/postgresql/data
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d betting_service" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
   
-  # Сервис пользователей (PostgreSQL)
+  # БД сервиса пользователей (PostgreSQL)
   user-service-postgres:
     image: postgres:latest
     container_name: bookmaker-user-postgres
     environment:
       POSTGRES_DB: user_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     ports:
-      - "10000:5432"
+      - "5433:5432"
     volumes:
       - user_pg_data:/var/lib/postgresql/data
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d user_service" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
-  # Сервис спортивных данных (MongoDB)
+  # БД сервиса спортивных данных (MongoDB)
   sport-data-service-mongodb:
     image: mongo:latest
     container_name: bookmaker-sport-data-mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: sport_data
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
     ports:
       - "27017:27017"
     volumes:
       - sport_data_mongo_data:/data/db
-        
-  # Hangfire для сервиса спортивных данных (MongoDB)
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "db.adminCommand('ping')" -u "${MONGO_USER}" -p "${MONGO_PASSWORD}" --authenticationDatabase "admin"
+      interval: 10s
+      timeout: 15s
+      start_period: 30s
+      retries: 5
+  
+  # БД Hangfire для сервиса спортивных данных (MongoDB)
   sport-data-hangfire-mongodb:
     image: mongo:latest
     container_name: bookmaker-sport-data-hangfire-mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: hangfire_db
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
     ports:
       - "27018:27017"
     volumes:
       - sport_data_hangfire_mongo_data:/data/db
-        
-  # Hangfire для сервиса ставок (MongoDB)
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "db.adminCommand('ping')" -u "${MONGO_USER}" -p "${MONGO_PASSWORD}" --authenticationDatabase "admin"
+      interval: 10s
+      timeout: 15s
+      start_period: 30s
+      retries: 5
+  
+  # БД Hangfire для сервиса ставок (MongoDB)
   betting-hangfire-mongodb:
     image: mongo:latest
     container_name: bookmaker-betting-hangfire-mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
       MONGO_INITDB_DATABASE: hangfire_db
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
     ports:
       - "27019:27017"
     volumes:
       - betting_hangfire_mongo_data:/data/db
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "db.adminCommand('ping')" -u "${MONGO_USER}" -p "${MONGO_PASSWORD}" --authenticationDatabase "admin"
+      interval: 10s
+      timeout: 15s
+      start_period: 30s
+      retries: 5
+
+  # Сервис ставок
+  betting-service:
+    container_name: bookmaker-betting-service
+    build:
+      context: .
+      dockerfile: BettingService.API/Dockerfile
+    ports:
+      - "50001:50001" # HTTPS
+      - "50011:50011" # HTTP
+    depends_on:
+      betting-service-postgres:
+        condition: service_healthy
+      user-grpc-service:
+        condition: service_started
+      sport-data-grpc-service:
+        condition: service_started
+    volumes:
+      - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DbConnection=Server=betting-service-postgres;Port=5432;Database=betting_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@betting-hangfire-mongodb:27017/hangfire_db?authSource=admin
+      - Grpc__UserService=http://user-grpc-service:50023
+      - Grpc__SportDataService=http://sport-data-grpc-service:50022
+    secrets:
+      - jwt_secrets
+    networks:
+      - bookmaker-net
+  
+  # Сервис спортивных данных
+  sport-data-service:
+    container_name: bookmaker-sport-data-service
+    build:
+      context: .
+      dockerfile: SportDataService.Presentation/Dockerfile
+    ports:
+      - "50002:50002" # HTTPS
+      - "50012:50012" # HTTP
+    depends_on:
+      sport-data-service-mongodb:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@sport-data-service-mongodb:27017/sport_data?authSource=admin
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@sport-data-hangfire-mongodb:27017/hangfire_db?authSource=admin
+    secrets:
+      - jwt_secrets
+    networks:
+      - bookmaker-net
+  
+  # Grpc сервис спортивных данных
+  sport-data-grpc-service:
+    container_name: bookmaker-sport-data-grpc-service
+    build:
+      context: .
+      dockerfile: SportDataService.GrpcService/Dockerfile
+    ports:
+      - "50022:50022" # HTTPS
+      - "50032:50032" # HTTP
+    depends_on:
+      sport-data-service-mongodb:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@sport-data-service-mongodb:27017/sport_data?authSource=admin
+    secrets:
+      - jwt_secrets
+    networks:
+      - bookmaker-net
+  
+  # Сервис работы с пользователями 
+  user-service:
+    container_name: bookmaker-user-service
+    build:
+      context: .
+      dockerfile: UserService.Presentation/Dockerfile
+    ports:
+      - "50003:50003" # HTTPS
+      - "50013:50013" # HTTP
+    depends_on:
+      user-service-postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+    environment:
+      - ConnectionStrings__DbConnection=Server=user-service-postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    secrets:
+      - jwt_secrets
+    networks:
+      - bookmaker-net
+  
+  # Grpc сервис работы с пользователями
+  user-grpc-service:
+    container_name: bookmaker-user-grpc-service
+    build:
+      context: .
+      dockerfile: UserService.GrpcService/Dockerfile
+    ports:
+      - "50023:50023" # HTTPS
+      - "50033:50033" # HTTP
+    depends_on:
+      user-service-postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=user-service-postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    networks:
+      - bookmaker-net
+
+secrets:
+  jwt_secrets:
+    file: ./deploy/secrets/jwt_secrets.txt
 
 volumes:
   betting_pg_data:
@@ -71,3 +236,7 @@ volumes:
   sport_data_mongo_data:
   betting_hangfire_mongo_data:
   sport_data_hangfire_mongo_data:
+
+networks:
+  bookmaker-net:
+    driver: bridge

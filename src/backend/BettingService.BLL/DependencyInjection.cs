@@ -48,10 +48,11 @@ public static class DependencyInjection
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
 
+        var connectionString = configuration.GetConnectionString("HangfireDbConnection");
         var hangfireSettings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
         services.AddHangfire(config => config
             .UseMongoStorage(
-                hangfireSettings.ConnectionString,
+                connectionString,
                 hangfireSettings.DatabaseName,
                 new MongoStorageOptions
                 {

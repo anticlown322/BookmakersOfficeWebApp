@@ -1,12 +1,10 @@
 ﻿using System.Text;
 using Hangfire;
-using Hangfire.Dashboard;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -37,33 +35,49 @@ namespace SportDataService.Presentation.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
     {
-        var path = Directory.GetCurrentDirectory() + @"\Properties";
-
-        return configurationBuilder
-            .SetBasePath(path)
-            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
-    }
-
-    public static void ConfigureNLog(this IServiceCollection services)
-    {
-        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
-
-        if (!File.Exists(configFilePath))
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
         {
-            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
         }
-
-        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
     }
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<SportDataDbSettings>(configuration.GetSection("SportDataDbSettings"));
+        services.Configure<SportDataDbSettings>(options =>
+        {
+            options.DatabaseName = configuration.GetValue<string>("DatabaseSettings:DatabaseName");
+            options.TimeoutSeconds = configuration.GetValue<int>("DatabaseSettings:TimeoutSeconds");
+        });
+
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
-        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+
+        services.Configure<HangfireSettings>(options =>
+        {
+            options.DatabaseName = configuration.GetValue<string>("HangfireSettings:DatabaseName");
+            options.DashboardPath = configuration.GetValue<string>("HangfireSettings:DashboardPath");
+            options.EnableDashboard = configuration.GetValue<bool>("HangfireSettings:EnableDashboard");
+            options.RecurringJobs =
+                configuration.GetValue<Dictionary<string, string>>("HangfireSettings:RecurringJobs");
+        });
+    }
+
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        const string configPath = "/app/Properties/nlog.config";
+        if (File.Exists(configPath))
+        {
+            LogManager.Setup().LoadConfigurationFromFile(configPath);
+            return;
+        }
+
+        throw new FileNotFoundException($"NLog config not found at: {configPath}");
     }
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
@@ -115,22 +129,23 @@ public static class ServiceExtensions
         MongoDbMappingConfig.ConfigureMappings();
     }
 
-    public static void ConfigureMongoDbContext(this IServiceCollection services)
+    public static void ConfigureMongoDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
-            var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+            var connectionString = configuration.GetConnectionString("DbConnection");
+
+            var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+            var settings = configuration.GetSection("SportDataDbSettings").Get<SportDataDbSettings>()!;
             clientSettings.ConnectTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
 
             return new MongoClient(clientSettings);
         });
 
-        services.AddSingleton<IMongoClient>(sp =>
+        services.AddSingleton<IMongoClient>(_ =>
         {
-            var settings = sp.GetRequiredService<IOptions<HangfireSettings>>().Value;
-
-            return new MongoClient(settings.ConnectionString);
+            var connectionString = configuration.GetConnectionString("HangfireDbConnection");
+            return new MongoClient(connectionString);
         });
     }
 
@@ -219,11 +234,12 @@ public static class ServiceExtensions
 
     public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("HangfireDbConnection");
         var settings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
 
         services.AddHangfire(config => config
             .UseMongoStorage(
-                settings.ConnectionString,
+                connectionString,
                 settings.DatabaseName,
                 new MongoStorageOptions
                 {

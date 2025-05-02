@@ -20,24 +20,47 @@ namespace BettingService.API.Extensions;
 
 public static class ServiceExtensions
 {
-    public static void ConfigureNLog(this IServiceCollection services)
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
     {
-        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
-
-        if (!File.Exists(configFilePath))
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
         {
-            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
         }
-
-        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
     }
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<DatabaseSettings>(options =>
+        {
+            options.ConnectionString = configuration.GetConnectionString("DbConnection");
+            options.Timeout = configuration.GetValue<int>("DatabaseSettings:Timeout");
+        });
+
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+        services.Configure<HangfireSettings>(options =>
+        {
+            options.DatabaseName = configuration.GetValue<string>("HangfireSettings:DatabaseName");
+            options.DashboardPath = configuration.GetValue<string>("HangfireSettings:DashboardPath");
+            options.EnableDashboard = configuration.GetValue<bool>("HangfireSettings:EnableDashboard");
+            options.RecurringJobs = configuration.GetValue<Dictionary<string, string>>("HangfireSettings:RecurringJobs");
+        });
         services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
+    }
+
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        const string configPath = "/app/Properties/nlog.config";
+        if (File.Exists(configPath))
+        {
+            LogManager.Setup().LoadConfigurationFromFile(configPath);
+            return;
+        }
+
+        throw new FileNotFoundException($"NLog config not found at: {configPath}");
     }
 
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)

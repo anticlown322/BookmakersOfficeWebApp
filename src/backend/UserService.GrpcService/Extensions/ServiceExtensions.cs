@@ -11,13 +11,23 @@ namespace UserService.GrpcService.Extensions;
 
 public static class ServiceExtensions
 {
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
+    {
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
+        {
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
+        }
+    }
+
     public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration["DatabaseSettings:ConnectionString"]
-                               ?? throw new InvalidOperationException("Connection string is missing");
+        var connectionString = configuration.GetConnectionString("DbConnection");
 
-        services.AddDbContext<RepositoryContext>(opts =>
-            opts.UseNpgsql(connectionString));
+        services.AddDbContext<RepositoryContext>(opts => opts.UseNpgsql(connectionString));
     }
 
     public static void ConfigureGrpc(this IServiceCollection services)
@@ -28,7 +38,7 @@ public static class ServiceExtensions
             options.Interceptors.Add<ExceptionInterceptor>();
         });
     }
-    
+
     public static void AddRepository(this IServiceCollection services)
     {
         services.AddScoped<IUsersRepository, UserRepository>();

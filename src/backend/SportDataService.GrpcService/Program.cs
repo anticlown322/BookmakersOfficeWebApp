@@ -7,11 +7,11 @@ using SportDataService.GrpcService.Services;
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Configuration
-        .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "Properties"))
-        .AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddDockerSecrets();
 
-    builder.Services.Configure<SportDataDbSettings>(
-        builder.Configuration.GetSection("DatabaseSettings"));
+    builder.Services.AddAppSettings(builder.Configuration);
 
     builder.WebHost.ConfigureKestrel(options =>
     {
@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureGrpc();
 
     builder.Services.ConfigureMongoDbMappings();
-    builder.Services.ConfigureMongoDbContext();
+    builder.Services.ConfigureMongoDbContext(builder.Configuration);
     builder.Services.AddSportDataDb();
     builder.Services.AddRepositories();
 }
