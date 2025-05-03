@@ -46,7 +46,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(typeof(PlaceBetCommandValidator).Assembly);
 
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
-        services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
+        services.AddSingleton<IBackgroundJobExecutor, HangfireJobExecutor>();
 
         var connectionString = configuration.GetConnectionString("HangfireDbConnection");
         var hangfireSettings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
@@ -64,32 +64,15 @@ public static class DependencyInjection
                         BackupStrategy = new CollectionMongoBackupStrategy(),
                     },
                 })
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
             .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
         services.AddHangfireServer(options =>
         {
             options.ServerName = "Betting.Background";
             options.Queues = new[] { "default", "critical" };
-            options.WorkerCount = Environment.ProcessorCount * 2;
-        });
-
-        var grpcSettings = configuration.GetSection("GrpcSettings").Get<GrpcSettings>()!;
-        services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
-            {
-                o.Address = new Uri(grpcSettings.UserService);
-            })
-            .ConfigureChannel(opts =>
-            {
-                opts.HttpHandler = new SocketsHttpHandler
-                {
-                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                };
-            });
-
-        services.AddGrpcClient<SportDataService.SportDataServiceClient>(o =>
-        {
-            o.Address = new Uri(grpcSettings.SportDataService);
+            options.WorkerCount = 1;
         });
 
         return services;

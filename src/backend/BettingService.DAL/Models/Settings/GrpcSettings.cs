@@ -2,6 +2,6 @@
 
 public class GrpcSettings
 {
-    public string UserService { get; set; }
-    public string SportDataService { get; set; }
+    public string UserServiceConnection { get; set; }
+    public string SportDataServiceConnection { get; set; }
 }

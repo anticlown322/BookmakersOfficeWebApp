@@ -1,6 +1,7 @@
 ﻿# 1. Base image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
+
 EXPOSE 50011
 EXPOSE 50001
 
@@ -32,7 +33,7 @@ FROM base AS final
 WORKDIR /app
 
 # 4.1. Copying publish files
-COPY --from=publish /app/publish .
+COPY --from=publish /app/publish/. .
 
 # 4.2. Container optimizations
 ENV DOTNET_RUNNING_IN_CONTAINER=true \

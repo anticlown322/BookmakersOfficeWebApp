@@ -57,17 +57,21 @@
       sport-data-grpc-service:
         condition: service_started
     volumes:
+      - ./deploy/certs/aspnetapp.crt:/app/Properties/aspnetapp.crt:ro
       - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
+      - CERT_PATH=./deploy/certs/aspnetapp.crt
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTPS_PORTS=50001
       - ASPNETCORE_HTTP_PORTS=50011
       - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=betting_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
-      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/hangfire_betting?authSource=admin
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/betting_hangfire_db?authSource=admin
       - Grpc__UserService=http://user-grpc-service:50023
       - Grpc__SportDataService=http://sport-data-grpc-service:50022
     networks:
@@ -89,6 +93,8 @@
       - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
@@ -96,7 +102,7 @@
       - ASPNETCORE_HTTPS_PORTS=50002
       - ASPNETCORE_HTTP_PORTS=50012
       - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
-      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/hangfire_sport_data?authSource=admin
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data_hangfire_db?authSource=admin
     networks:
       - bookmaker-net
   
@@ -108,7 +114,6 @@
       dockerfile: SportDataService.GrpcService/Dockerfile
     ports:
       - "50022:50022" # HTTPS
-      - "50032:50032" # HTTP
     depends_on:
       mongodb:
         condition: service_healthy
@@ -116,7 +121,10 @@
       - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
+      - ASPNETCORE_URLS=https://+:50022
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
       - ASPNETCORE_ENVIRONMENT=Production
@@ -140,6 +148,8 @@
       - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
@@ -157,7 +167,6 @@
       dockerfile: UserService.GrpcService/Dockerfile
     ports:
       - "50023:50023" # HTTPS
-      - "50033:50033" # HTTP
     depends_on:
       postgres:
         condition: service_healthy
@@ -165,10 +174,13 @@
       - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
+      - ASPNETCORE_URLS=https://+:50023
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
-      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
     networks:
       - bookmaker-net
 

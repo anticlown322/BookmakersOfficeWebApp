@@ -31,5 +31,9 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
+    
+    <PropertyGroup>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
+    </PropertyGroup>
 
 </Project>

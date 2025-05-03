@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BettingService.API.Utility;
 using BettingService.BLL.Contracts.Services;
@@ -9,6 +10,10 @@ using BettingService.DAL.Models.Settings;
 using BettingService.DAL.Repositories;
 using BettingService.DAL.Repositories.Implementations;
 using BettingService.Protos;
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -96,15 +101,35 @@ public static class ServiceExtensions
 
     public static void AddGrpcClients(this IServiceCollection services, IConfiguration configuration)
     {
+        var grpcSettings = configuration.GetSection("GrpcSettings").Get<GrpcSettings>()!;
+        var certPath = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "aspnetapp.crt");
+        var certificate = new X509Certificate2(certPath);
+
         services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
-        {
-            o.Address = new Uri("http://localhost:50023");
-        });
+            {
+                o.Address = new Uri(grpcSettings.UserServiceConnection);
+            })
+            .ConfigureChannel(o =>
+            {
+                o.HttpHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => cert?.Issuer == certificate.Issuer,
+                };
+            });
 
         services.AddGrpcClient<SportDataService.SportDataServiceClient>(o =>
-        {
-            o.Address = new Uri("http://localhost:50022");
-        });
+            {
+                o.Address = new Uri(grpcSettings.SportDataServiceConnection);
+            })
+            .ConfigureChannel(o =>
+            {
+                o.HttpHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => cert?.Issuer == certificate.Issuer,
+                };
+            });
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>

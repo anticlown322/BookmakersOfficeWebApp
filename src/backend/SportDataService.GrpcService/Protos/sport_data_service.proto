@@ -53,7 +53,7 @@ message MatchResultData {
   repeated SubScoreData sub_scores = 7;
   repeated MatchEventResultData event_results = 8;
   google.protobuf.Timestamp result_time = 9;
-  map<string, string> outcomes = 10; // key: market selection, value: outcome (won/lost/cancelled)
+  map<string, string> outcomes = 10;
 }
 
 message TeamData {

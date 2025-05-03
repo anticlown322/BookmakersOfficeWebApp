@@ -27,11 +27,7 @@ public static class ServiceExtensions
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<SportDataDbSettings>(options =>
-        {
-            options.DatabaseName = configuration.GetValue<string>("DatabaseSettings:DatabaseName");
-            options.TimeoutSeconds = configuration.GetValue<int>("DatabaseSettings:TimeoutSeconds");
-        });
+        services.Configure<SportDataDbSettings>(configuration.GetSection("DatabaseSettings"));
     }
     
     public static void ConfigureGrpc(this IServiceCollection services)
@@ -55,19 +51,19 @@ public static class ServiceExtensions
             var connectionString = configuration.GetConnectionString("DbConnection");
             
             var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
-            var settings = configuration.GetSection("SportDataDbSettings").Get<SportDataDbSettings>()!;
+            var settings = configuration.GetSection("DatabaseSettings").Get<SportDataDbSettings>()!;
             clientSettings.ConnectTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             
             return new MongoClient(clientSettings);
         });
     }
 
-    public static void AddSportDataDb(this IServiceCollection services)
+    public static void AddSportDataDb(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IMongoDatabase>(sp =>
         {
+            var settings = configuration.GetSection("DatabaseSettings").Get<SportDataDbSettings>()!;   
             var client = sp.GetRequiredService<IMongoClient>();
-            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
             return client.GetDatabase(settings.DatabaseName);
         });
     }

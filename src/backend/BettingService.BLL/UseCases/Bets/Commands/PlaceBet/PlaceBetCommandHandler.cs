@@ -1,8 +1,12 @@
-﻿using BettingService.BLL.Exceptions.Specific;
+﻿using BettingService.BLL.Contracts.Services;
+using BettingService.BLL.Exceptions.Specific;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
 using BettingService.Protos;
+using Grpc.Core;
+using Grpc.Net.Client;
 using MediatR;
+using NLog;
 
 namespace BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 

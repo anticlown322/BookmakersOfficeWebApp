@@ -20,14 +20,12 @@ public class UpdatePendingBetsCommandHandler(IBetRepository betRepository)
         }
 
         var now = DateTime.UtcNow;
-        var updatedCount = 0;
 
         foreach (var bet in pendingBets)
         {
             bet.Status = BetStatus.Active;
             bet.AcceptedAt = now;
             betRepository.Update(bet);
-            updatedCount++;
         }
 
         await betRepository.SaveAsync(cancellationToken);

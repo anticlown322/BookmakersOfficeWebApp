@@ -11,18 +11,9 @@ public class UserGrpcServiceImplementation(IUsersRepository repository)
         GetUserBalanceRequest request,
         ServerCallContext context)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
-        {
-            throw new UsernameIsEmptyException();
-        }
-
         try
         {
             var user = await repository.GetUserByNameAsync(request.Username);
-            if (user == null)
-            {
-                throw new UserNotFoundException(request.Username);
-            }
 
             return new GetUserBalanceResponse
             {
@@ -40,11 +31,6 @@ public class UserGrpcServiceImplementation(IUsersRepository repository)
         UpdateUserBalanceRequest request,
         ServerCallContext context)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
-        {
-            throw new UsernameIsEmptyException();
-        }
-
         try
         {
             decimal amount;

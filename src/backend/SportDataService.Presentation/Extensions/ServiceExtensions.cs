@@ -244,7 +244,7 @@ public static class ServiceExtensions
         {
             options.ServerName = "SportData.Background";
             options.Queues = new[] { "default", "critical" };
-            options.WorkerCount = Environment.ProcessorCount * 2;
+            options.WorkerCount = 1;
         });
     }
 }

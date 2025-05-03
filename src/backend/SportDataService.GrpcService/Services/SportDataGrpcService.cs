@@ -1,4 +1,5 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SportDataService.Application.Validation.Exceptions.Specific;
@@ -25,6 +26,11 @@ public class SportDataGrpcService(
     {
         try
         {
+            if (request is null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            
             if (!ObjectId.TryParse(request.MatchId, out _))
             {
                 throw new InvalidIdFormatException(request.MatchId);
@@ -32,19 +38,27 @@ public class SportDataGrpcService(
 
             var match = await matchRepository.GetByIdAsync(request.MatchId, CancellationToken.None);
             if (match == null)
-                throw new MatchNotFoundException(request.MatchId);
+            {
+                throw new MatchNotFoundException(request.MatchId);   
+            }
 
             var domainValue = GetCurrentOdds(match, request.LineType, request.MarketSelection);
 
             if (!double.TryParse(domainValue.Value, out var currentOdds))
+            {
                 throw new InvalidOddsFormatException(domainValue.Value);
+            }
 
             if (Math.Abs(currentOdds - request.Odds) > 0.01)
+            {
                 throw new OddsChangedException(currentOdds);
+            }
 
             var isMatchStarted = match.StartTime <= DateTime.UtcNow;
             if (isMatchStarted)
+            {
                 throw new MatchAlreadyStartedException(match.StartTime.Value);
+            }
 
             return new ValidateBetResponse
             {
@@ -53,7 +67,6 @@ public class SportDataGrpcService(
                 IsLive = isMatchStarted,
             };
         }
-
         catch (GrpcExceptionBase)
         {
             throw;
@@ -368,7 +381,9 @@ public class SportDataGrpcService(
         var value = line.GetValue(marketSelection);
 
         if (value == null || !value.IsActive)
-            throw new MarketNotFoundException(marketSelection);
+        {
+            throw new MarketNotFoundException(marketSelection);   
+        }
 
         return value;
     }
