@@ -1,23 +1,11 @@
-﻿using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BettingService.API.Utility;
-using BettingService.BLL.Contracts.Services;
-using BettingService.BLL.Services;
 using BettingService.BLL.Utility;
-using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Settings;
-using BettingService.DAL.Repositories;
-using BettingService.DAL.Repositories.Implementations;
 using BettingService.Protos;
-using Hangfire;
-using Hangfire.Mongo;
-using Hangfire.Mongo.Migration.Strategies;
-using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
 

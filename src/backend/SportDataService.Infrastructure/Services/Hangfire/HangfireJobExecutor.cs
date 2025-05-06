@@ -14,13 +14,13 @@ public class HangfireJobExecutor(
     {
         switch (jobId)
         {
-            case "UpdatePrematch":
+            case HangfireJobNames.UpdatePrematch:
             {
                 await refreshTournamentsUseCase.ExecuteAsync(default);
                 break;
             }
 
-            case "UpdateResults":
+            case HangfireJobNames.UpdateResults:
             {
                 await refreshTournamentResultsUseCase.ExecuteAsync(default);
                 break;

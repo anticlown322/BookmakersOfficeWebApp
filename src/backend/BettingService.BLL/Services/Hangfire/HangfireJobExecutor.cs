@@ -8,31 +8,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BettingService.BLL.Services.Hangfire;
 
-public class HangfireJobExecutor(
-    IDbContextFactory<RepositoryContext> dbFactory,
-    IMediator mediator,
-    ILoggerService logger)
+public class HangfireJobExecutor(IMediator mediator)
     : IBackgroundJobExecutor
 {
     public async Task ExecuteAsync(string jobId)
     {
-        await using var db = await dbFactory.CreateDbContextAsync();
-
         switch (jobId)
         {
-            case "UpdatePendingBets":
+            case HangfireJobNames.UpdatePendingBets:
             {
                 await mediator.Send(new UpdatePendingBetsCommand(), CancellationToken.None);
                 break;
             }
 
-            case "UpdateBetsResults":
+            case HangfireJobNames.UpdateActiveBets:
             {
                 await mediator.Send(new UpdateActiveBetsCommand(), CancellationToken.None);
                 break;
             }
 
-            case "ProcessPayouts":
+            case HangfireJobNames.ProcessPayouts:
             {
                 await mediator.Send(new ProcessPayoutsCommand(), CancellationToken.None);
                 break;
