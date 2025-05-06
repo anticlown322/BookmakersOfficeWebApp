@@ -1,5 +1,7 @@
-﻿using Hangfire;
+﻿using System.Text.Json;
+using Hangfire;
 using Microsoft.Extensions.Options;
+using SportDataService.Application.Contracts.Services;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Infrastructure.Services.Hangfire;
 

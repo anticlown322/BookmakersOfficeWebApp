@@ -44,25 +44,16 @@ namespace UserService.Presentation.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
     {
-        var path = Directory.GetCurrentDirectory() + @"\Properties";
-
-        return configurationBuilder
-            .SetBasePath(path)
-            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
-    }
-
-    public static void ConfigureNLog(this IServiceCollection services)
-    {
-        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
-
-        if (!File.Exists(configFilePath))
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
         {
-            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
         }
-
-        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
     }
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
@@ -72,18 +63,29 @@ public static class ServiceExtensions
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
     }
 
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        const string configPath = "/app/Properties/nlog.config";
+        if (File.Exists(configPath))
+        {
+            LogManager.Setup().LoadConfigurationFromFile(configPath);
+            return;
+        }
+
+        throw new FileNotFoundException($"NLog config not found at: {configPath}");
+    }
+
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerService, LoggerService>();
 
     public static void AddTokenService(this IServiceCollection services) =>
         services.AddScoped<ITokenService, TokenService>();
 
-    public static void AddEmailService(this IServiceCollection services)
+    public static void AddEmailService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IEmailService, EmailService>();
 
-        var serviceProvider = services.BuildServiceProvider();
-        var emailSettings = serviceProvider.GetRequiredService<IOptions<EmailSettings>>().Value;
+        var emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>()!;
         services
             .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
             .AddSmtpSender(() => new SmtpClient
@@ -96,6 +98,9 @@ public static class ServiceExtensions
                     emailSettings.Password),
             });
     }
+
+    public static void AddDatabaseMigrationService(this IServiceCollection services) =>
+        services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
 
     public static void AddUserRepository(this IServiceCollection services) =>
         services.AddScoped<IUsersRepository, UserRepository>();
@@ -129,31 +134,30 @@ public static class ServiceExtensions
         services.AddScoped<IGetTransactionHistory, GetTransactionHistoryUseCase>();
     }
 
-    public static void ConfigureSqlContext(this IServiceCollection services)
+    public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var databaseSettings = serviceProvider.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+        var connectionString = configuration.GetConnectionString("DbConnection");
 
-        services.AddDbContext<RepositoryContext>(opts =>
-            opts.UseNpgsql(databaseSettings.ConnectionString));
+        services.AddDbContext<RepositoryContext>(opts => opts.UseNpgsql(connectionString));
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
     {
         services.AddAutoMapper(
             cfg =>
-        {
-            cfg.AddProfile<RegisterUserMappingProfile>();
-            cfg.AddProfile<GetUsersMappingProfile>();
-            cfg.AddProfile<GetUserProfileMappingProfile>();
-            cfg.AddProfile<UpdateUserProfileMappingProfile>();
-            cfg.AddProfile<GetTransactionsMappingProfile>();
-        }, AppDomain.CurrentDomain.GetAssemblies());
+            {
+                cfg.AddProfile<RegisterUserMappingProfile>();
+                cfg.AddProfile<GetUsersMappingProfile>();
+                cfg.AddProfile<GetUserProfileMappingProfile>();
+                cfg.AddProfile<UpdateUserProfileMappingProfile>();
+                cfg.AddProfile<GetTransactionsMappingProfile>();
+            },
+            AppDomain.CurrentDomain.GetAssemblies());
     }
 
     public static void ConfigureIdentity(this IServiceCollection services)
     {
-        var builder = services.AddIdentity<User, IdentityRole>(o =>
+        services.AddIdentity<User, IdentityRole>(o =>
             {
                 o.Password.RequireDigit = true;
                 o.Password.RequireLowercase = false;
@@ -166,11 +170,9 @@ public static class ServiceExtensions
             .AddDefaultTokenProviders();
     }
 
-    public static void ConfigureJwt(this IServiceCollection services)
+    public static void ConfigureJwt(this IServiceCollection services, IConfiguration configuration)
     {
-        var serviceProvider = services.BuildServiceProvider();
-        var jwtSettings = serviceProvider.GetRequiredService<IOptions<JwtSettings>>().Value;
-        var secretKey = jwtSettings.SecretKey;
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
 
         services.AddAuthentication(opt =>
             {
@@ -187,7 +189,7 @@ public static class ServiceExtensions
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSettings.Issuer,
                     ValidAudience = jwtSettings.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                 };
             });
     }
@@ -195,29 +197,49 @@ public static class ServiceExtensions
     public static void AddAuthorizationPolicies(this IServiceCollection services) =>
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(AuthorizationPolicies.GamblerOnly, policy =>
-                policy.RequireRole(UserRoles.Gambler));
+            options.AddPolicy(
+                AuthorizationPolicies.GamblerOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Gambler));
 
-            options.AddPolicy(AuthorizationPolicies.ModeratorOnly, policy =>
-                policy.RequireRole(UserRoles.Moderator));
+            options.AddPolicy(
+                AuthorizationPolicies.ModeratorOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Moderator));
 
-            options.AddPolicy(AuthorizationPolicies.BookmakerOnly, policy =>
-                policy.RequireRole(UserRoles.Bookmaker));
+            options.AddPolicy(
+                AuthorizationPolicies.BookmakerOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Bookmaker));
 
-            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
-                policy.RequireRole(UserRoles.Administrator));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOnly,
+                policy =>
+                    policy.RequireRole(UserRoles.Administrator));
 
-            options.AddPolicy(AuthorizationPolicies.AdministratorOrGambler, policy =>
-                policy.RequireRole(UserRoles.Gambler, UserRoles.Administrator));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOrGambler,
+                policy =>
+                    policy.RequireRole(UserRoles.Gambler, UserRoles.Administrator));
 
-            options.AddPolicy(AuthorizationPolicies.AdministratorOrModerator, policy =>
-                policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOrModerator,
+                policy =>
+                    policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator));
 
-            options.AddPolicy(AuthorizationPolicies.AdministratorOrModeratorOrGambler, policy =>
-                policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator, UserRoles.Gambler));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOrModeratorOrGambler,
+                policy =>
+                    policy.RequireRole(UserRoles.Administrator, UserRoles.Moderator, UserRoles.Gambler));
 
-            options.AddPolicy(AuthorizationPolicies.AllUsers, policy =>
-                policy.RequireRole(UserRoles.Administrator, UserRoles.Gambler, UserRoles.Moderator, UserRoles.Bookmaker));
+            options.AddPolicy(
+                AuthorizationPolicies.AllUsers,
+                policy =>
+                    policy.RequireRole(
+                        UserRoles.Administrator,
+                        UserRoles.Gambler,
+                        UserRoles.Moderator,
+                        UserRoles.Bookmaker));
         });
 
     public static void AddValidators(this IServiceCollection services)

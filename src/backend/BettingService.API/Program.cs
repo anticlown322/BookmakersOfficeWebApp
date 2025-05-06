@@ -7,21 +7,24 @@ using BettingService.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 {
-    var configuration = new ConfigurationBuilder()
-        .AddSecretsYaml()
-        .Build();
+    builder.Configuration
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddJsonFile("/app/Properties/secrets.json", optional: true)
+        .AddDockerSecrets();
 
-    builder.Configuration.AddConfiguration(configuration);
     builder.Services.AddAppSettings(builder.Configuration);
 
     builder.Services.ConfigureNLog();
 
-    builder.Services.AddDataAccessLayer(configuration);
-    builder.Services.AddBusinessLogicLayer(configuration);
+    builder.Services.AddDataAccessLayer(builder.Configuration);
+    builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
     builder.Services.ConfigureAuth(builder.Configuration);
     builder.Services.AddAuthorizationPolicies();
     builder.Services.AddHttpContextAccessor();
+
+    builder.Services.AddGrpcClients(builder.Configuration);
 
     builder.Services.AddHostedService<HangfireJobScheduler>();
 

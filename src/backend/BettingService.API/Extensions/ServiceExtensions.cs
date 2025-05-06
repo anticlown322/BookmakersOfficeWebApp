@@ -1,17 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using BettingService.API.Utility;
-using BettingService.BLL.Contracts.Services;
-using BettingService.BLL.Services;
 using BettingService.BLL.Utility;
-using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Settings;
-using BettingService.DAL.Repositories;
-using BettingService.DAL.Repositories.Implementations;
+using BettingService.Protos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
 
@@ -19,25 +13,16 @@ namespace BettingService.API.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
     {
-        var path = Directory.GetCurrentDirectory() + @"\Properties";
-
-        return configurationBuilder
-            .SetBasePath(path)
-            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
-    }
-
-    public static void ConfigureNLog(this IServiceCollection services)
-    {
-        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
-
-        if (!File.Exists(configFilePath))
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
         {
-            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
         }
-
-        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
     }
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
@@ -45,6 +30,19 @@ public static class ServiceExtensions
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+        services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
+    }
+
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        const string configPath = "/app/Properties/nlog.config";
+        if (File.Exists(configPath))
+        {
+            LogManager.Setup().LoadConfigurationFromFile(configPath);
+            return;
+        }
+
+        throw new FileNotFoundException($"NLog config not found at: {configPath}");
     }
 
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
@@ -88,6 +86,39 @@ public static class ServiceExtensions
                 policy =>
                     policy.RequireRole(UserRoles.Gambler));
         });
+
+    public static void AddGrpcClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        var grpcSettings = configuration.GetSection("GrpcSettings").Get<GrpcSettings>()!;
+        var certPath = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "aspnetapp.crt");
+        var certificate = new X509Certificate2(certPath);
+
+        services.AddGrpcClient<UserGrpcService.UserGrpcServiceClient>(o =>
+            {
+                o.Address = new Uri(grpcSettings.UserServiceConnection);
+            })
+            .ConfigureChannel(o =>
+            {
+                o.HttpHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => cert?.Issuer == certificate.Issuer,
+                };
+            });
+
+        services.AddGrpcClient<SportDataService.SportDataServiceClient>(o =>
+            {
+                o.Address = new Uri(grpcSettings.SportDataServiceConnection);
+            })
+            .ConfigureChannel(o =>
+            {
+                o.HttpHandler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => cert?.Issuer == certificate.Issuer,
+                };
+            });
+    }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
         services.Configure<ApiBehaviorOptions>(opt => { opt.SuppressModelStateInvalidFilter = true; });

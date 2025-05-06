@@ -9,6 +9,11 @@ internal static class ValidationUtils
     public const int MatchIdMinLength = 1;
     public const int MatchIdMaxLength = 50;
 
+    internal static string DtoDataRequired(string paramName)
+    {
+        return $"{paramName} data is required.";
+    }
+
     internal static string EmptyParamMessage(string paramName)
     {
         return $"{paramName} can't be empty.";
@@ -32,5 +37,15 @@ internal static class ValidationUtils
     internal static string TooLargeValueParamMessage(string paramName, decimal value)
     {
         return $"{paramName} should be less than {value} or equal to {value}.";
+    }
+
+    internal static string InvalidGuidValue(string paramName, Guid value)
+    {
+        return $"{paramName} with value {value} is not a valid GUID.";
+    }
+
+    internal static bool BeValidGuidString(string? id)
+    {
+        return !string.IsNullOrEmpty(id) && Guid.TryParse(id, out _);
     }
 }

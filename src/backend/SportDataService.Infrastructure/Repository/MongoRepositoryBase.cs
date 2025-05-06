@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using SportDataService.Domain.Models.Tournaments;
 using SportDataService.Domain.RepositoryContracts;
 
 namespace SportDataService.Infrastructure.Repository;

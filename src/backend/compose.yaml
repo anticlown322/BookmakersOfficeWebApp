@@ -1,73 +1,193 @@
-﻿
-services:
-  # Сервис ставок (PostgreSQL)
-  betting-service-postgres:
+﻿services:
+  postgres:
     image: postgres:latest
-    container_name: bookmaker-betting-postgres
+    container_name: bookmaker-postgres
     environment:
-      POSTGRES_DB: betting_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     ports:
-      - "9000:5432"
+      - "5432:5432"
     volumes:
-      - betting_pg_data:/var/lib/postgresql/data
-  
-  # Сервис пользователей (PostgreSQL)
-  user-service-postgres:
-    image: postgres:latest
-    container_name: bookmaker-user-postgres
-    environment:
-      POSTGRES_DB: user_service
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "10000:5432"
-    volumes:
-      - user_pg_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/inits/postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
-  # Сервис спортивных данных (MongoDB)
-  sport-data-service-mongodb:
+  mongodb:
     image: mongo:latest
-    container_name: bookmaker-sport-data-mongo
+    container_name: bookmaker-mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: sport_data
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
     ports:
       - "27017:27017"
     volumes:
-      - sport_data_mongo_data:/data/db
-        
-  # Hangfire для сервиса спортивных данных (MongoDB)
-  sport-data-hangfire-mongodb:
-    image: mongo:latest
-    container_name: bookmaker-sport-data-hangfire-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: hangfire_db
+      - mongodb_data:/data/db
+      - ./deploy/inits/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "db.adminCommand('ping')" -u "${MONGO_USER}" -p "${MONGO_PASSWORD}" --authenticationDatabase "admin"
+      interval: 10s
+      timeout: 15s
+      start_period: 30s
+      retries: 5
+
+  # Сервис ставок
+  betting-service:
+    container_name: bookmaker-betting-service
+    build:
+      context: .
+      dockerfile: BettingService.API/Dockerfile
     ports:
-      - "27018:27017"
+      - "50001:50001" # HTTPS
+      - "50011:50011" # HTTP
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-grpc-service:
+        condition: service_started
+      sport-data-grpc-service:
+        condition: service_started
     volumes:
-      - sport_data_hangfire_mongo_data:/data/db
-        
-  # Hangfire для сервиса ставок (MongoDB)
-  betting-hangfire-mongodb:
-    image: mongo:latest
-    container_name: bookmaker-betting-hangfire-mongo
+      - ./deploy/certs/aspnetapp.crt:/app/Properties/aspnetapp.crt:ro
+      - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    env_file:
+      - .env
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: hangfire_db
+      - CERT_PATH=./deploy/certs/aspnetapp.crt
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTPS_PORTS=50001
+      - ASPNETCORE_HTTP_PORTS=50011
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=betting_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/betting_hangfire_db?authSource=admin
+      - Grpc__UserService=http://user-grpc-service:50023
+      - Grpc__SportDataService=http://sport-data-grpc-service:50022
+    networks:
+      - bookmaker-net
+  
+  # Сервис спортивных данных
+  sport-data-service:
+    container_name: bookmaker-sport-data-service
+    build:
+      context: .
+      dockerfile: SportDataService.Presentation/Dockerfile
     ports:
-      - "27019:27017"
+      - "50002:50002" # HTTPS
+      - "50012:50012" # HTTP
+    depends_on:
+      mongodb:
+        condition: service_healthy
     volumes:
-      - betting_hangfire_mongo_data:/data/db
+      - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTPS_PORTS=50002
+      - ASPNETCORE_HTTP_PORTS=50012
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data_hangfire_db?authSource=admin
+    networks:
+      - bookmaker-net
+  
+  # Grpc сервис спортивных данных
+  sport-data-grpc-service:
+    container_name: bookmaker-sport-data-grpc-service
+    build:
+      context: .
+      dockerfile: SportDataService.GrpcService/Dockerfile
+    ports:
+      - "50022:50022" # HTTPS
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_URLS=https://+:50022
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
+    networks:
+      - bookmaker-net
+  
+  # Сервис работы с пользователями 
+  user-service:
+    container_name: bookmaker-user-service
+    build:
+      context: .
+      dockerfile: UserService.Presentation/Dockerfile
+    ports:
+      - "50003:50003" # HTTPS
+      - "50013:50013" # HTTP
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_HTTPS_PORTS=50003
+      - ASPNETCORE_HTTP_PORTS=50013
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    networks:
+      - bookmaker-net
+  
+  # Grpc сервис работы с пользователями
+  user-grpc-service:
+    container_name: bookmaker-user-grpc-service
+    build:
+      context: .
+      dockerfile: UserService.GrpcService/Dockerfile
+    ports:
+      - "50023:50023" # HTTPS
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_URLS=https://+:50023
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    networks:
+      - bookmaker-net
 
 volumes:
-  betting_pg_data:
-  user_pg_data:
-  sport_data_mongo_data:
-  betting_hangfire_mongo_data:
-  sport_data_hangfire_mongo_data:
+  postgres_data:
+  mongodb_data:
+
+networks:
+  bookmaker-net:
+    driver: bridge

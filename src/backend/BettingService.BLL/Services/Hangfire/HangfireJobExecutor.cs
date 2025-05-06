@@ -1,23 +1,35 @@
 ﻿using BettingService.BLL.Contracts.Services;
+using BettingService.BLL.UseCases.Bets.Commands.UpdateActiveBets;
+using BettingService.BLL.UseCases.Bets.Commands.UpdatePendingBets;
+using BettingService.BLL.UseCases.Payouts.Commands.ProcessPayouts;
+using BettingService.DAL.Repositories;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BettingService.BLL.Services.Hangfire;
 
-public class HangfireJobExecutor()
+public class HangfireJobExecutor(IMediator mediator)
     : IBackgroundJobExecutor
 {
     public async Task ExecuteAsync(string jobId)
     {
         switch (jobId)
         {
-            case "UpdateBets":
+            case HangfireJobNames.UpdatePendingBets:
             {
-                // TODO: add bets updating job when grpc interaction is implemented
+                await mediator.Send(new UpdatePendingBetsCommand(), CancellationToken.None);
                 break;
             }
 
-            case "NotifyUsers":
+            case HangfireJobNames.UpdateActiveBets:
             {
-                // TODO: add user notifying job when grpc interaction is implemented
+                await mediator.Send(new UpdateActiveBetsCommand(), CancellationToken.None);
+                break;
+            }
+
+            case HangfireJobNames.ProcessPayouts:
+            {
+                await mediator.Send(new ProcessPayoutsCommand(), CancellationToken.None);
                 break;
             }
         }

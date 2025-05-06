@@ -2,8 +2,10 @@
 
 public enum BetStatus
 {
+    Pending,
     Active,
     Won,
     Lost,
-    Canceled
+    Cancelled,
+    Refunded,
 }

@@ -1,4 +1,4 @@
-﻿using SportDataService.Application.DTO.Tournament;
+﻿using SportDataService.Application.DTO.Prematch;
 
 namespace SportDataService.Application.Contracts.UseCases.Tournament;
 

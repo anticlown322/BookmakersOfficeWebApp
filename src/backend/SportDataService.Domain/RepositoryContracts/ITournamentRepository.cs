@@ -1,6 +1,4 @@
-﻿using SportDataService.Domain.Models;
-using SportDataService.Domain.Models.Tournaments;
-using SportDataService.Domain.RequestFeatures;
+﻿using SportDataService.Domain.Models.Prematch;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
 

@@ -2,5 +2,6 @@
 
 public class DataCollectionServiceSettings
 {
-    public string Url { get; set; }
+    public string MarketsUrl { get; set; }
+    public string ResultsUrl { get; set; }
 }

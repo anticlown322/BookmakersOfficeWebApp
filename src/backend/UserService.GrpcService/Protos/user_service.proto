@@ -1,0 +1,29 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "UserService.GrpcService";
+
+package user;
+
+service UserGrpcService {
+  rpc GetUserBalance (GetUserBalanceRequest) returns (GetUserBalanceResponse);
+  rpc UpdateUserBalance (UpdateUserBalanceRequest) returns (UpdateUserBalanceResponse);
+}
+
+message GetUserBalanceRequest {
+  string username = 1;
+}
+
+message GetUserBalanceResponse {
+  double balance = 1;
+  bool user_exists = 2;
+}
+
+message UpdateUserBalanceRequest {
+  string username= 1;
+  double amount = 2;
+}
+
+message UpdateUserBalanceResponse {
+  bool success = 1;
+  double new_balance = 2;
+}

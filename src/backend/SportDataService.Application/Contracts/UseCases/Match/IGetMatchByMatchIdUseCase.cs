@@ -1,4 +1,4 @@
-﻿using SportDataService.Application.DTO.Match;
+﻿using SportDataService.Application.DTO.Prematch;
 
 namespace SportDataService.Application.Contracts.UseCases.Match;
 

@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using SportDataService.Application.DTO.Lines;
-using SportDataService.Application.DTO.Match;
-using SportDataService.Application.DTO.Team;
-using SportDataService.Domain.Models.Lines;
-using SportDataService.Domain.Models.Markets;
+using SportDataService.Application.DTO.Prematch;
+using SportDataService.Application.DTO.Prematch.Lines;
+using SportDataService.Domain.Models.Prematch.Lines;
+using SportDataService.Domain.Models.Prematch.Markets;
 
 namespace SportDataService.Application.DTO.MappingProfiles;
 
@@ -30,7 +29,7 @@ public class GetMatchMappingProfile : Profile
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) =>
                 srcMember != null && !IsEmptyMarketValue(srcMember)));
 
-        CreateMap<Domain.Models.Tournaments.Match, MatchGetDto>()
+        CreateMap<Domain.Models.Prematch.Match, MatchGetDto>()
             .ForMember(
                 dest => dest.MainLine,
                 opt => opt.MapFrom(src => !IsEmptyLine(src.MainLine) ? src.MainLine : null))

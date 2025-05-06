@@ -1,24 +1,26 @@
 ﻿using System.Text;
 using Hangfire;
-using Hangfire.Dashboard;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using NLog;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Match;
+using SportDataService.Application.Contracts.UseCases.MatchResult;
 using SportDataService.Application.Contracts.UseCases.Team;
 using SportDataService.Application.Contracts.UseCases.Tournament;
+using SportDataService.Application.Contracts.UseCases.TournamentResult;
 using SportDataService.Application.DTO.MappingProfiles;
 using SportDataService.Application.UseCases.Match;
+using SportDataService.Application.UseCases.MatchResult;
 using SportDataService.Application.UseCases.Team;
 using SportDataService.Application.UseCases.Tournament;
+using SportDataService.Application.UseCases.TournamentResult;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Infrastructure.Configs;
@@ -33,33 +35,36 @@ namespace SportDataService.Presentation.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IConfigurationBuilder AddSecretsYaml(this IConfigurationBuilder configurationBuilder)
+    public static void AddDockerSecrets(this IConfigurationBuilder config)
     {
-        var path = Directory.GetCurrentDirectory() + @"\Properties";
-
-        return configurationBuilder
-            .SetBasePath(path)
-            .AddYamlFile("secrets.yaml", optional: true, reloadOnChange: true);
-    }
-
-    public static void ConfigureNLog(this IServiceCollection services)
-    {
-        var configFilePath = Path.Combine(Directory.GetCurrentDirectory(), @"Properties\nlog.config");
-
-        if (!File.Exists(configFilePath))
+        const string secretsPath = "/run/secrets/";
+        if (Directory.Exists(secretsPath))
         {
-            throw new FileNotFoundException($"NLog configuration file not found: {configFilePath}");
+            foreach (var file in Directory.GetFiles(secretsPath))
+            {
+                config.AddKeyPerFile(file, optional: true);
+            }
         }
-
-        LogManager.Setup().LoadConfigurationFromFile(configFilePath);
     }
 
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<SportDataDbSettings>(configuration.GetSection("SportDataDbSettings"));
+        services.Configure<SportDataDbSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
         services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+    }
+
+    public static void ConfigureNLog(this IServiceCollection services)
+    {
+        const string configPath = "/app/Properties/nlog.config";
+        if (File.Exists(configPath))
+        {
+            LogManager.Setup().LoadConfigurationFromFile(configPath);
+            return;
+        }
+
+        throw new FileNotFoundException($"NLog config not found at: {configPath}");
     }
 
     public static void ConfigureLoggerService(this IServiceCollection services) =>
@@ -91,6 +96,19 @@ public static class ServiceExtensions
         services.AddScoped<IGetAllMatchesUseCase, GetAllMatchesUseCase>();
         services.AddScoped<IGetMatchByIdUseCase, GetMatchByIdUseCase>();
         services.AddScoped<IGetMatchByMatchIdUseCase, GetMatchByMatchIdUseCase>();
+
+        // tournament results
+        services.AddScoped<IGetAllTournamentResultsUseCase, GetAllTournamentResultsUseCase>();
+        services.AddScoped<IGetTournamentResultByIdUseCase, GetTournamentResultByIdUseCase>();
+        services
+            .AddScoped<IGetTournamentResultByResultIdUseCase,
+                GetTournamentResultByResultIdUseCase>();
+        services.AddScoped<IRefreshTournamentResultsUseCase, RefreshTournamentResultsUseCase>();
+
+        // match results
+        services.AddScoped<IGetAllMatchResultsUseCase, GetAllMatchResultsUseCase>();
+        services.AddScoped<IGetMatchResultByIdUseCase, GetMatchResultByIdUseCase>();
+        services.AddScoped<IGetMatchResultByResultIdUseCase, GetMatchResultByResultIdUseCase>();
     }
 
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -98,22 +116,23 @@ public static class ServiceExtensions
         MongoDbMappingConfig.ConfigureMappings();
     }
 
-    public static void ConfigureMongoDbContext(this IServiceCollection services)
+    public static void ConfigureMongoDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IMongoClient>(sp =>
         {
-            var settings = sp.GetRequiredService<IOptions<SportDataDbSettings>>().Value;
-            var clientSettings = MongoClientSettings.FromConnectionString(settings.ConnectionString);
+            var connectionString = configuration.GetConnectionString("DbConnection");
+
+            var clientSettings = MongoClientSettings.FromConnectionString(connectionString);
+            var settings = configuration.GetSection("SportDataDbSettings").Get<SportDataDbSettings>()!;
             clientSettings.ConnectTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
 
             return new MongoClient(clientSettings);
         });
 
-        services.AddSingleton<IMongoClient>(sp =>
+        services.AddSingleton<IMongoClient>(_ =>
         {
-            var settings = sp.GetRequiredService<IOptions<HangfireSettings>>().Value;
-
-            return new MongoClient(settings.ConnectionString);
+            var connectionString = configuration.GetConnectionString("HangfireDbConnection");
+            return new MongoClient(connectionString);
         });
     }
 
@@ -137,6 +156,12 @@ public static class ServiceExtensions
 
         services.AddScoped<IMatchRepository>(sp =>
             new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
+
+        services.AddScoped<ITournamentResultRepository>(sp =>
+            new TournamentResultsRepository(sp.GetRequiredService<IMongoDatabase>()));
+
+        services.AddScoped<IMatchResultRepository>(sp =>
+            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
@@ -147,7 +172,12 @@ public static class ServiceExtensions
                 cfg.AddProfile<GetTournamentMappingProfile>();
                 cfg.AddProfile<GetTeamMappingProfile>();
                 cfg.AddProfile<GetMatchMappingProfile>();
-            }, AppDomain.CurrentDomain.GetAssemblies());
+                cfg.AddProfile<GetSubScoreMappingProfile>();
+                cfg.AddProfile<GetMatchResultMappingProfile>();
+                cfg.AddProfile<GetMatchEventResultMappingProfile>();
+                cfg.AddProfile<GetTournamentResultMappingProfile>();
+            },
+            AppDomain.CurrentDomain.GetAssemblies());
     }
 
     public static void ConfigureApiBehaviorOptions(this IServiceCollection services) =>
@@ -163,36 +193,40 @@ public static class ServiceExtensions
             .AddJwtBearer();
 
         var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
-        services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.PostConfigure<JwtBearerOptions>(
+            JwtBearerDefaults.AuthenticationScheme,
+            options =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings.Issuer,
-                ValidateAudience = true,
-                ValidAudience = jwtSettings.Audience,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
-                ClockSkew = TimeSpan.Zero,
-            };
-        });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
+                    ClockSkew = TimeSpan.Zero,
+                };
+            });
     }
 
     public static void AddAuthorizationPolicies(this IServiceCollection services) =>
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(AuthorizationPolicies.AdministratorOnly, policy =>
-                policy.RequireRole(UserRoles.Administrator));
+            options.AddPolicy(
+                AuthorizationPolicies.AdministratorOnly,
+                policy => policy.RequireRole(UserRoles.Administrator));
         });
 
     public static void ConfigureHangfire(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("HangfireDbConnection");
         var settings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
 
         services.AddHangfire(config => config
             .UseMongoStorage(
-                settings.ConnectionString,
+                connectionString,
                 settings.DatabaseName,
                 new MongoStorageOptions
                 {
@@ -206,10 +240,11 @@ public static class ServiceExtensions
                 })
             .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
-        services.AddHangfireServer(options => {
+        services.AddHangfireServer(options =>
+        {
             options.ServerName = "SportData.Background";
             options.Queues = new[] { "default", "critical" };
-            options.WorkerCount = Environment.ProcessorCount * 2;
+            options.WorkerCount = 1;
         });
     }
 }

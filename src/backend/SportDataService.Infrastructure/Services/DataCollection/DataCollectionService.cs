@@ -2,10 +2,13 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Parser.DataCollection;
 using SportDataService.Application.Contracts.Services;
-using SportDataService.Domain.Models.Markets;
+using SportDataService.Domain.Models.Common;
+using SportDataService.Domain.Models.Prematch;
+using SportDataService.Domain.Models.Prematch.Markets;
+using SportDataService.Domain.Models.Results;
 using SportDataService.Domain.Models.Settings;
-using SportDataService.Domain.Models.Tournaments;
 
 namespace SportDataService.Infrastructure.Services.DataCollection;
 
@@ -20,7 +23,9 @@ public class DataCollectionService(
         try
         {
             using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync(_settings.Url, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await httpClient.GetAsync(
+                _settings.MarketsUrl,
+                HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -43,6 +48,52 @@ public class DataCollectionService(
             LinkMatchesToTournaments(tournaments, matches);
 
             return tournaments;
+        }
+        catch (HttpRequestException)
+        {
+            Console.WriteLine("Can't get API response");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<List<TournamentResult>> GetTournamentsResultsInfoAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var httpClient = new HttpClient();
+            var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+            var fullUrl = _settings.ResultsUrl + currentDate;
+            using var response = await httpClient.GetAsync(
+                fullUrl,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await using var decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
+
+            using var jsonReader = new StreamReader(decompressedStream);
+            using var jsonTextReader = new JsonTextReader(jsonReader);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var rawTournamentsResultsData = await JToken.LoadAsync(jsonTextReader, cancellationToken);
+            var tournamentsResults = ParseAllTournamentResults(rawTournamentsResultsData);
+            var matchesResults = ParseMatchResults(rawTournamentsResultsData);
+
+            LinkMatchesToTournamentsResults(tournamentsResults, matchesResults);
+
+            return tournamentsResults;
         }
         catch (HttpRequestException)
         {
@@ -204,6 +255,190 @@ public class DataCollectionService(
         }
     }
 
+    private void LinkMatchesToTournaments(List<Tournament> tournaments, List<Match> matches)
+    {
+        var tournamentDict = tournaments.ToDictionary(t => t.TournamentId);
+
+        foreach (var match in matches)
+        {
+            if (tournamentDict.TryGetValue(match.TournamentId, out var tournament))
+            {
+                tournament.Matches.Add(match);
+            }
+        }
+    }
+
+    private List<TournamentResult> ParseAllTournamentResults(JToken resultsRawData)
+    {
+        var tournamentResults = new List<TournamentResult>();
+
+        var tournaments = resultsRawData.GetList(ResultNodeNames.Tournaments)
+            .Where(t => t.GetStringValue(ResultNodeNames.SportId) == ResultNodeNames.CyberSportIdValue);
+
+        foreach (var tournament in tournaments)
+        {
+            var tournamentResult = new TournamentResult
+            {
+                TournamentId = tournament.GetStringValue(ResultNodeNames.TournamentId),
+                TournamentName = tournament.GetStringValue(ResultNodeNames.TournamentName),
+            };
+
+            tournamentResults.Add(tournamentResult);
+        }
+
+        return tournamentResults;
+    }
+
+    private List<MatchResult> ParseMatchResults(JToken resultsRawData)
+    {
+        var matchResults = new List<MatchResult>();
+        var matchEventResults = new List<MatchEventResult>();
+        var rawMatchesAndEvents = resultsRawData.GetList(ResultNodeNames.MatchesAndEvents);
+        var rawMatchOrEventScores = resultsRawData.GetList(ResultNodeNames.MatchOrEventScores);
+
+        var scoresDict = rawMatchOrEventScores
+            .ToDictionary(
+                score => score[ResultNodeNames.ResultId]?.ToString(),
+                score => score);
+
+        foreach (var rawMatchOrEvent in rawMatchesAndEvents)
+        {
+            var matchOrEventId = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchOrEventId);
+
+            if (string.IsNullOrEmpty(matchOrEventId) ||
+                !scoresDict.TryGetValue(matchOrEventId, out var rawMatchOrEventScore))
+            {
+                continue;
+            }
+
+            var kindId = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchOrEventKindId);
+            switch (kindId)
+            {
+                case ResultNodeNames.MatchKindIdValue:
+                {
+                    var matchResult = new MatchResult
+                    {
+                        MatchResultId = matchOrEventId,
+                        TournamentId = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchTournamentId),
+                        MatchName = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchOrEventName),
+                        Team1 = new Team
+                        {
+                            TeamId = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchTeam1Id),
+                            Name = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchTeam1Name),
+                        },
+                        Team2 = new Team
+                        {
+                            TeamId = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchTeam2Id),
+                            Name = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchTeam2Name),
+                        },
+                        ResultTime = ParseDateTime(rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchStartTime)),
+                        Status = rawMatchOrEvent[ResultNodeNames.MatchOrEventStatus].ToObject<ResultStatus>(),
+                    };
+
+                    ProcessMatchSubScores(matchResult, rawMatchOrEventScore);
+
+                    matchResults.Add(matchResult);
+
+                    break;
+                }
+
+                case ResultNodeNames.EventKindIdValue:
+                {
+                    var matchEventResult = new MatchEventResult
+                    {
+                        MatchEventResultId = matchOrEventId,
+                        ParentMatchResultId = rawMatchOrEvent.GetStringValue(ResultNodeNames.EventMatchId),
+                        EventName = rawMatchOrEvent.GetStringValue(ResultNodeNames.MatchOrEventName),
+                        Status = rawMatchOrEvent[ResultNodeNames.MatchOrEventStatus].ToObject<ResultStatus>(),
+                    };
+
+                    ProcessMatchEventSubScores(matchEventResult, rawMatchOrEventScore);
+
+                    matchEventResults.Add(matchEventResult);
+
+                    break;
+                }
+
+                default:
+                    continue;
+            }
+        }
+
+        LinkMatchResultsToEventResults(matchResults, matchEventResults);
+
+        return matchResults;
+    }
+
+    private void ProcessMatchSubScores(MatchResult matchResult, JToken matchScores)
+    {
+        matchResult.Team1TotalScore = matchScores[ResultNodeNames.Team1TotalScore]?.Value<int>() ?? 0;
+        matchResult.Team2TotalScore = matchScores[ResultNodeNames.Team2TotalScore]?.Value<int>() ?? 0;
+
+        var matchSubscores = matchScores.GetList(ResultNodeNames.SubScores);
+        foreach (var matchSubScore in matchSubscores)
+        {
+            var subscore = new SubScore
+            {
+                SubscorePosition = matchSubScore[ResultNodeNames.SubScorePosition]?.Value<int>() ?? -1,
+                Team1Score = matchSubScore[ResultNodeNames.Team1SubScore]?.Value<int>() ?? 0,
+                Team2Score = matchSubScore[ResultNodeNames.Team2SubScore]?.Value<int>() ?? 0,
+                Title = matchSubScore.GetStringValue(ResultNodeNames.SubScoreName)
+            };
+
+            matchResult.SubScores.Add(subscore);
+        }
+    }
+
+    private void ProcessMatchEventSubScores(MatchEventResult matchEventResult, JToken eventScores)
+    {
+        matchEventResult.Team1TotalScore = eventScores[ResultNodeNames.Team1TotalScore]?.Value<int>() ?? 0;
+        matchEventResult.Team2TotalScore = eventScores[ResultNodeNames.Team2TotalScore]?.Value<int>() ?? 0;
+
+        var matchEventSubscores = eventScores.GetList(ResultNodeNames.SubScores);
+        foreach (var matchSubScore in matchEventSubscores)
+        {
+            var subscore = new SubScore
+            {
+                SubscorePosition = matchSubScore[ResultNodeNames.SubScorePosition]?.Value<int>() ?? -1,
+                Team1Score = matchSubScore[ResultNodeNames.Team1SubScore]?.Value<int>() ?? 0,
+                Team2Score = matchSubScore[ResultNodeNames.Team2SubScore]?.Value<int>() ?? 0,
+                Title = matchSubScore.GetStringValue(ResultNodeNames.SubScoreName)
+            };
+
+            matchEventResult.SubScores.Add(subscore);
+        }
+    }
+
+    private void LinkMatchResultsToEventResults(
+        List<MatchResult> matchResults,
+        List<MatchEventResult> matchEventResults)
+    {
+        var matchDictionary = matchResults.ToDictionary(t => t.MatchResultId);
+
+        foreach (var matchEventResult in matchEventResults)
+        {
+            if (matchDictionary.TryGetValue(matchEventResult.ParentMatchResultId, out var matchResult))
+            {
+                matchResult.EventResults.Add(matchEventResult);
+            }
+        }
+    }
+
+    private void LinkMatchesToTournamentsResults(
+        List<TournamentResult> tournamentResults,
+        List<MatchResult> matchResults)
+    {
+        var tournamentDict = tournamentResults.ToDictionary(t => t.TournamentId);
+
+        foreach (var matchResult in matchResults)
+        {
+            if (tournamentDict.TryGetValue(matchResult.TournamentId, out var tournament))
+            {
+                tournament.Matches.Add(matchResult);
+            }
+        }
+    }
+
     private DateTime? ParseDateTime(JToken timeToken)
     {
         if (string.IsNullOrWhiteSpace(timeToken.ToString()))
@@ -222,18 +457,5 @@ public class DataCollectionService(
         }
 
         return null;
-    }
-
-    private void LinkMatchesToTournaments(List<Tournament> tournaments, List<Match> matches)
-    {
-        var tournamentDict = tournaments.ToDictionary(t => t.TournamentId);
-
-        foreach (var match in matches)
-        {
-            if (tournamentDict.TryGetValue(match.TournamentId, out var tournament))
-            {
-                tournament.Matches.Add(match);
-            }
-        }
     }
 }

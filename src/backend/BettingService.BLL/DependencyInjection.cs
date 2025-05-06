@@ -5,13 +5,16 @@ using BettingService.BLL.DTO.MappingProfiles;
 using BettingService.BLL.DTO.Payout;
 using BettingService.BLL.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 using BettingService.DAL.Models.Settings;
+using BettingService.Protos;
 using FluentValidation;
 using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,7 +30,10 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
 
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
 
         services.AddAutoMapper(
             cfg =>
@@ -37,17 +43,17 @@ public static class DependencyInjection
             },
             AppDomain.CurrentDomain.GetAssemblies());
 
-        services.AddTransient<IValidator<CreatePayoutDto>, CreatePayoutDtoValidator>();
-        services.AddTransient<IValidator<PlaceBetDto>, PlaceBetDtoValidator>();
+        services.AddValidatorsFromAssembly(typeof(PlaceBetCommandValidator).Assembly);
 
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
-        services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
+        services.AddSingleton<IBackgroundJobExecutor, HangfireJobExecutor>();
 
-        var settings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
+        var connectionString = configuration.GetConnectionString("HangfireDbConnection");
+        var hangfireSettings = configuration.GetSection("HangfireSettings").Get<HangfireSettings>()!;
         services.AddHangfire(config => config
             .UseMongoStorage(
-                settings.ConnectionString,
-                settings.DatabaseName,
+                connectionString,
+                hangfireSettings.DatabaseName,
                 new MongoStorageOptions
                 {
                     CheckConnection = true,
@@ -58,13 +64,15 @@ public static class DependencyInjection
                         BackupStrategy = new CollectionMongoBackupStrategy(),
                     },
                 })
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
             .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
         services.AddHangfireServer(options =>
         {
             options.ServerName = "Betting.Background";
             options.Queues = new[] { "default", "critical" };
-            options.WorkerCount = Environment.ProcessorCount * 2;
+            options.WorkerCount = 1;
         });
 
         return services;

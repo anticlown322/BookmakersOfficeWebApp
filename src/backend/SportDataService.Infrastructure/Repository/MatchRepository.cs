@@ -1,5 +1,5 @@
 ﻿using MongoDB.Driver;
-using SportDataService.Domain.Models.Tournaments;
+using SportDataService.Domain.Models.Prematch;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
@@ -42,5 +42,10 @@ public sealed class MatchRepository : MongoRepositoryBase<Match>, IMatchReposito
         ct.ThrowIfCancellationRequested();
 
         return await Collection.Find(filter).FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<List<Match>> GetMatchesStartedBeforeAsync(DateTime cutoffTime, CancellationToken ct)
+    {
+        return (await FindByConditionAsync(m => m.StartTime != null && m.StartTime < cutoffTime, ct)).ToList();
     }
 }

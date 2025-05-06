@@ -1,0 +1,96 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "SportDataService.GrpcService";
+
+package sportData;
+
+service SportDataService {
+  rpc ValidateBet (ValidateBetRequest) returns (ValidateBetResponse);
+  rpc GetMatchResult (GetMatchResultRequest) returns (GetMatchResultResponse);
+  rpc GetMatchResultsBatch (GetMatchResultsBatchRequest) returns (GetMatchResultsBatchResponse);
+}
+
+message ValidateBetRequest {
+  string match_id = 1;
+  string line_type = 2;
+  string market_selection = 3;
+  double odds = 4;
+}
+
+message ValidateBetResponse {
+  bool is_valid = 1;
+  string error_message = 2;
+  double current_odds = 3;
+  bool is_live = 4;
+}
+
+message GetMatchResultRequest {
+  string match_id = 1;
+}
+
+message GetMatchResultResponse {
+  bool has_result = 1;
+  MatchResultData result = 2;
+}
+
+message GetMatchResultsBatchRequest {
+  repeated string match_ids = 1;
+}
+
+message GetMatchResultsBatchResponse {
+  repeated MatchResultData results = 1;
+}
+
+message MatchResultData {
+  string match_id = 1;
+  ResultStatus status = 2;
+  TeamData team1 = 3;
+  TeamData team2 = 4;
+  int32 team1_total_score = 5;
+  int32 team2_total_score = 6;
+  repeated SubScoreData sub_scores = 7;
+  repeated MatchEventResultData event_results = 8;
+  google.protobuf.Timestamp result_time = 9;
+  map<string, string> outcomes = 10;
+}
+
+message TeamData {
+  string id = 1;
+  string name = 2;
+  string short_name = 3;
+  string image_url = 4;
+}
+
+message SubScoreData {
+  int32 subscore_position = 1;
+  string title = 2;
+  int32 team1_score = 3;
+  int32 team2_score = 4;
+}
+
+message MatchEventResultData {
+  string event_name = 1;
+  ResultStatus status = 2;
+  int32 team1_total_score = 3;
+  int32 team2_total_score = 4;
+  repeated SubScoreData sub_scores = 5;
+}
+
+enum ResultStatus {
+  RUNNING = 0;
+  ENDED = 1;
+  INTERRUPTED = 2;
+  CANCELED = 3;
+}
+
+message Market {
+  map<string, MarketValue> selections = 1;
+}
+
+message MarketValue {
+  double odds = 1;
+  bool is_active = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
