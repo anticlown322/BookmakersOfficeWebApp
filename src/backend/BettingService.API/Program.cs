@@ -29,7 +29,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddControllers();
 
     builder.Services.AddHostedService<HangfireJobScheduler>();
-    builder.Services.AddHostedService<ValidationAggregator>();
+    builder.Services.AddHostedService<KafkaBackgroundService>();
 
     builder.Services.ConfigureApiBehaviorOptions();
 }

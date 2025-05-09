@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using BettingService.BLL.Contracts.Services;
+using BettingService.BLL.Exceptions.Specific;
 using BettingService.DAL.Models.Settings.Kafka;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
@@ -11,88 +12,55 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly ILogger<KafkaProducerService> _logger;
-    private readonly KafkaSettings _settings;
 
     public KafkaProducerService(
-        IOptions<KafkaSettings> settings,
+        IOptions<KafkaSettings> kafkaSettings,
         ILogger<KafkaProducerService> logger)
     {
-        _settings = settings.Value;
-        _logger = logger;
-
         var config = new ProducerConfig
         {
-            BootstrapServers = _settings.BootstrapServers,
+            BootstrapServers = kafkaSettings.Value.BootstrapServers,
             Acks = Acks.All,
             EnableIdempotence = true,
-            MessageTimeoutMs = 15000,
-            RequestTimeoutMs = 10000,
-            SocketTimeoutMs = 10000,
-            Debug = "broker,protocol,msg", // Включите детальное логирование
-            SecurityProtocol = SecurityProtocol.Plaintext, // Явно укажите протокол
-            SslEndpointIdentificationAlgorithm = SslEndpointIdentificationAlgorithm.None
+            MessageSendMaxRetries = 5,
+            RetryBackoffMs = 500,
+            LingerMs = 5
         };
 
-        _producer = new ProducerBuilder<string, string>(config)
-            .SetLogHandler((_, logMessage) =>
-                _logger.Log(ToLogLevel(logMessage.Level), logMessage.Message))
-            .Build();
+        _producer = new ProducerBuilder<string, string>(config).Build();
+        _logger = logger;
     }
 
-    public async Task ProduceAsync<T>(string topic, T message, CancellationToken ct = default)
-        => await ProduceAsync(topic, null!, message, ct);
-
-    public async Task ProduceAsync<T>(string topic, string key, T message, CancellationToken ct = default)
+    public async Task ProduceAsync<T>(string topic, T message, CancellationToken cancellationToken)
     {
         try
         {
-            var json = JsonSerializer.Serialize(message);
-            _logger.LogInformation("Attempting to produce message to {Topic}. Key: {Key}, Value: {Value}", 
-                topic, key, json); // Логируем перед отправкой
+            var jsonMessage = JsonSerializer.Serialize(message);
+            var kafkaMessage = new Message<string, string>
+            {
+                Key = Guid.NewGuid().ToString(),
+                Value = jsonMessage,
+            };
 
-            var kafkaMessage = new Message<string, string> { Key = key, Value = json };
-            var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, ct);
-
-            _logger.LogInformation(
-                "Successfully delivered message to {Topic} [Partition: {Partition}, Offset: {Offset}, Status: {Status}]",
-                deliveryResult.Topic,
-                deliveryResult.Partition,
-                deliveryResult.Offset,
-                deliveryResult.Status);
+            var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken);
+            _logger.LogInformation("Message delivered to {Topic} [Partition: {Partition}, Offset: {Offset}]",
+                deliveryResult.Topic, deliveryResult.Partition, deliveryResult.Offset);
         }
-        catch (Exception ex) // Ловим все исключения, а не только ProduceException
+        catch (ProduceException<string, string> ex)
         {
-            _logger.LogError(ex, "Failed to produce message to {Topic}", topic);
+            _logger.LogError(ex, "Failed to deliver message to {Topic}", topic);
+            throw new KafkaProduceException($"Failed to produce message to {topic}", ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error producing message to {Topic}", topic);
             throw;
         }
     }
 
-    public void Flush(TimeSpan timeout)
-        => _producer.Flush(timeout);
-
     public void Dispose()
     {
-        try
-        {
-            _producer.Flush(TimeSpan.FromSeconds(5));
-            _producer.Dispose();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex, "Error during Kafka producer disposal");
-        }
+        _producer.Flush(TimeSpan.FromSeconds(5));
+        _producer.Dispose();
     }
-
-    private static LogLevel ToLogLevel(SyslogLevel level) => level switch
-    {
-        SyslogLevel.Emergency => LogLevel.Critical,
-        SyslogLevel.Alert => LogLevel.Critical,
-        SyslogLevel.Critical => LogLevel.Critical,
-        SyslogLevel.Error => LogLevel.Error,
-        SyslogLevel.Warning => LogLevel.Warning,
-        SyslogLevel.Notice => LogLevel.Information,
-        SyslogLevel.Info => LogLevel.Information,
-        SyslogLevel.Debug => LogLevel.Debug,
-        _ => LogLevel.None
-    };
 }

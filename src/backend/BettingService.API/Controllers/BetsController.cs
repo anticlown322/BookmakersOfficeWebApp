@@ -29,9 +29,9 @@ public class BetsController(IMediator mediator)
     {
         var username = GetUsernameFromToken();
         var command = new PlaceBetCommand(username, placeBetDto);
-        var result = await mediator.Send(command, cancellationToken);
+        await mediator.Send(command, cancellationToken);
 
-        return Created(result.BetId.ToString(), result.Status.ToString());
+        return Created();
     }
 
     [HttpPost("pending")]

@@ -21,7 +21,7 @@ public class BetValidationConsumer(
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        _consumer.Subscribe(kafkaSettings.Value.Topics.BetValidation);
+        _consumer.Subscribe(kafkaSettings.Value.Topics.BetValidationRequests);
 
         while (!ct.IsCancellationRequested)
         {
