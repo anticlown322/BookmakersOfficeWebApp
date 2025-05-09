@@ -67,5 +67,6 @@ public static class ServiceExtensions
         services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
         services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
         services.AddHostedService<UserValidationConsumer>();
+        services.AddHostedService<PayoutRequestConsumer>();
     }
 }

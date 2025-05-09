@@ -36,7 +36,7 @@ public class UserValidationConsumer(
 
                 logger.LogInformation("Validating user for bet {BetId}", message.BetId);
 
-                var response = await ValidateUserAsync(message, ct);
+                var response = await ProcessUserBetAsync(message, ct);
                 await SendValidationResult(response, message.BetId);
 
                 _consumer.Commit(consumeResult);
@@ -48,72 +48,77 @@ public class UserValidationConsumer(
         }
     }
 
-    private async Task<UserValidationResult> ValidateUserAsync(BetValidationEvent message, CancellationToken ct)
+    private async Task<UserValidationResult> ProcessUserBetAsync(BetValidationEvent message, CancellationToken ct)
     {
         try
         {
             var balanceRequest = new GetUserBalanceRequest { Username = message.Username };
-
             var balanceResponse = await userService.GetUserBalance(balanceRequest, null!);
 
             if (!balanceResponse.UserExists)
             {
-                return new UserValidationResult
-                {
-                    BetId = message.BetId,
-                    CorrelationId = message.CorrelationId,
-                    IsValid = false,
-                    RejectionReason = "User not found",
-                    Timestamp = DateTime.UtcNow.ToUniversalTime(),
-                };
+                return CreateFailedValidationResult(message, "User not found");
             }
 
             if (balanceResponse.Balance < message.Amount)
             {
-                return new UserValidationResult
-                {
-                    BetId = message.BetId,
-                    CorrelationId = message.CorrelationId,
-                    IsValid = false,
-                    RejectionReason = "Insufficient funds",
-                    CurrentBalance = balanceResponse.Balance,
-                    Timestamp = DateTime.UtcNow.ToUniversalTime(),
-                };
+                return CreateFailedValidationResult(message, "Insufficient funds", balanceResponse.Balance);
             }
 
+            var deductionRequest = new UpdateUserBalanceRequest
+            {
+                Username = message.Username,
+                Amount = -message.Amount,
+            };
+
+            var deductionResponse = await userService.UpdateUserBalance(deductionRequest, null!);
+
+            if (!deductionResponse.Success)
+            {
+                return CreateFailedValidationResult(
+                    message,
+                    $"Balance update failed.",
+                    balanceResponse.Balance);
+            }
+
+            // 3. Возвращаем успешный результат
             return new UserValidationResult
             {
                 BetId = message.BetId,
                 CorrelationId = message.CorrelationId,
                 IsValid = true,
-                CurrentBalance = balanceResponse.Balance,
-                Timestamp = DateTime.UtcNow.ToUniversalTime(),
+                CurrentBalance = deductionResponse.NewBalance,
+                Timestamp = DateTime.UtcNow,
             };
         }
         catch (RpcException ex) when (ex.StatusCode == StatusCode.NotFound)
         {
-            return new UserValidationResult
-            {
-                BetId = message.BetId,
-                CorrelationId = message.CorrelationId,
-                IsValid = false,
-                RejectionReason = "User not found",
-                CurrentBalance = 0,
-                Timestamp = DateTime.UtcNow.ToUniversalTime(),
-            };
+            return CreateFailedValidationResult(message, "User not found");
         }
-        catch (RpcException)
+        catch (RpcException ex)
         {
-            return new UserValidationResult
-            {
-                BetId = message.BetId,
-                CorrelationId = message.CorrelationId,
-                IsValid = false,
-                RejectionReason = "Error while validating user",
-                CurrentBalance = 0,
-                Timestamp = DateTime.UtcNow.ToUniversalTime(),
-            };
+            return CreateFailedValidationResult(message, $"gRPC error: {ex.Status.Detail}");
         }
+        catch (Exception ex)
+        {
+            return CreateFailedValidationResult(message, $"Internal error: {ex.Message}");
+        }
+    }
+
+    private UserValidationResult CreateFailedValidationResult(
+        BetValidationEvent message,
+        string reason,
+        double? currentBalance = null)
+    {
+        return new UserValidationResult
+        {
+            BetId = message.BetId,
+            CorrelationId = message.CorrelationId,
+            IsValid = false,
+            RejectionReason = reason,
+            CurrentBalance = currentBalance ?? 0,
+            Timestamp = DateTime.UtcNow,
+        };
     }
 
     private async Task SendValidationResult(UserValidationResult result, string betId)
