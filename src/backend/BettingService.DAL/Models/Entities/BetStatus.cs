@@ -2,6 +2,8 @@
 
 public enum BetStatus
 {
+    Validating,
+    Rejected,
     Pending,
     Active,
     Won,

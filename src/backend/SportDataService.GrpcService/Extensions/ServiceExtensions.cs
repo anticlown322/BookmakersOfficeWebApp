@@ -5,7 +5,12 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
+using SportDataService.GrpcService.Contracts;
 using SportDataService.GrpcService.Exceptions;
+using SportDataService.GrpcService.Models.Settings;
+using SportDataService.GrpcService.Services;
+using SportDataService.GrpcService.Services.Kafka;
+using SportDataService.GrpcService.Utility;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
 
@@ -28,6 +33,7 @@ public static class ServiceExtensions
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SportDataDbSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
     }
     
     public static void ConfigureGrpc(this IServiceCollection services)
@@ -37,6 +43,8 @@ public static class ServiceExtensions
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<ExceptionInterceptor>();
         });
+        
+        services.AddScoped<SportDataGrpcService>();
     }
     
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -76,4 +84,11 @@ public static class ServiceExtensions
         services.AddScoped<IMatchResultRepository>(sp =>
             new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
     }
+
+    public static void ConfigureKafka(this IServiceCollection services)
+    {
+        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+        services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
+        services.AddHostedService<BetValidationConsumer>();
+    }   
 }

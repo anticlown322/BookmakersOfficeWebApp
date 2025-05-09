@@ -3,6 +3,7 @@ using BettingService.API.Middlewares;
 using BettingService.BLL;
 using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.Services.Kafka;
 using BettingService.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,10 +26,11 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddHttpContextAccessor();
 
     builder.Services.AddGrpcClients(builder.Configuration);
+    builder.Services.AddControllers();
 
     builder.Services.AddHostedService<HangfireJobScheduler>();
+    builder.Services.AddHostedService<ValidationAggregator>();
 
-    builder.Services.AddControllers();
     builder.Services.ConfigureApiBehaviorOptions();
 }
 

@@ -3,6 +3,7 @@ using System.Text;
 using BettingService.API.Utility;
 using BettingService.BLL.Utility;
 using BettingService.DAL.Models.Settings;
+using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,6 @@ public static class ServiceExtensions
     {
         services.Configure<DatabaseSettings>(configuration.GetSection("DatabaseSettings"));
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
         services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
     }
 

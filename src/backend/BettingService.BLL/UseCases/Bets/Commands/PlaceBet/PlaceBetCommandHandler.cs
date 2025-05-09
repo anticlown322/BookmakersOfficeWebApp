@@ -2,64 +2,27 @@
 using BettingService.BLL.Exceptions.Specific;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
+using BettingService.DAL.Models.Kafka.BetValidation;
+using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using Grpc.Core;
 using Grpc.Net.Client;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NLog;
 
 namespace BettingService.BLL.UseCases.Bets.Commands.PlaceBet;
 
 public sealed class PlaceBetCommandHandler(
     IBetRepository betRepository,
-    UserGrpcService.UserGrpcServiceClient userClient,
-    SportDataService.SportDataServiceClient sportDataClient)
-    : IRequestHandler<PlaceBetCommand, Unit>
+    IKafkaProducerService kafkaProducer,
+    IOptions<KafkaSettings> kafkaSettings,
+    ILogger<PlaceBetCommandHandler> logger)
+    : IRequestHandler<PlaceBetCommand, BetPlacementResult>
 {
-    public async Task<Unit> Handle(PlaceBetCommand request, CancellationToken cancellationToken)
+    public async Task<BetPlacementResult> Handle(PlaceBetCommand request, CancellationToken cancellationToken)
     {
-        var balanceResponse = await userClient.GetUserBalanceAsync(
-            new GetUserBalanceRequest { Username = request.Username },
-            cancellationToken: cancellationToken);
-
-        if (!balanceResponse.UserExists)
-        {
-            throw new UserNotFoundByNameException(request.Username);
-        }
-
-        if (balanceResponse.Balance < (double)request.PlaceBetDto.Amount)
-        {
-            throw new InsufficientFundsException(request.PlaceBetDto.Amount);
-        }
-
-        var validationResponse = await sportDataClient.ValidateBetAsync(
-            new ValidateBetRequest
-            {
-                MatchId = request.PlaceBetDto.MatchId,
-                LineType = request.PlaceBetDto.LineType,
-                MarketSelection = request.PlaceBetDto.MarketSelection,
-                Odds = (double)request.PlaceBetDto.Odds,
-            },
-            cancellationToken: cancellationToken);
-
-        if (!validationResponse.IsValid)
-        {
-            throw new InvalidBetParametersException();
-        }
-
-        var deductionResult = await userClient.UpdateUserBalanceAsync(
-            new UpdateUserBalanceRequest
-            {
-                Username = request.Username,
-                Amount = -(double)request.PlaceBetDto.Amount,
-            },
-            cancellationToken: cancellationToken);
-
-        if (!deductionResult.Success)
-        {
-            throw new BalanceUpdateFailedException(request.Username);
-        }
-
         var bet = new Bet
         {
             Id = Guid.NewGuid(),
@@ -68,16 +31,48 @@ public sealed class PlaceBetCommandHandler(
             LineType = ParseLineType(request.PlaceBetDto.LineType),
             MarketSelection = request.PlaceBetDto.MarketSelection,
             Amount = request.PlaceBetDto.Amount,
-            Odds = (decimal)validationResponse.CurrentOdds,
-            Status = BetStatus.Pending,
+            Odds = request.PlaceBetDto.Odds,
+            Status = BetStatus.Validating,
             CreatedAt = DateTime.UtcNow.ToUniversalTime(),
-            AcceptedAt = DateTime.UtcNow.ToUniversalTime(),
+            AcceptedAt = null,
         };
 
         betRepository.Create(bet);
-        await betRepository.SaveAsync(cancellationToken);
+        logger.LogInformation("Created bet {BetId} in Validating state", bet.Id);
 
-        return Unit.Value;
+        var validationEvent = new BetValidationEvent
+        {
+            BetId = bet.Id.ToString(),
+            CorrelationId = Guid.NewGuid().ToString(),
+            Username = request.Username,
+            Amount = (double)request.PlaceBetDto.Amount,
+            MatchId = request.PlaceBetDto.MatchId,
+            LineType = request.PlaceBetDto.LineType,
+            MarketSelection = request.PlaceBetDto.MarketSelection,
+            RequestedOdds = (double)request.PlaceBetDto.Odds,
+            Timestamp = DateTime.UtcNow.ToUniversalTime(),
+        };
+
+        try
+        {
+            await kafkaProducer.ProduceAsync(
+                topic: kafkaSettings.Value.Topics.BetValidation,
+                key: bet.Id.ToString(),
+                message: validationEvent,
+                ct: cancellationToken);
+
+            logger.LogInformation("Sent validation event for bet {BetId}", bet.Id);
+            return new BetPlacementResult(bet.Id, BetPlacementStatus.ValidationPending);
+        }
+        catch (Exception ex)
+        {
+            bet.Status = BetStatus.Rejected;
+            bet.RejectionReason = "Failed to start validation";
+            betRepository.Update(bet);
+
+            logger.LogError(ex, "Failed to validate bet {BetId}", bet.Id);
+            return new BetPlacementResult(bet.Id, BetPlacementStatus.Rejected);
+        }
     }
 
     private BetLineType ParseLineType(string lineType) => lineType switch

@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.Yaml;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
+using UserService.GrpcService.Contracts;
 using UserService.GrpcService.Exceptions;
+using UserService.GrpcService.Models.Settings;
+using UserService.GrpcService.Services;
+using UserService.GrpcService.Services.Kafka;
 using UserService.Infrastructure.Repository;
 using UserService.Infrastructure.Repository.Repositories;
 
@@ -23,6 +27,11 @@ public static class ServiceExtensions
         }
     }
 
+    public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
+    }
+
     public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DbConnection");
@@ -37,6 +46,8 @@ public static class ServiceExtensions
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<ExceptionInterceptor>();
         });
+
+        services.AddScoped<UserGrpcServiceImplementation>();
     }
 
     public static void AddRepository(this IServiceCollection services)
@@ -49,5 +60,12 @@ public static class ServiceExtensions
         services.AddIdentityCore<User>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<RepositoryContext>();
+    }
+
+    public static void ConfigureKafka(this IServiceCollection services)
+    {
+        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+        services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
+        services.AddHostedService<UserValidationConsumer>();
     }
 }

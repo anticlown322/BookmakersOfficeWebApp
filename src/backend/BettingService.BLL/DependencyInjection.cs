@@ -5,9 +5,11 @@ using BettingService.BLL.DTO.MappingProfiles;
 using BettingService.BLL.DTO.Payout;
 using BettingService.BLL.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.Services.Kafka;
 using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 using BettingService.DAL.Models.Settings;
+using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using FluentValidation;
 using Hangfire;
@@ -45,6 +47,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(typeof(PlaceBetCommandValidator).Assembly);
 
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddSingleton<IBackgroundJobExecutor, HangfireJobExecutor>();
 
@@ -74,6 +77,9 @@ public static class DependencyInjection
             options.Queues = new[] { "default", "critical" };
             options.WorkerCount = 1;
         });
+
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
+        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 
         return services;
     }
