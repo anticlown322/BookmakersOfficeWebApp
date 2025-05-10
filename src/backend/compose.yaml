@@ -3,7 +3,7 @@
   # Databases
   postgres:
     image: postgres:latest
-    container_name: bookmaker-postgres
+    container_name: postgres
     environment:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
@@ -23,7 +23,7 @@
 
   mongodb:
     image: mongo:latest
-    container_name: bookmaker-mongodb
+    container_name: mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
       MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
@@ -42,25 +42,27 @@
       start_period: 30s
       retries: 5
       
-      #  redis:
-      #    image: redis:latest
-      #    container_name: redis
-      #    ports:
-      #      - "6379:6379"
-      #    volumes:
-      #      - redis_data:/data
-      #    networks:
-      #      - bookmaker-net
-      #    healthcheck:
-      #      test: [ "CMD", "redis-cli", "ping" ]
-      #      interval: 10s
-      #      timeout: 5s
-      #      retries: 5
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=$REDIS_PASSWORD
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   # Kafka message broker
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
-    container_name: bookmaker-zookeeper
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -71,7 +73,7 @@
 
   kafka:
     image: confluentinc/cp-kafka
-    container_name: bookmaker-kafka
+    container_name: kafka
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -107,7 +109,7 @@
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: bookmaker-kafka-ui
+    container_name: kafka-ui
     ports:
       - "8080:8080"
     environment:
@@ -121,7 +123,7 @@
 
   # Сервис ставок
   betting-service:
-    container_name: bookmaker-betting-service
+    container_name: betting
     build:
       context: .
       dockerfile: BettingService.API/Dockerfile
@@ -144,8 +146,6 @@
       - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
-    env_file:
-      - .env
     environment:
       - CERT_PATH=./deploy/certs/aspnetapp.crt
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
@@ -164,7 +164,7 @@
   
   # Сервис спортивных данных
   sport-data-service:
-    container_name: bookmaker-sport-data-service
+    container_name: sport-data
     build:
       context: .
       dockerfile: SportDataService.Presentation/Dockerfile
@@ -178,8 +178,6 @@
       - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
-    env_file:
-      - .env
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
@@ -188,12 +186,13 @@
       - ASPNETCORE_HTTP_PORTS=50012
       - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
       - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data_hangfire_db?authSource=admin
+      - ConnectionStrings__RedisConnection=redis:6379,password=$REDIS_PASSWORD,abortConnect=false,connectTimeout=5000,syncTimeout=2000
     networks:
       - bookmaker-net
   
   # Grpc сервис спортивных данных
   sport-data-grpc-service:
-    container_name: bookmaker-sport-data-grpc-service
+    container_name: sport-data-grpc
     build:
       context: .
       dockerfile: SportDataService.GrpcService/Dockerfile
@@ -206,12 +205,12 @@
         condition: service_healthy
       zookeeper:
         condition: service_started
+      redis:
+        condition: service_healthy
     volumes:
       - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
-    env_file:
-      - .env
     environment:
       - ASPNETCORE_URLS=https://+:50022
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
@@ -223,7 +222,7 @@
   
   # Сервис работы с пользователями 
   user-service:
-    container_name: bookmaker-user-service
+    container_name: user
     build:
       context: .
       dockerfile: UserService.Presentation/Dockerfile
@@ -237,8 +236,6 @@
       - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
-    env_file:
-      - .env
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
@@ -250,7 +247,7 @@
   
   # Grpc сервис работы с пользователями
   user-grpc-service:
-    container_name: bookmaker-user-grpc-service
+    container_name: user-grpc
     build:
       context: .
       dockerfile: UserService.GrpcService/Dockerfile
@@ -267,8 +264,6 @@
       - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
-    env_file:
-      - .env
     environment:
       - ASPNETCORE_URLS=https://+:50023
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
@@ -280,6 +275,7 @@
 volumes:
   postgres_data:
   mongodb_data:
+  redis_data:
 
 networks:
   bookmaker-net:

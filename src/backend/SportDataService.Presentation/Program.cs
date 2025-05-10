@@ -24,7 +24,12 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureMongoDbContext(builder.Configuration);
     builder.Services.AddSportDataDb();
     builder.Services.AddHostedService<MongoDbInitializer>();
+
+    builder.Services.ConfigureRedis(builder.Configuration);
+    builder.Services.ConfigureCacheService();
+
     builder.Services.AddRepositories();
+    builder.Services.AddCachedRepositories();
 
     builder.Services.ConfigureNLog();
     builder.Services.ConfigureLoggerService();

@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using SportDataService.Domain.RepositoryContracts;
 
-namespace SportDataService.Infrastructure.Repository;
+namespace SportDataService.Infrastructure.Repository.Default;
 
 public abstract class MongoRepositoryBase<T> : IRepositoryBase<T>
     where T : class

@@ -1,4 +1,5 @@
 ﻿using SportDataService.Domain.Models.Results;
+using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
 

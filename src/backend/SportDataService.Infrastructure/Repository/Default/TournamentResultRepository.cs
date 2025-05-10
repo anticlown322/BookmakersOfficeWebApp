@@ -1,11 +1,11 @@
 ﻿using MongoDB.Driver;
-using SportDataService.Domain.Models.Prematch;
 using SportDataService.Domain.Models.Results;
 using SportDataService.Domain.RepositoryContracts;
+using SportDataService.Domain.RequestFeatures;
 using SportDataService.Domain.RequestFeatures.Params;
 using UserService.Domain.RequestFeatures;
 
-namespace SportDataService.Infrastructure.Repository;
+namespace SportDataService.Infrastructure.Repository.Default;
 
 public class TournamentResultsRepository : MongoRepositoryBase<TournamentResult>, ITournamentResultRepository
 {

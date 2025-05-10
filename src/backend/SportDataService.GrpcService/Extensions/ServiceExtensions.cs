@@ -13,6 +13,7 @@ using SportDataService.GrpcService.Services.Kafka;
 using SportDataService.GrpcService.Utility;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
+using SportDataService.Infrastructure.Repository.Default;
 
 namespace SportDataService.GrpcService.Extensions;
 
