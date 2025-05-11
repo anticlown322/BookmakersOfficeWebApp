@@ -64,26 +64,18 @@ public sealed class CachedTeamRepository(
     }
 
     public Task<IEnumerable<Team>> FindAllAsync(CancellationToken cancellationToken)
-    {
-        return decorated.FindAllAsync(cancellationToken);
-    }
+        => decorated.FindAllAsync(cancellationToken);
 
     public Task<IEnumerable<Team>> FindByConditionAsync(
         Expression<Func<Team, bool>> expression,
-        CancellationToken ct)
-    {
-        return decorated.FindByConditionAsync(expression, ct);
-    }
+        CancellationToken ct) =>
+        decorated.FindByConditionAsync(expression, ct);
 
     public Task<Team?> GetByIdAsync(string id, CancellationToken ct)
-    {
-        return decorated.GetByIdAsync(id, ct);
-    }
+        => decorated.GetByIdAsync(id, ct);
 
-    public Task CreateAsync(Team entity, CancellationToken ct)
-    {
-        return decorated.CreateAsync(entity, ct);
-    }
+    public Task CreateAsync(Team entity, CancellationToken ct) 
+        => decorated.CreateAsync(entity, ct);
 
     public async Task UpdateAsync(Team entity, CancellationToken ct)
     {
@@ -91,6 +83,7 @@ public sealed class CachedTeamRepository(
 
         var cacheKey = $"team_{entity.TeamId}";
         await cache.RemoveAsync(cacheKey);
+
         await cache.RemoveByPrefixAsync("teams_");
     }
 
@@ -100,6 +93,7 @@ public sealed class CachedTeamRepository(
 
         var cacheKey = $"team_{id}";
         await cache.RemoveAsync(cacheKey);
+
         await cache.RemoveByPrefixAsync("teams_");
     }
 }

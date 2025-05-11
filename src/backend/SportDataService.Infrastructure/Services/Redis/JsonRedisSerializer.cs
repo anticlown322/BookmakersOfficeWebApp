@@ -11,8 +11,9 @@ public class JsonRedisSerializer : ISerializer
         Converters = { new PagedListConverterFactory() },
     };
 
-    public byte[] Serialize<T>(T value) => JsonSerializer.SerializeToUtf8Bytes(value, _options);
+    public byte[] Serialize<T>(T value)
+        => JsonSerializer.SerializeToUtf8Bytes(value, _options);
 
-    public T Deserialize<T>(byte[] value) =>
-        value == null ? default : JsonSerializer.Deserialize<T>(value, _options);
+    public T Deserialize<T>(byte[] value)
+        => value == null ? default : JsonSerializer.Deserialize<T>(value, _options);
 }

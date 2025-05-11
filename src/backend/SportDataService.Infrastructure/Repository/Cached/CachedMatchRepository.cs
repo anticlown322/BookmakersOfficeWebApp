@@ -88,7 +88,9 @@ public sealed class CachedMatchRepository(
     public Task<IEnumerable<Match>> FindAllAsync(CancellationToken cancellationToken)
         => decorated.FindAllAsync(cancellationToken);
 
-    public Task<IEnumerable<Match>> FindByConditionAsync(Expression<Func<Match, bool>> expression, CancellationToken ct)
+    public Task<IEnumerable<Match>> FindByConditionAsync(
+        Expression<Func<Match, bool>> expression,
+        CancellationToken ct)
         => decorated.FindByConditionAsync(expression, ct);
 
     public Task<Match?> GetByIdAsync(string id, CancellationToken ct)
@@ -103,6 +105,7 @@ public sealed class CachedMatchRepository(
 
         var cacheKey = $"match_id_{entity.MatchId}";
         await cache.RemoveAsync(cacheKey);
+
         await cache.RemoveByPrefixAsync("matches_");
     }
 
@@ -112,6 +115,7 @@ public sealed class CachedMatchRepository(
 
         var matchCacheKey = $"match_id_{id}";
         await cache.RemoveAsync(matchCacheKey);
+
         await cache.RemoveByPrefixAsync("matches_");
     }
 }

@@ -12,6 +12,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly ILogger<KafkaProducerService> _logger;
+    private bool _disposed = false;
 
     public KafkaProducerService(
         IOptions<KafkaSettings> kafkaSettings,
@@ -33,6 +34,11 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 
     public async Task ProduceAsync<T>(string topic, T message, CancellationToken cancellationToken)
     {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(this.ToString());
+        }
+
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message);
@@ -43,8 +49,11 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
             };
 
             var deliveryResult = await _producer.ProduceAsync(topic, kafkaMessage, cancellationToken);
-            _logger.LogInformation("Message delivered to {Topic} [Partition: {Partition}, Offset: {Offset}]",
-                deliveryResult.Topic, deliveryResult.Partition, deliveryResult.Offset);
+            _logger.LogInformation(
+                "Message delivered to {Topic} [Partition: {Partition}, Offset: {Offset}]",
+                deliveryResult.Topic,
+                deliveryResult.Partition,
+                deliveryResult.Offset);
         }
         catch (ProduceException<string, string> ex)
         {
@@ -60,7 +69,12 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 
     public void Dispose()
     {
-        _producer.Flush(TimeSpan.FromSeconds(5));
-        _producer.Dispose();
+        if (!_disposed)
+        {
+            _producer.Flush(TimeSpan.FromSeconds(5));
+            _producer.Dispose();
+
+            _disposed = true;
+        }
     }
 }

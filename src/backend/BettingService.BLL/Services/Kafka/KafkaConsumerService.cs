@@ -12,6 +12,7 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
     private readonly IConsumer<string, string> _consumer;
     private readonly ILogger<KafkaConsumerService> _logger;
     private readonly KafkaSettings _kafkaSettings;
+    private bool _disposed = false;
 
     public KafkaConsumerService(
         IOptions<KafkaSettings> kafkaSettings,
@@ -34,38 +35,53 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
             .Build();
     }
 
-    public async Task<T> ConsumeSingleMessageAsync<T>(string topic, TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task<T> ConsumeSingleMessageAsync<T>(
+        string topic,
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
     {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(this.ToString());
+        }
+
+        using var cts = new CancellationTokenSource(timeout);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
+
         try
         {
             _consumer.Subscribe(topic);
-
-            using var cts = new CancellationTokenSource(timeout);
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
 
             while (!linkedCts.IsCancellationRequested)
             {
                 try
                 {
                     var consumeResult = _consumer.Consume(linkedCts.Token);
-                    if (consumeResult != null && !consumeResult.IsPartitionEOF)
+                    if (consumeResult == null || consumeResult.IsPartitionEOF)
                     {
-                        _logger.LogDebug("Received message from {Topic} [Partition: {Partition}, Offset: {Offset}]",
-                            consumeResult.Topic, consumeResult.Partition, consumeResult.Offset);
+                        continue;
+                    }
 
-                        try
+                    _logger.LogDebug(
+                        "Received message from {Topic} [Partition: {Partition}, Offset: {Offset}]",
+                        consumeResult.Topic,
+                        consumeResult.Partition,
+                        consumeResult.Offset);
+
+                    try
+                    {
+                        var message = JsonSerializer.Deserialize<T>(consumeResult.Message.Value);
+                        if (message == null)
                         {
-                            var message = JsonSerializer.Deserialize<T>(consumeResult.Message.Value);
-                            if (message != null)
-                            {
-                                _consumer.Commit(consumeResult);
-                                return message;
-                            }
+                            continue;
                         }
-                        catch (JsonException ex)
-                        {
-                            _logger.LogError(ex, "Failed to deserialize message from {Topic}", topic);
-                        }
+
+                        _consumer.Commit(consumeResult);
+                        return message;
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize message from {Topic}", topic);
                     }
                 }
                 catch (ConsumeException ex) when (ex.Error.IsFatal)
@@ -80,7 +96,8 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
                 catch (OperationCanceledException)
                 {
                     _logger.LogWarning("Consumption from {Topic} was cancelled", topic);
-                    throw new TimeoutException($"No message received from {topic} within {timeout.TotalSeconds} seconds");
+                    throw new TimeoutException(
+                        $"No message received from {topic} within {timeout.TotalSeconds} seconds");
                 }
             }
 
@@ -94,7 +111,12 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
 
     public void Dispose()
     {
-        _consumer.Close();
-        _consumer.Dispose();
+        if (!_disposed)
+        {
+            _consumer.Close();
+            _consumer.Dispose();
+
+            _disposed = true;
+        }
     }
 }
