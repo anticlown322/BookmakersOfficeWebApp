@@ -11,8 +11,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{197C60B2-11FD-4A83-BF9C-6AE0F79109AC}"
 	ProjectSection(SolutionItems) = preProject
 		stylecop.ruleset = stylecop.ruleset
-		compose.yaml = compose.yaml
-		.dockerignore = .dockerignore
+		.env = .env
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportDataService.Domain", "SportDataService.Domain\SportDataService.Domain.csproj", "{C8E0F687-BEBC-4114-8DF4-8EE16581C189}"

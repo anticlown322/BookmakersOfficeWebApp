@@ -1,0 +1,42 @@
+services:
+  betting-service:
+    container_name: betting
+    build:
+      context: ..
+      dockerfile: docker/betting/Dockerfile
+    ports:
+      - "50001:50001"
+      - "50011:50011"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      user-grpc-service:  
+        condition: service_started
+      sport-data-grpc-service:
+        condition: service_started
+    volumes:
+      - ./deploy/certs/aspnetapp.crt:/app/Properties/aspnetapp.crt:ro
+      - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    environment:
+      - CERT_PATH=./deploy/certs/aspnetapp.crt
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTPS_PORTS=50001
+      - ASPNETCORE_HTTP_PORTS=50011
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=betting_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/betting_hangfire_db?authSource=admin
+      - Kafka__BootstrapServers=kafka:9092
+      - Kafka__SecurityProtocol=Plaintext
+      - Grpc__UserService=http://user-grpc-service:50023
+      - Grpc__SportDataService=http://sport-data-grpc-service:50022
+    networks:
+      - bookmaker-net
+
+networks:
+  bookmaker-net:
+    external: true

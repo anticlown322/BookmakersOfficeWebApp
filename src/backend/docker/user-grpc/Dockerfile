@@ -9,10 +9,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # 2.1. Copy .csproj files
-COPY ["UserService.GrpcService/UserService.GrpcService.csproj", "UserService.GrpcService/"]
-COPY ["UserService.Application/UserService.Application.csproj", "UserService.Application/"]
-COPY ["UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]
-COPY ["UserService.Infrastructure/UserService.Infrastructure.csproj", "UserService.Infrastructure/"]
+COPY ["../../UserService.GrpcService/UserService.GrpcService.csproj", "UserService.GrpcService/"]
+COPY ["../../UserService.Application/UserService.Application.csproj", "UserService.Application/"]
+COPY ["../../UserService.Domain/UserService.Domain.csproj", "UserService.Domain/"]
+COPY ["../../UserService.Infrastructure/UserService.Infrastructure.csproj", "UserService.Infrastructure/"]
 
 # 2.2. Restore dependencies
 RUN dotnet restore "UserService.GrpcService/UserService.GrpcService.csproj"

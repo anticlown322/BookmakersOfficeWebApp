@@ -9,10 +9,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # 2.1. Copy .csproj files
-COPY ["SportDataService.Presentation/SportDataService.Presentation.csproj", "SportDataService.Presentation/"]
-COPY ["SportDataService.Application/SportDataService.Application.csproj", "SportDataService.Application/"]
-COPY ["SportDataService.Domain/SportDataService.Domain.csproj", "SportDataService.Domain/"]
-COPY ["SportDataService.Infrastructure/SportDataService.Infrastructure.csproj", "SportDataService.Infrastructure/"]
+COPY ["../../SportDataService.Presentation/SportDataService.Presentation.csproj", "SportDataService.Presentation/"]
+COPY ["../../SportDataService.Application/SportDataService.Application.csproj", "SportDataService.Application/"]
+COPY ["../../SportDataService.Domain/SportDataService.Domain.csproj", "SportDataService.Domain/"]
+COPY ["../../SportDataService.Infrastructure/SportDataService.Infrastructure.csproj", "SportDataService.Infrastructure/"]
 
 # 2.2. Restore dependencies
 RUN dotnet restore "SportDataService.Presentation/SportDataService.Presentation.csproj"

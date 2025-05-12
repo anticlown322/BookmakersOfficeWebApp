@@ -1,0 +1,29 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./deploy/inits/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - bookmaker-net
+    healthcheck:
+      test: |
+        mongosh --quiet --eval "db.adminCommand('ping')" -u "${MONGO_USER}" -p "${MONGO_PASSWORD}" --authenticationDatabase "admin"
+      interval: 10s
+      timeout: 15s
+      start_period: 30s
+      retries: 5
+      
+networks:
+  bookmaker-net:
+    external: true
+
+volumes:
+  mongodb_data:
+    external: true

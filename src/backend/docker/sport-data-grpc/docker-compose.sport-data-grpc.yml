@@ -1,0 +1,29 @@
+services:
+  sport-data-grpc-service:
+    container_name: sport-data-grpc
+    build:
+      context: ..
+      dockerfile: docker/sport-data-grpc/Dockerfile
+    ports:
+      - "50022:50022" # HTTPS
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    environment:
+      - ASPNETCORE_URLS=https://+:50022
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
+    networks:
+      - bookmaker-net
+      
+networks:
+  bookmaker-net:
+    external: true

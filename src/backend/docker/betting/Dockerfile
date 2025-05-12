@@ -10,9 +10,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # 2.1. Copy .csproj files
-COPY ["BettingService.API/BettingService.API.csproj", "BettingService.API/"]
-COPY ["BettingService.BLL/BettingService.BLL.csproj", "BettingService.BLL/"]
-COPY ["BettingService.DAL/BettingService.DAL.csproj", "BettingService.DAL/"]
+COPY ["../../BettingService.API/BettingService.API.csproj", "BettingService.API/"]
+COPY ["../../BettingService.BLL/BettingService.BLL.csproj", "BettingService.BLL/"]
+COPY ["../../BettingService.DAL/BettingService.DAL.csproj", "BettingService.DAL/"]
 
 # 2.2. Restore dependencies
 RUN dotnet restore "BettingService.API/BettingService.API.csproj"
