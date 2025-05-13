@@ -5,7 +5,7 @@ using UserService.Domain.RequestFeatures;
 
 namespace SportDataService.Domain.RepositoryContracts;
 
-public interface ITournamentResultRepository : IRepositoryBase<TournamentResult>
+public interface ITournamentResultRepository : ICachedRepository<TournamentResult>
 {
     Task<PagedList<TournamentResult>> FindAllTournamentResultsAsync(TournamentResultParameters tournamentResultParameters, CancellationToken cancellationToken);
     Task<TournamentResult?> GetTournamentResultByTournamentResultIdAsync(string tournamentResultId, CancellationToken ct);

@@ -5,8 +5,8 @@ using UserService.Domain.RequestFeatures;
 
 namespace SportDataService.Domain.RepositoryContracts;
 
-public interface ITeamRepository : IRepositoryBase<Team>
+public interface ITeamRepository : ICachedRepository<Team>
 {
-    Task<PagedList<Team>> FindAllTeamsAsync(TeamParameters teamParameters, CancellationToken cancellationToken);
+    Task<PagedList<Team>> FindAllTeamsAsync(TeamParameters teamParameters, CancellationToken ct);
     Task<Team?> GetTeamByTeamIdAsync(string teamId, CancellationToken ct);
 }

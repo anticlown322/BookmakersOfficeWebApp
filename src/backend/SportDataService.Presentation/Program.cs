@@ -29,7 +29,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureCacheService();
 
     builder.Services.AddRepositories();
-    builder.Services.AddCachedRepositories();
 
     builder.Services.ConfigureNLog();
     builder.Services.ConfigureLoggerService();

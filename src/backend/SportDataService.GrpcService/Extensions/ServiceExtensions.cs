@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration.Yaml;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
+﻿using MongoDB.Driver;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.GrpcService.Contracts;
@@ -10,10 +6,8 @@ using SportDataService.GrpcService.Exceptions;
 using SportDataService.GrpcService.Models.Settings;
 using SportDataService.GrpcService.Services;
 using SportDataService.GrpcService.Services.Kafka;
-using SportDataService.GrpcService.Utility;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
-using SportDataService.Infrastructure.Repository.Default;
 
 namespace SportDataService.GrpcService.Extensions;
 
@@ -79,11 +73,8 @@ public static class ServiceExtensions
     
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IMatchRepository>(sp =>
-            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchResultRepository>(sp =>
-            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
+        services.AddScoped<IMatchNoCacheRepository, MatchNoCacheRepository>();
+        services.AddScoped<IMatchResultNoCacheRepository, MatchResultNoCacheRepository>();
     }
 
     public static void ConfigureKafka(this IServiceCollection services)

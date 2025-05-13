@@ -13,8 +13,8 @@ namespace SportDataService.GrpcService.Services;
 using Grpc.Core;
 
 public class SportDataGrpcService(
-    IMatchRepository matchRepository,
-    IMatchResultRepository matchResultRepository)
+    IMatchNoCacheRepository matchRepository,
+    IMatchResultNoCacheRepository matchResultRepository)
     : SportDataService.SportDataServiceBase
 {
     public override async Task<ValidateBetResponse> ValidateBet(

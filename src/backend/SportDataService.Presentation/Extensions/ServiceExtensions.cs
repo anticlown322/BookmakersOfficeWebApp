@@ -25,8 +25,6 @@ using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
-using SportDataService.Infrastructure.Repository.Cached;
-using SportDataService.Infrastructure.Repository.Default;
 using SportDataService.Infrastructure.Services;
 using SportDataService.Infrastructure.Services.DataCollection;
 using SportDataService.Infrastructure.Services.Hangfire;
@@ -173,29 +171,11 @@ public static class ServiceExtensions
 
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<ITournamentRepository>(sp =>
-            new TournamentsRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<ITeamRepository>(sp =>
-            new TeamRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchRepository>(sp =>
-            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<ITournamentResultRepository>(sp =>
-            new TournamentResultsRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchResultRepository>(sp =>
-            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
-    }
-
-    public static void AddCachedRepositories(this IServiceCollection services)
-    {
-        services.Decorate<IMatchRepository, CachedMatchRepository>();
-        services.Decorate<IMatchResultRepository, CachedMatchResultRepository>();
-        services.Decorate<ITeamRepository, CachedTeamRepository>();
-        services.Decorate<ITournamentRepository, CachedTournamentRepository>();
-        services.Decorate<ITournamentResultRepository, CachedTournamentResultRepository>();
+        services.AddScoped<ITournamentRepository, TournamentsRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<ITournamentResultRepository, TournamentResultsRepository>();
+        services.AddScoped<IMatchRepository, MatchRepository>();
+        services.AddScoped<IMatchResultRepository, MatchResultRepository>();
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)
