@@ -3,7 +3,7 @@ using BettingService.BLL.Exceptions.Specific;
 using BettingService.BLL.UseCases.Bets;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
-using BettingService.DAL.Models.Kafka;
+using BettingService.DAL.Models.MessageBroker;
 using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using MediatR;
@@ -19,6 +19,8 @@ public sealed class PlacePayoutCommandHandler(
     IOptions<KafkaSettings> kafkaSettings)
     : IRequestHandler<RequestPayoutCommand, Unit>
 {
+    private readonly KafkaSettings _kafkaSettings = kafkaSettings.Value;
+
     public async Task<Unit> Handle(RequestPayoutCommand request, CancellationToken cancellationToken)
     {
         var bet = await betRepository.GetByIdAsync(request.RequestPayoutDto.BetId, cancellationToken);
@@ -70,13 +72,13 @@ public sealed class PlacePayoutCommandHandler(
         };
 
         await kafkaProducer.ProduceAsync(
-            kafkaSettings.Value.Topics.PayoutRequests,
+            _kafkaSettings.Topics.PayoutRequests,
             payoutRequest,
             cancellationToken);
 
         var payoutResult = await WaitForPayoutResult(
             payoutRequest.CorrelationId,
-            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(_kafkaSettings.RequestTimeoutSeconds),
             cancellationToken);
 
         if (payoutResult.IsSuccess)
@@ -105,8 +107,8 @@ public sealed class PlacePayoutCommandHandler(
         while (DateTime.UtcNow - startTime < timeout)
         {
             var message = await kafkaConsumer.ConsumeSingleMessageAsync<PayoutResult>(
-                kafkaSettings.Value.Topics.PayoutResults,
-                TimeSpan.FromSeconds(5),
+                _kafkaSettings.Topics.PayoutResults,
+                TimeSpan.FromSeconds(_kafkaSettings.ConsumeMsgTimeoutSeconds),
                 cancellationToken);
 
             if (message != null && message.CorrelationId == correlationId)

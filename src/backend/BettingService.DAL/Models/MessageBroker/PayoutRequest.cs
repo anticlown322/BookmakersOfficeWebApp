@@ -1,4 +1,4 @@
-﻿namespace BettingService.DAL.Models.Kafka;
+﻿namespace BettingService.DAL.Models.MessageBroker;
 
 public class PayoutRequest
 {

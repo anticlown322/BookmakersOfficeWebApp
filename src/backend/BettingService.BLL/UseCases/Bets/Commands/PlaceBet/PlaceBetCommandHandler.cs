@@ -2,7 +2,7 @@
 using BettingService.BLL.Exceptions.Specific;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
-using BettingService.DAL.Models.Kafka;
+using BettingService.DAL.Models.MessageBroker;
 using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using MediatR;
@@ -17,6 +17,8 @@ public sealed class PlaceBetCommandHandler(
     IOptions<KafkaSettings> kafkaSettings)
     : IRequestHandler<PlaceBetCommand, Unit>
 {
+    private readonly KafkaSettings _kafkaSettings = kafkaSettings.Value;
+
     public async Task<Unit> Handle(PlaceBetCommand request, CancellationToken cancellationToken)
     {
         var correlationId = Guid.NewGuid().ToString();
@@ -26,21 +28,21 @@ public sealed class PlaceBetCommandHandler(
         {
             BetId = betId,
             CorrelationId = correlationId,
-            ValidationType = "User",
+            ValidationType = BetValidationType.User,
             Username = request.Username,
-            Amount = (double)request.PlaceBetDto.Amount,
+            Amount = request.PlaceBetDto.Amount,
             Timestamp = DateTime.UtcNow,
         };
 
         await kafkaProducer.ProduceAsync(
-            kafkaSettings.Value.Topics.BetValidationRequests,
+            _kafkaSettings.Topics.BetValidationRequests,
             userValidationRequest,
             cancellationToken);
 
         var userValidationResult = await WaitForValidationResult<UserValidationResult>(
-            kafkaSettings.Value.Topics.UserValidationResults,
+            _kafkaSettings.Topics.UserValidationResults,
             correlationId,
-            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(_kafkaSettings.RequestTimeoutSeconds),
             cancellationToken);
 
         if (!userValidationResult.IsValid)
@@ -52,23 +54,23 @@ public sealed class PlaceBetCommandHandler(
         {
             BetId = betId,
             CorrelationId = correlationId,
-            ValidationType = "Sport",
+            ValidationType = BetValidationType.Sport,
             MatchId = request.PlaceBetDto.MatchId,
             LineType = request.PlaceBetDto.LineType,
             MarketSelection = request.PlaceBetDto.MarketSelection,
-            RequestedOdds = (double)request.PlaceBetDto.Odds,
+            RequestedOdds = request.PlaceBetDto.Odds,
             Timestamp = DateTime.UtcNow,
         };
 
         await kafkaProducer.ProduceAsync(
-            kafkaSettings.Value.Topics.BetValidationRequests,
+            _kafkaSettings.Topics.BetValidationRequests,
             sportValidationRequest,
             cancellationToken);
 
         var sportValidationResult = await WaitForValidationResult<SportValidationResult>(
-            kafkaSettings.Value.Topics.SportValidationResults,
+            _kafkaSettings.Topics.SportValidationResults,
             correlationId,
-            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(_kafkaSettings.RequestTimeoutSeconds),
             cancellationToken);
 
         if (!sportValidationResult.IsValid)
@@ -84,7 +86,7 @@ public sealed class PlaceBetCommandHandler(
             LineType = ParseLineType(request.PlaceBetDto.LineType),
             MarketSelection = request.PlaceBetDto.MarketSelection,
             Amount = request.PlaceBetDto.Amount,
-            Odds = (decimal)sportValidationResult.CurrentOdds,
+            Odds = sportValidationResult.CurrentOdds,
             Status = BetStatus.Pending,
             CreatedAt = DateTime.UtcNow.ToUniversalTime(),
             AcceptedAt = DateTime.UtcNow.ToUniversalTime(),
@@ -108,7 +110,7 @@ public sealed class PlaceBetCommandHandler(
         {
             var message = await kafkaConsumer.ConsumeSingleMessageAsync<T>(
                 topic,
-                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(_kafkaSettings.ConsumeMsgTimeoutSeconds),
                 cancellationToken);
 
             if (message != null && GetCorrelationId(message) == correlationId)
