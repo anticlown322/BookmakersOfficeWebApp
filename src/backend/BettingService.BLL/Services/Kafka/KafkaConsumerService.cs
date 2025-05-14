@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using BettingService.BLL.Contracts.Services;
 using BettingService.DAL.Models.Settings.Kafka;
 using Confluent.Kafka;
@@ -12,14 +13,25 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
     private readonly IConsumer<string, string> _consumer;
     private readonly ILogger<KafkaConsumerService> _logger;
     private readonly KafkaSettings _kafkaSettings;
+    private readonly JsonSerializerOptions _jsonOptions;
     private bool _disposed = false;
 
     public KafkaConsumerService(
         IOptions<KafkaSettings> kafkaSettings,
-        ILogger<KafkaConsumerService> logger)
+        ILogger<KafkaConsumerService> logger,
+        JsonSerializerOptions? jsonOptions = null)
     {
         _kafkaSettings = kafkaSettings.Value;
         _logger = logger;
+        _jsonOptions = jsonOptions ?? new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+            UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        };
 
         var config = new ConsumerConfig
         {
@@ -62,15 +74,9 @@ public class KafkaConsumerService : IKafkaConsumerService, IDisposable
                         continue;
                     }
 
-                    _logger.LogDebug(
-                        "Received message from {Topic} [Partition: {Partition}, Offset: {Offset}]",
-                        consumeResult.Topic,
-                        consumeResult.Partition,
-                        consumeResult.Offset);
-
                     try
                     {
-                        var message = JsonSerializer.Deserialize<T>(consumeResult.Message.Value);
+                        var message = JsonSerializer.Deserialize<T>(consumeResult.Message.Value, _jsonOptions);
                         if (message == null)
                         {
                             continue;

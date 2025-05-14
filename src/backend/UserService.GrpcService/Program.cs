@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureGrpc();
     builder.Services.ConfigureIdentity();
     builder.Services.AddRepository();
-    builder.Services.ConfigureKafka();
+    builder.Services.ConfigureMessageBroker();
 }
 
 var app = builder.Build();

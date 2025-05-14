@@ -6,7 +6,6 @@ using SportDataService.Domain.Models.Prematch.Lines;
 using SportDataService.Domain.Models.Results;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.GrpcService.Exceptions;
-using SportDataService.GrpcService.Utility;
 
 namespace SportDataService.GrpcService.Services;
 

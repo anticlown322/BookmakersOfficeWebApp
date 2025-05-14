@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.Yaml;
+using Microsoft.Extensions.Options;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
-using UserService.GrpcService.Contracts;
 using UserService.GrpcService.Exceptions;
-using UserService.GrpcService.Models.Settings;
 using UserService.GrpcService.Services;
-using UserService.GrpcService.Services.Kafka;
 using UserService.Infrastructure.Repository;
 using UserService.Infrastructure.Repository.Repositories;
+using UserService.Infrastructure.Services.EventBus.Kafka.Abstractions;
+using UserService.Infrastructure.Services.EventBus.Kafka.Implementations;
+using UserService.Infrastructure.Services.EventBus.Kafka.Settings;
 
 namespace UserService.GrpcService.Extensions;
 
@@ -62,11 +63,29 @@ public static class ServiceExtensions
             .AddEntityFrameworkStores<RepositoryContext>();
     }
 
-    public static void ConfigureKafka(this IServiceCollection services)
+    public static void ConfigureMessageBroker(this IServiceCollection services)
     {
-        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
-        services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
-        services.AddHostedService<UserValidationConsumer>();
+        services.AddSingleton<IEventProducer, KafkaEventProducer>();
+        services.AddSingleton<JsonSerializerOptions>(_ =>
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false,
+            });
+
+        services.AddSingleton<IEventConsumer<PayoutRequest>>(provider =>
+            new KafkaEventConsumer<PayoutRequest>(
+                provider.GetRequiredService<IOptions<KafkaSettings>>(),
+                provider.GetRequiredService<ILogger<KafkaEventConsumer<PayoutRequest>>>(),
+                provider.GetRequiredService<JsonSerializerOptions>()));
+
+        services.AddSingleton<IEventConsumer<UserValidationEvent>>(provider =>
+            new KafkaEventConsumer<UserValidationEvent>(
+                provider.GetRequiredService<IOptions<KafkaSettings>>(),
+                provider.GetRequiredService<ILogger<KafkaEventConsumer<UserValidationEvent>>>(),
+                provider.GetRequiredService<JsonSerializerOptions>()));
+
         services.AddHostedService<PayoutRequestConsumer>();
+        services.AddHostedService<UserValidationConsumer>();
     }
 }

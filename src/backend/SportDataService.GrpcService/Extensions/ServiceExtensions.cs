@@ -1,13 +1,13 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
-using SportDataService.GrpcService.Contracts;
 using SportDataService.GrpcService.Exceptions;
-using SportDataService.GrpcService.Models.Settings;
 using SportDataService.GrpcService.Services;
-using SportDataService.GrpcService.Services.Kafka;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
+using SportDataService.Infrastructure.Services.EventBus.Kafka.Abstractions;
+using SportDataService.Infrastructure.Services.EventBus.Kafka.Implementations;
 
 namespace SportDataService.GrpcService.Extensions;
 
@@ -76,11 +76,16 @@ public static class ServiceExtensions
         services.AddScoped<IMatchNoCacheRepository, MatchNoCacheRepository>();
         services.AddScoped<IMatchResultNoCacheRepository, MatchResultNoCacheRepository>();
     }
+    
 
-    public static void ConfigureKafka(this IServiceCollection services)
+    public static void ConfigureMessageBroker(this IServiceCollection services)
     {
-        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
-        services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
+        services.AddSingleton<IEventProducer, KafkaEventProducer>();
+        services.AddSingleton<IEventConsumer<SportValidationEvent>>(sp => 
+            new KafkaEventConsumer<SportValidationEvent>(
+                sp.GetRequiredService<IOptions<KafkaSettings>>(),
+                sp.GetRequiredService<ILogger<KafkaEventConsumer<SportValidationEvent>>>()));
+
         services.AddHostedService<BetValidationConsumer>();
     }   
 }

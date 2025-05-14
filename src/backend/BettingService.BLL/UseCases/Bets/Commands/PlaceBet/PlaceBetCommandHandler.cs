@@ -24,18 +24,17 @@ public sealed class PlaceBetCommandHandler(
         var correlationId = Guid.NewGuid().ToString();
         var betId = Guid.NewGuid().ToString();
 
-        var userValidationRequest = new BetValidationRequest
+        var userValidationRequest = new UserValidationRequest
         {
             BetId = betId,
             CorrelationId = correlationId,
-            ValidationType = BetValidationType.User,
             Username = request.Username,
             Amount = request.PlaceBetDto.Amount,
             Timestamp = DateTime.UtcNow,
         };
 
         await kafkaProducer.ProduceAsync(
-            _kafkaSettings.Topics.BetValidationRequests,
+            _kafkaSettings.Topics.UserValidationRequests,
             userValidationRequest,
             cancellationToken);
 
@@ -50,11 +49,10 @@ public sealed class PlaceBetCommandHandler(
             throw new UserValidationFailedException(userValidationResult.RejectionReason);
         }
 
-        var sportValidationRequest = new BetValidationRequest
+        var sportValidationRequest = new SportValidationRequest
         {
             BetId = betId,
             CorrelationId = correlationId,
-            ValidationType = BetValidationType.Sport,
             MatchId = request.PlaceBetDto.MatchId,
             LineType = request.PlaceBetDto.LineType,
             MarketSelection = request.PlaceBetDto.MarketSelection,
@@ -63,7 +61,7 @@ public sealed class PlaceBetCommandHandler(
         };
 
         await kafkaProducer.ProduceAsync(
-            _kafkaSettings.Topics.BetValidationRequests,
+            _kafkaSettings.Topics.SportValidationRequests,
             sportValidationRequest,
             cancellationToken);
 
