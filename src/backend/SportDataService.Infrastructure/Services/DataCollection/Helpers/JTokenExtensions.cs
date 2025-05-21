@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace SportDataService.Infrastructure.Services.DataCollection;
+namespace SportDataService.Infrastructure.Services.DataCollection.Helpers;
 
 public static class JTokenExtensions
 {
