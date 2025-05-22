@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Domain.RequestFeatures;
 using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.User;

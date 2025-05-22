@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Domain.RequestFeatures;
 using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.DTO.Balance;
 using UserService.Application.Validation.Exceptions.Specific;
