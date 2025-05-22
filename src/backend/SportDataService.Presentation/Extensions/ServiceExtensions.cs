@@ -27,6 +27,8 @@ using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
 using SportDataService.Infrastructure.Services;
 using SportDataService.Infrastructure.Services.DataCollection;
+using SportDataService.Infrastructure.Services.DataCollection.Abstractions;
+using SportDataService.Infrastructure.Services.DataCollection.Implementations;
 using SportDataService.Infrastructure.Services.Hangfire;
 using SportDataService.Infrastructure.Utility;
 using SportDataService.Presentation.Utility;
@@ -70,9 +72,13 @@ public static class ServiceExtensions
     public static void ConfigureLoggerService(this IServiceCollection services) =>
         services.AddSingleton<ILoggerService, LoggerService>();
 
-    public static void ConfigureDataCollectionService(this IServiceCollection services) =>
-        services.AddSingleton<IDataCollectionService, DataCollectionService>();
-
+    public static void ConfigureDataCollectionService(this IServiceCollection services)
+    {
+        services.AddHttpClient<IApiDataService, ApiDataService>();
+        services.AddScoped<IPrematchDataParser, PrematchDataParser>();
+        services.AddScoped<IResultsDataParser, ResultsDataParser>();
+        services.AddScoped<IDataCollectionService, DataCollectionService>();
+    }
     public static void ConfigureBackgroundJobService(this IServiceCollection services) =>
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
 

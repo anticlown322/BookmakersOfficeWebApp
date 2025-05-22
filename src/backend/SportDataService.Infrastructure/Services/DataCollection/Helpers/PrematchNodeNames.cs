@@ -1,4 +1,4 @@
-﻿namespace Parser.DataCollection;
+﻿namespace SportDataService.Infrastructure.Services.DataCollection.Helpers;
 
 public static class PrematchNodeNames
 {
