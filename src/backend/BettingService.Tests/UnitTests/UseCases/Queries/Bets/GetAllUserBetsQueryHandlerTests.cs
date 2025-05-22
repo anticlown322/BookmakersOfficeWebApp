@@ -116,7 +116,7 @@ public class GetAllUserBetsQueryHandlerTests
         var cancellationToken = CancellationToken.None;
 
         var expectedPageSize = 50;
-        var userBets = UseCasesTestData.CreateTestUserBets(username, 60);
+        var userBets = BetsUseCasesTestData.CreateTestUserBets(username, 60);
 
         var pagedList = PagedList<Bet>.ToPagedList(
             userBets.AsQueryable(),

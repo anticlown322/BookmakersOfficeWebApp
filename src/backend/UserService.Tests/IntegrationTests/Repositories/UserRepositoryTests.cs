@@ -39,7 +39,7 @@ public class UserRepositoryTests : IClassFixture<DatabaseFixture>
 
         // Assert
         result.Succeeded.Should().BeTrue();
-        
+
         var dbUser = await _fixture.UserManager.FindByNameAsync(user.UserName);
         dbUser.Should().NotBeNull();
         dbUser!.Email.Should().Be(user.Email);
@@ -122,7 +122,7 @@ public class UserRepositoryTests : IClassFixture<DatabaseFixture>
         // Assert
         pagedList.Should().NotBeNull();
         pagedList.Count.Should().Be(2);
-        
+
         pagedList[0].Amount.Should().Be(10);
         pagedList[1].Amount.Should().Be(20);
 
@@ -130,7 +130,7 @@ public class UserRepositoryTests : IClassFixture<DatabaseFixture>
         var secondPage = await _userRepository.GetAllBalanceTransactionsAsync(
             new TransactionParameters { PageNumber = 2, PageSize = 2 },
             user);
-            
+
         secondPage.Count.Should().Be(1);
         secondPage[0].Amount.Should().Be(30);
     }

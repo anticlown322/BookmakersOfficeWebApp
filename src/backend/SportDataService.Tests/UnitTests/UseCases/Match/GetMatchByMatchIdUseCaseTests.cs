@@ -26,8 +26,8 @@ public class GetMatchByMatchIdUseCaseTests
         // Arrange
         var validMatchId = "50012345";
         var ct = CancellationToken.None;
-        var testMatch = UseCasesTestData.CreateTestMatchesWithMetadata(1).First();
-        var testMatchDto = UseCasesTestData.CreateTestMatchDtos(1).First();
+        var testMatch = MatchUseCasesTestData.CreateTestMatchesWithMetadata(1).First();
+        var testMatchDto = MatchUseCasesTestData.CreateTestMatchDtos(1).First();
 
         _matchRepositoryMock
             .Setup(x => x.GetMatchByMatchIdAsync(validMatchId, ct))
@@ -127,7 +127,7 @@ public class GetMatchByMatchIdUseCaseTests
         // Arrange
         var validMatchId = "50012345";
         var ct = CancellationToken.None;
-        var testMatch = UseCasesTestData.CreateTestMatchesWithMetadata(1).First();
+        var testMatch = MatchUseCasesTestData.CreateTestMatchesWithMetadata(1).First();
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _matchRepositoryMock

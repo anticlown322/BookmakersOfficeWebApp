@@ -26,7 +26,7 @@ public class GetPayoutByBetIdQueryHandlerTests
     public async Task Handle_ShouldReturnPayout_WhenBetAndPayoutExist()
     {
         // Arrange
-        var testPayout = UseCasesTestData.GetTestPayouts().First();
+        var testPayout = PayoutsUseCasesTestData.GetTestPayouts().First();
         var testBet = new Bet { Id = testPayout.BetId };
         var query = new GetPayoutByBetIdQuery(testPayout.BetId);
         var cancellationToken = CancellationToken.None;
@@ -119,7 +119,7 @@ public class GetPayoutByBetIdQueryHandlerTests
     public async Task Handle_ShouldPassCorrectBetIdToRepositories()
     {
         // Arrange
-        var testPayout = UseCasesTestData.GetTestPayouts().First();
+        var testPayout = PayoutsUseCasesTestData.GetTestPayouts().First();
         var testBet = new Bet { Id = testPayout.BetId };
         var query = new GetPayoutByBetIdQuery(testPayout.BetId);
         var cancellationToken = CancellationToken.None;

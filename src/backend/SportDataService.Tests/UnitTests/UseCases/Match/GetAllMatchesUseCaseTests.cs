@@ -26,8 +26,8 @@ public class GetAllMatchesUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var matchParams = new MatchParameters();
-        var testMatches = UseCasesTestData.CreateTestMatchesWithMetadata(3);
-        var testMatchDtos = UseCasesTestData.CreateTestMatchDtos(3);
+        var testMatches = MatchUseCasesTestData.CreateTestMatchesWithMetadata(3);
+        var testMatchDtos = MatchUseCasesTestData.CreateTestMatchDtos(3);
 
         _matchRepositoryMock
             .Setup(x => x.FindAllMatchesAsync(matchParams, ct))
@@ -59,8 +59,8 @@ public class GetAllMatchesUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var matchParams = new MatchParameters();
-        var emptyMatches = UseCasesTestData.CreateTestMatchesWithMetadata(0);
-        var emptyDtos = UseCasesTestData.CreateTestMatchDtos(0);
+        var emptyMatches = MatchUseCasesTestData.CreateTestMatchesWithMetadata(0);
+        var emptyDtos = MatchUseCasesTestData.CreateTestMatchDtos(0);
 
         _matchRepositoryMock
             .Setup(x => x.FindAllMatchesAsync(matchParams, ct))
@@ -123,7 +123,7 @@ public class GetAllMatchesUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var matchParams = new MatchParameters();
-        var testMatches = UseCasesTestData.CreateTestMatchesWithMetadata(2);
+        var testMatches = MatchUseCasesTestData.CreateTestMatchesWithMetadata(2);
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _matchRepositoryMock

@@ -22,7 +22,7 @@ public class RefreshTokenForAuthUseCaseTests
         _tokenServiceMock = new Mock<ITokenService>();
 
         _jwtSettingsMock = new Mock<IOptions<JwtSettings>>();
-        _jwtSettingsMock.Setup(x => x.Value).Returns(UseCasesTestData.ValidJwtSettings);
+        _jwtSettingsMock.Setup(x => x.Value).Returns(AuthUseCasesTestData.ValidJwtSettings);
         
         _refreshTokenUseCase = new RefreshTokenForAuthUseCase(
             _jwtSettingsMock.Object,
@@ -34,8 +34,8 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_ValidTokens_ReturnsNewAccessToken()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
         var ct = CancellationToken.None;
         var newAccessToken = "new_access_token";
 
@@ -61,7 +61,7 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_UserNotFound_ThrowsRefreshTokenBadRequest()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, UseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -79,8 +79,8 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_InvalidRefreshToken_ThrowsRefreshTokenBadRequest()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, UseCasesTestData.ValidTokens.RefreshToken);
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -98,9 +98,9 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_ExpiredRefreshToken_ThrowsRefreshTokenBadRequest()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(-1);
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -116,8 +116,8 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_TokenServiceReturnsNull_ThrowsTokenNotCreatedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, user.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -142,7 +142,7 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, UseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = new CancellationToken(canceled: true);
 
         // Act and Assert
@@ -154,7 +154,7 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_InvalidAccessToken_ThrowsSecurityTokenException()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(UseCasesTestData.ValidTokens.AccessToken, UseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         // Act and Assert

@@ -21,7 +21,7 @@ public class DeleteUserUseCaseTests
         // Arrange
         const string userName = "testUser";
         var ct = CancellationToken.None;
-        var user = UseCasesTestData.ValidUser;
+        var user = UserUseCasesTestData.ValidUser;
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(userName, ct))
             .ReturnsAsync(user);
@@ -60,7 +60,7 @@ public class DeleteUserUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {userName} does not exist in the database.");
-        
+
         _usersRepositoryMock.Verify(
             x => x.GetUserByNameAsync(userName, ct),
             Times.Once);
@@ -101,7 +101,7 @@ public class DeleteUserUseCaseTests
 
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(userName, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(UseCasesTestData.ValidUser)
+            .ReturnsAsync(UserUseCasesTestData.ValidUser)
             .Callback(() => cts.Cancel());
 
         // Act
@@ -138,7 +138,7 @@ public class DeleteUserUseCaseTests
         var exception = await act.Should().ThrowAsync<Exception>();
 
         exception.Which.Message.Should().Be(expectedException.Message);
-    
+
         _usersRepositoryMock.Verify(
             x => x.GetUserByNameAsync(userName, ct),
             Times.Once);

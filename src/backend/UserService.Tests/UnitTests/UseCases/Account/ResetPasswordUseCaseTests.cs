@@ -21,10 +21,10 @@ public class ResetPasswordUseCaseTests
     public async Task ExecuteAsync_ValidReset_ResetsPassword()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithPassword();
+        var user = AccountUseCasesTestData.CreateUserWithPassword();
         var username = user.UserName;
         var ct = CancellationToken.None;
-        var passwordResetDto = UseCasesTestData.ValidPasswordResetDto;
+        var passwordResetDto = AccountUseCasesTestData.ValidPasswordResetDto;
         var successResult = IdentityResult.Success;
 
         _usersRepositoryMock
@@ -51,12 +51,12 @@ public class ResetPasswordUseCaseTests
         // Arrange
         var username = "nonExistingUser";
         var ct = CancellationToken.None;
-        var passwordResetDto = UseCasesTestData.ValidPasswordResetDto;
+        var passwordResetDto = AccountUseCasesTestData.ValidPasswordResetDto;
 
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ReturnsAsync((Domain.Models.User?)null);
-        
+
         // Act
         Func<Task> act = () => _resetPasswordUseCase.ExecuteAsync(username, passwordResetDto, ct);
 
@@ -70,7 +70,7 @@ public class ResetPasswordUseCaseTests
     public async Task ExecuteAsync_ResetFails_ThrowsPasswordCanNotBeReset()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithPassword();
+        var user = AccountUseCasesTestData.CreateUserWithPassword();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var passwordResetDto = new PasswordResetDto("invalid_token", "NewP@ssw0rd123");
@@ -98,8 +98,8 @@ public class ResetPasswordUseCaseTests
         // Arrange
         var username = "testUser";
         var ct = new CancellationToken(canceled: true);
-        var passwordResetDto = UseCasesTestData.ValidPasswordResetDto;
-        
+        var passwordResetDto = AccountUseCasesTestData.ValidPasswordResetDto;
+
         // Act
         Func<Task> act = () => _resetPasswordUseCase.ExecuteAsync(username, passwordResetDto, ct);
 
@@ -111,10 +111,10 @@ public class ResetPasswordUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithPassword();
+        var user = AccountUseCasesTestData.CreateUserWithPassword();
         var username = user.UserName;
         var ct = CancellationToken.None;
-        var passwordResetDto = UseCasesTestData.ValidPasswordResetDto;
+        var passwordResetDto = AccountUseCasesTestData.ValidPasswordResetDto;
         var expectedException = new Exception("Database error");
 
         _usersRepositoryMock
@@ -127,7 +127,7 @@ public class ResetPasswordUseCaseTests
         // Assert
         var exception = await act.Should()
             .ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 }

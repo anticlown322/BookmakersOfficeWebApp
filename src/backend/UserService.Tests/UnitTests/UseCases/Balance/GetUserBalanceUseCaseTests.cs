@@ -20,7 +20,7 @@ public class GetUserBalanceUseCaseTests
     public async Task ExecuteAsync_UserWithBalanceExists_ReturnsBalanceDto()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var expectedBalance = user.Balance.CurrentAmount;
@@ -66,7 +66,7 @@ public class GetUserBalanceUseCaseTests
     public async Task ExecuteAsync_BalanceDataIsNull_ThrowsBalanceDataIsNotFoundException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         user.Balance = null;
         var username = user.UserName;
         var ct = CancellationToken.None;
@@ -88,7 +88,7 @@ public class GetUserBalanceUseCaseTests
     public async Task ExecuteAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = BalanceUseCasesTestData.ValidUser.UserName;
         var ct = new CancellationToken(canceled: true);
 
         // Act
@@ -102,7 +102,7 @@ public class GetUserBalanceUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = BalanceUseCasesTestData.ValidUser.UserName;
         var ct = CancellationToken.None;
         var expectedException = new Exception("Database error");
 

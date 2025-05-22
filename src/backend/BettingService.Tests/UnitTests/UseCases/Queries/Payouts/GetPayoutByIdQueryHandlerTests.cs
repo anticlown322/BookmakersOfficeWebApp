@@ -24,7 +24,7 @@ public class GetPayoutByIdQueryHandlerTests
     public async Task Handle_ShouldReturnPayout_WhenPayoutExists()
     {
         // Arrange
-        var existingPayout = UseCasesTestData.GetTestPayouts().First();
+        var existingPayout = PayoutsUseCasesTestData.GetTestPayouts().First();
         var query = new GetPayoutByIdQuery(existingPayout.Id);
         var cancellationToken = CancellationToken.None;
 
@@ -70,7 +70,7 @@ public class GetPayoutByIdQueryHandlerTests
     public async Task Handle_ShouldPassCorrectIdToRepository()
     {
         // Arrange
-        var testPayout = UseCasesTestData.GetTestPayouts().First();
+        var testPayout = PayoutsUseCasesTestData.GetTestPayouts().First();
         var query = new GetPayoutByIdQuery(testPayout.Id);
         var cancellationToken = CancellationToken.None;
 

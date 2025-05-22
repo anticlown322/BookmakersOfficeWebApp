@@ -26,8 +26,8 @@ public class GetAllTeamsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TeamParameters();
-        var testTeams = UseCasesTestData.CreateTestTeamsWithMetadata(3);
-        var testTeamDtos = UseCasesTestData.CreateTestTeamDtos(3);
+        var testTeams = TeamUseCasesTestData.CreateTestTeamsWithMetadata(3);
+        var testTeamDtos = TeamUseCasesTestData.CreateTestTeamDtos(3);
 
         _teamRepositoryMock
             .Setup(x => x.FindAllTeamsAsync(parameters, ct))
@@ -59,8 +59,8 @@ public class GetAllTeamsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TeamParameters();
-        var emptyTeams = UseCasesTestData.CreateTestTeamsWithMetadata(0);
-        var emptyDtos = UseCasesTestData.CreateTestTeamDtos(0);
+        var emptyTeams = TeamUseCasesTestData.CreateTestTeamsWithMetadata(0);
+        var emptyDtos = TeamUseCasesTestData.CreateTestTeamDtos(0);
 
         _teamRepositoryMock
             .Setup(x => x.FindAllTeamsAsync(parameters, ct))
@@ -123,7 +123,7 @@ public class GetAllTeamsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TeamParameters();
-        var testTeams = UseCasesTestData.CreateTestTeamsWithMetadata(2);
+        var testTeams = TeamUseCasesTestData.CreateTestTeamsWithMetadata(2);
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _teamRepositoryMock

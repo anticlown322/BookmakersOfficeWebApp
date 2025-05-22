@@ -24,7 +24,7 @@ public class SendResetPasswordEmailUseCaseTests
     public async Task ExecuteAsync_ValidRequest_SendsResetPasswordEmail()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithConfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithConfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var resetToken = "password_reset_token";
@@ -88,7 +88,7 @@ public class SendResetPasswordEmailUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedAfterUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithConfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithConfirmedEmail();
         var username = user.UserName;
         var cts = new CancellationTokenSource();
 
@@ -102,14 +102,13 @@ public class SendResetPasswordEmailUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
-
     }
 
     [Fact]
     public async Task ExecuteAsync_EmailServiceThrows_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithConfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithConfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var resetToken = "password_reset_token";
@@ -132,7 +131,7 @@ public class SendResetPasswordEmailUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 
@@ -153,7 +152,7 @@ public class SendResetPasswordEmailUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 }

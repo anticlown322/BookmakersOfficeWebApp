@@ -19,16 +19,16 @@ public class LoginUseCaseTests
     {
         _tokenServiceMock = new Mock<ITokenService>();
         _usersRepositoryMock = new Mock<IUsersRepository>();
-        
+
         var userManagerMock = new Mock<UserManager<Domain.Models.User>>(
-            Mock.Of<IUserStore<Domain.Models.User>>(), 
+            Mock.Of<IUserStore<Domain.Models.User>>(),
             null!, null!, null!, null!, null!, null!, null!, null!);
         _signInManagerMock = new Mock<SignInManager<Domain.Models.User>>(
             userManagerMock.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<Domain.Models.User>>(),
             null!, null!, null!, null!);
-        
+
         _loginUseCase = new LoginUseCase(
             _tokenServiceMock.Object,
             _usersRepositoryMock.Object,
@@ -39,8 +39,8 @@ public class LoginUseCaseTests
     public async Task ExecuteAsync_ValidCredentials_ReturnsTokens()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(100m);
-        var loginDto = UseCasesTestData.ValidLoginDto;
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var loginDto = AuthUseCasesTestData.ValidLoginDto;
         var ct = CancellationToken.None;
         var expectedTokens = new TokensGetDto("access_token", "refresh_token");
 
@@ -62,7 +62,7 @@ public class LoginUseCaseTests
         // Assert
         result.AccessToken.Should().Be(expectedTokens.AccessToken);
         result.RefreshToken.Should().Be(expectedTokens.RefreshToken);
-        
+
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(loginDto.UserName, ct), Times.Once);
         _signInManagerMock.Verify(x => x.CheckPasswordSignInAsync(user, loginDto.Password, false), Times.Once);
         _tokenServiceMock.Verify(x => x.CreateTokens(user, true), Times.Once);
@@ -72,7 +72,7 @@ public class LoginUseCaseTests
     public async Task ExecuteAsync_UserNotFound_ThrowsUserNotFoundByNameException()
     {
         // Arrange
-        var loginDto = UseCasesTestData.ValidLoginDto;
+        var loginDto = AuthUseCasesTestData.ValidLoginDto;
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -86,14 +86,13 @@ public class LoginUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {loginDto.UserName} does not exist in the database.");
-
     }
 
     [Fact]
     public async Task ExecuteAsync_InvalidPassword_ThrowsInvalidCredentialsException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(100m);
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
         var loginDto = new UserLoginDto { UserName = user.UserName, Password = "invalidPass" };
         var ct = CancellationToken.None;
 
@@ -112,15 +111,14 @@ public class LoginUseCaseTests
         await act.Should()
             .ThrowAsync<InvalidCredentialsException>()
             .WithMessage($"Cannot login with username {loginDto.UserName} and password {loginDto.Password}.");
-        
     }
 
     [Fact]
     public async Task ExecuteAsync_TokenServiceReturnsNullAccessToken_ThrowsTokenNotCreatedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(100m);
-        var loginDto = UseCasesTestData.ValidLoginDto;
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var loginDto = AuthUseCasesTestData.ValidLoginDto;
         var ct = CancellationToken.None;
         var invalidTokens = new TokensGetDto(null, "refresh_token");
 
@@ -143,15 +141,14 @@ public class LoginUseCaseTests
         await act.Should()
             .ThrowAsync<TokenNotCreatedException>()
             .WithMessage($"Cannot create access or refresh token {nameof(invalidTokens.AccessToken)}.");
-        
     }
 
     [Fact]
     public async Task ExecuteAsync_TokenServiceReturnsNullRefreshToken_ThrowsTokenNotCreatedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(100m);
-        var loginDto = UseCasesTestData.ValidLoginDto;
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
+        var loginDto = AuthUseCasesTestData.ValidLoginDto;
         var ct = CancellationToken.None;
         var invalidTokens = new TokensGetDto("access_token", null);
 
@@ -174,15 +171,13 @@ public class LoginUseCaseTests
         await act.Should()
             .ThrowAsync<TokenNotCreatedException>()
             .WithMessage($"Cannot create access or refresh token {nameof(invalidTokens.RefreshToken)}.");
-
-
     }
 
     [Fact]
     public async Task ExecuteAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
-        var loginDto = UseCasesTestData.ValidLoginDto;
+        var loginDto = AuthUseCasesTestData.ValidLoginDto;
         var ct = new CancellationToken(canceled: true);
 
         // Act

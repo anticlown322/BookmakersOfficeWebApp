@@ -20,7 +20,7 @@ public class LogoutUseCaseTests
     public async Task ExecuteAsync_ValidUser_ClearsRefreshToken()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
         user.RefreshToken = "valid_refresh_token";
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1);
         
@@ -86,7 +86,7 @@ public class LogoutUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateAuthenticatedUser();
+        var user = AuthUseCasesTestData.CreateAuthenticatedUser();
         var logoutDto = new UserLogoutDto { UserName = user.UserName };
         var ct = CancellationToken.None;
         var expectedException = new Exception("Database error");

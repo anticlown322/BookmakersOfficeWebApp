@@ -26,8 +26,8 @@ public class GetMatchResultByIdUseCaseTests
         // Arrange
         var validId = "507f1f77bcf86cd799439011";
         var ct = CancellationToken.None;
-        var testMatchResult = UseCasesTestData.CreateTestMatchResultsWithMetadata(1).First();
-        var testMatchResultDto = UseCasesTestData.CreateTestMatchResultDtos(1).First();
+        var testMatchResult = MatchResultUseCasesTestData.CreateTestMatchResultsWithMetadata(1).First();
+        var testMatchResultDto = MatchResultUseCasesTestData.CreateTestMatchResultDtos(1).First();
 
         _matchResultRepositoryMock
             .Setup(x => x.GetByIdAsync(validId, ct))
@@ -149,7 +149,7 @@ public class GetMatchResultByIdUseCaseTests
         // Arrange
         var validId = "507f1f77bcf86cd799439011";
         var ct = CancellationToken.None;
-        var testMatchResult = UseCasesTestData.CreateTestMatchResultsWithMetadata(1).First()
+        var testMatchResult = MatchResultUseCasesTestData.CreateTestMatchResultsWithMetadata(1).First()
             ;
         var expectedException = new AutoMapperMappingException("Mapping failed");
 

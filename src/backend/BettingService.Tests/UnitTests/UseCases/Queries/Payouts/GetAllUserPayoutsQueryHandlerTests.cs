@@ -30,7 +30,7 @@ public class GetAllUserPayoutsQueryHandlerTests
         var query = new GetAllUserPayoutsQuery(parameters, username);
         var cancellationToken = CancellationToken.None;
 
-        var pagedPayouts = UseCasesTestData.GetTestPagedPayouts(parameters);
+        var pagedPayouts = PayoutsUseCasesTestData.GetTestPagedPayouts(parameters);
         var testPayouts = pagedPayouts.ToList();
 
         var expectedDtos = testPayouts.Select(p => new GetPayoutDto(
@@ -121,8 +121,7 @@ public class GetAllUserPayoutsQueryHandlerTests
         var query = new GetAllUserPayoutsQuery(parameters, expectedUsername);
         var cancellationToken = CancellationToken.None;
 
-        var testPayouts = UseCasesTestData.GetTestPayouts();
-        var pagedPayouts = UseCasesTestData.GetTestPagedPayouts(parameters);
+        var pagedPayouts = PayoutsUseCasesTestData.GetTestPagedPayouts(parameters);
 
         _payoutRepositoryMock
             .Setup(r => r.GetUserPayoutsAsync(parameters, expectedUsername, cancellationToken))

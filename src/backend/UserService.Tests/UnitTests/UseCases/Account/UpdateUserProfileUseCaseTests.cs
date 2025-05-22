@@ -23,13 +23,13 @@ public class UpdateUserProfileUseCaseTests
     public async Task ExecuteAsync_ValidUpdate_UpdatesUserProfile()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithProfile();
+        var user = AccountUseCasesTestData.CreateUserWithProfile();
         var username = user.UserName;
         var ct = CancellationToken.None;
-        var updateDto = new UserProfileUpdateDto 
-        { 
-            FirstName = "NewFirstName", 
-            LastName = "NewLastName" 
+        var updateDto = new UserProfileUpdateDto
+        {
+            FirstName = "NewFirstName",
+            LastName = "NewLastName"
         };
 
         _usersRepositoryMock
@@ -72,7 +72,6 @@ public class UpdateUserProfileUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {username} does not exist in the database.");
-
     }
 
     [Fact]
@@ -94,7 +93,7 @@ public class UpdateUserProfileUseCaseTests
     public async Task ExecuteAsync_MapperThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithProfile();
+        var user = AccountUseCasesTestData.CreateUserWithProfile();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var updateDto = new UserProfileUpdateDto();
@@ -113,7 +112,7 @@ public class UpdateUserProfileUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<AutoMapperMappingException>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 
@@ -121,7 +120,7 @@ public class UpdateUserProfileUseCaseTests
     public async Task ExecuteAsync_RepositoryUpdateThrows_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithProfile();
+        var user = AccountUseCasesTestData.CreateUserWithProfile();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var updateDto = new UserProfileUpdateDto();
@@ -140,7 +139,7 @@ public class UpdateUserProfileUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 }

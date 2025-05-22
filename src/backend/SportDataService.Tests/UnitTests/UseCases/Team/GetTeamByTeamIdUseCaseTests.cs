@@ -26,8 +26,8 @@ public class GetTeamByTeamIdUseCaseTests
         // Arrange
         var validTeamId = "50012345";
         var ct = CancellationToken.None;
-        var testTeam = UseCasesTestData.CreateTestTeamsWithMetadata(1).First();
-        var testTeamDto = UseCasesTestData.CreateTestTeamDtos(1).First();
+        var testTeam = TeamUseCasesTestData.CreateTestTeamsWithMetadata(1).First();
+        var testTeamDto = TeamUseCasesTestData.CreateTestTeamDtos(1).First();
 
         _teamRepositoryMock
             .Setup(x => x.GetTeamByTeamIdAsync(validTeamId, ct))
@@ -127,7 +127,7 @@ public class GetTeamByTeamIdUseCaseTests
         // Arrange
         var validTeamId = "50012345";
         var ct = CancellationToken.None;
-        var testTeam = UseCasesTestData.CreateTestTeamsWithMetadata(1).First();
+        var testTeam = TeamUseCasesTestData.CreateTestTeamsWithMetadata(1).First();
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _teamRepositoryMock

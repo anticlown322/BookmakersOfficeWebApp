@@ -28,8 +28,8 @@ public class GetAllTournamentResultsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TournamentResultParameters();
-        var testResults = UseCasesTestData.CreateTestTournamentResultsWithMetadata(3);
-        var testResultDtos = UseCasesTestData.CreateTestTournamentResultDtos(3);
+        var testResults = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(3);
+        var testResultDtos = TournamentResultUseCasesTestData.CreateTestTournamentResultDtos(3);
 
         _tournamentResultRepositoryMock
             .Setup(x => x.FindAllTournamentResultsAsync(parameters, ct))
@@ -61,8 +61,8 @@ public class GetAllTournamentResultsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TournamentResultParameters();
-        var emptyResults = UseCasesTestData.CreateTestTournamentResultsWithMetadata(0);
-        var emptyDtos = UseCasesTestData.CreateTestTournamentResultDtos(0);
+        var emptyResults = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(0);
+        var emptyDtos = TournamentResultUseCasesTestData.CreateTestTournamentResultDtos(0);
 
         _tournamentResultRepositoryMock
             .Setup(x => x.FindAllTournamentResultsAsync(parameters, ct))
@@ -125,7 +125,7 @@ public class GetAllTournamentResultsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var parameters = new TournamentResultParameters();
-        var testResults = UseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
+        var testResults = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _tournamentResultRepositoryMock

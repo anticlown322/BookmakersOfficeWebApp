@@ -31,7 +31,7 @@ public class RefreshTournamentResultsUseCaseTests
     {
         // Arrange
         var ct = CancellationToken.None;
-        var testTournament = UseCasesTestData.CreateTestTournamentResultsWithMetadata(1).First();
+        var testTournament = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(1).First();
         
         _dataCollectionServiceMock
             .Setup(x => x.GetTournamentsResultsInfoAsync(ct))
@@ -55,7 +55,7 @@ public class RefreshTournamentResultsUseCaseTests
     {
         // Arrange
         var ct = CancellationToken.None;
-        var tournaments = UseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
+        var tournaments = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
         var existingTournament = tournaments[0];
         var newTournament = tournaments[1];
         newTournament.TournamentName = "Updated Name";
@@ -95,7 +95,7 @@ public class RefreshTournamentResultsUseCaseTests
     {
         // Arrange
         var ct = CancellationToken.None;
-        var tournaments = UseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
+        var tournaments = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(2);
         var existingTournament = tournaments[0];
         var newTournament = tournaments[1];
         newTournament.Matches.Clear();
@@ -121,8 +121,8 @@ public class RefreshTournamentResultsUseCaseTests
     {
         // Arrange
         var ct = CancellationToken.None;
-        var testTournament = UseCasesTestData.CreateTestTournamentResultsWithMetadata(1).First();
-        var existingTeam = UseCasesTestData.CreateTestTeamsWithMetadata(1).First();
+        var testTournament = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(1).First();
+        var existingTeam = TournamentResultUseCasesTestData.CreateTestTeamsWithMetadata(1).First();
         existingTeam.Name = "Old Name";
         testTournament.Matches[0].Team1.Name = "New Name";
         

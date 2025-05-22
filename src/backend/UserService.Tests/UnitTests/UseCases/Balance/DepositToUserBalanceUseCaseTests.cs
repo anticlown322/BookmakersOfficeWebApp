@@ -22,7 +22,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_ValidDeposit_UpdatesUserBalance()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var initialBalance = user.Balance.CurrentAmount;
@@ -75,7 +75,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_BalanceIsNull_ThrowsBalanceDataIsNotFoundException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         user.Balance = null;
         var username = user.UserName;
         var ct = CancellationToken.None;
@@ -98,7 +98,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedBeforeUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = BalanceUseCasesTestData.ValidUser.UserName;
         var ct = new CancellationToken(canceled: true);
         var depositRequest = new DepositRequestDto(50.0m, "Test deposit");
 
@@ -113,7 +113,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedAfterUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var cts = new CancellationTokenSource();
         var depositRequest = new DepositRequestDto(50.0m, "Test deposit");
@@ -134,7 +134,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var depositRequest = new DepositRequestDto(50.0m, "Test deposit");
@@ -157,7 +157,7 @@ public class DepositToUserBalanceUseCaseTests
     public async Task ExecuteAsync_TransactionAddedCorrectly()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         user.Balance.Transactions = new List<BalanceTransaction>();
         var username = user.UserName;
         var ct = CancellationToken.None;

@@ -26,8 +26,8 @@ public class GetTournamentByTournamentIdUseCaseTests
         // Arrange
         var validTournamentId = "10012345";
         var ct = CancellationToken.None;
-        var testTournament = UseCasesTestData.CreateTestTournamentsWithMetadata(1).First();
-        var testTournamentDto = UseCasesTestData.CreateTestTournamentDtos(1).First();
+        var testTournament = TournamentUseCasesTestData.CreateTestTournamentsWithMetadata(1).First();
+        var testTournamentDto = TournamentUseCasesTestData.CreateTestTournamentDtos(1).First();
 
         _tournamentRepositoryMock
             .Setup(x => x.GetTournamentByTournamentIdAsync(validTournamentId, ct))
@@ -127,7 +127,7 @@ public class GetTournamentByTournamentIdUseCaseTests
         // Arrange
         var validTournamentId = "10012345";
         var ct = CancellationToken.None;
-        var testTournament = UseCasesTestData.CreateTestTournamentsWithMetadata(1).First();
+        var testTournament = TournamentUseCasesTestData.CreateTestTournamentsWithMetadata(1).First();
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _tournamentRepositoryMock

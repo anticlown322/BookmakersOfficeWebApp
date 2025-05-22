@@ -25,8 +25,8 @@ public class RegisterUserUseCaseTests
     public async Task ExecuteAsync_ValidRegistration_ReturnsSuccess()
     {
         // Arrange
-        var registrationDto = UseCasesTestData.ValidRegistrationDto;
-        var user = UseCasesTestData.NewUser;
+        var registrationDto = AuthUseCasesTestData.ValidRegistrationDto;
+        var user = AuthUseCasesTestData.NewUser;
         var ct = CancellationToken.None;
         var successResult = IdentityResult.Success;
 
@@ -64,8 +64,8 @@ public class RegisterUserUseCaseTests
     public async Task ExecuteAsync_UserAlreadyExists_ThrowsUserAlreadyExistsException()
     {
         // Arrange
-        var registrationDto = UseCasesTestData.ValidRegistrationDto;
-        var existingUser = UseCasesTestData.ExistingUser;
+        var registrationDto = AuthUseCasesTestData.ValidRegistrationDto;
+        var existingUser = AuthUseCasesTestData.ExistingUser;
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -85,8 +85,8 @@ public class RegisterUserUseCaseTests
     public async Task ExecuteAsync_CreateUserFails_ThrowsUserCanNonBeRegistered()
     {
         // Arrange
-        var registrationDto = UseCasesTestData.ValidRegistrationDto;
-        var user = UseCasesTestData.NewUser;
+        var registrationDto = AuthUseCasesTestData.ValidRegistrationDto;
+        var user = AuthUseCasesTestData.NewUser;
         var ct = CancellationToken.None;
         var error = new IdentityError { Description = "Password too weak" };
         var failedResult = IdentityResult.Failed(error);
@@ -115,8 +115,8 @@ public class RegisterUserUseCaseTests
     public async Task ExecuteAsync_EmptyRoles_CreatesUserWithEmptyRoles()
     {
         // Arrange
-        var registrationDto = UseCasesTestData.ValidRegistrationDto with { Roles = null };
-        var user = UseCasesTestData.NewUser;
+        var registrationDto = AuthUseCasesTestData.ValidRegistrationDto with { Roles = null };
+        var user = AuthUseCasesTestData.NewUser;
         var ct = CancellationToken.None;
         var successResult = IdentityResult.Success;
 

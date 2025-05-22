@@ -24,7 +24,7 @@ public class SendConfirmationEmailUseCaseTests
     public async Task ExecuteAsync_ValidRequest_SendsConfirmationEmail()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var baseUrl = "https://example.com";
         var expectedLink = $"{baseUrl}/api/users/{username}/account/confirm-email";
@@ -65,14 +65,13 @@ public class SendConfirmationEmailUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {username} does not exist in the database.");
-
     }
 
     [Fact]
     public async Task ExecuteAsync_EmailAlreadyConfirmed_ThrowsEmailCanNotBeConfirmedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithConfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithConfirmedEmail();
         var username = user.UserName;
         var baseUrl = "https://example.com";
         var ct = CancellationToken.None;
@@ -82,8 +81,8 @@ public class SendConfirmationEmailUseCaseTests
             .ReturnsAsync(user);
 
         // Act and Assert
-        await Assert.ThrowsAsync<EmailCanNotBeConfirmedException>(
-            () => _sendConfirmationEmailUseCase.ExecuteAsync(username, baseUrl, ct));
+        await Assert.ThrowsAsync<EmailCanNotBeConfirmedException>(() =>
+            _sendConfirmationEmailUseCase.ExecuteAsync(username, baseUrl, ct));
     }
 
     [Fact]
@@ -105,7 +104,7 @@ public class SendConfirmationEmailUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedAfterUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var baseUrl = "https://example.com";
         var cts = new CancellationTokenSource();
@@ -126,7 +125,7 @@ public class SendConfirmationEmailUseCaseTests
     public async Task ExecuteAsync_EmailServiceThrows_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var baseUrl = "https://example.com";
         var ct = CancellationToken.None;
@@ -146,7 +145,7 @@ public class SendConfirmationEmailUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 
@@ -169,7 +168,7 @@ public class SendConfirmationEmailUseCaseTests
         // Assert
         var exception = await act.Should()
             .ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 
@@ -177,7 +176,7 @@ public class SendConfirmationEmailUseCaseTests
     public async Task ExecuteAsync_GeneratesCorrectConfirmationLink()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var baseUrl = "https://test.com";
         var expectedLink = $"{baseUrl}/api/users/{username}/account/confirm-email";

@@ -24,11 +24,11 @@ public class GetUserProfileUseCaseTests
     public async Task ExecuteAsync_ValidUser_ReturnsProfileWithRoles()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithProfile();
+        var user = AccountUseCasesTestData.CreateUserWithProfile();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var roles = new List<string> { UserRoles.Administrator, UserRoles.Gambler };
-        var expectedDto = UseCasesTestData.ValidUserProfileDto;
+        var expectedDto = AccountUseCasesTestData.ValidUserProfileDto;
 
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(username, ct))
@@ -37,25 +37,25 @@ public class GetUserProfileUseCaseTests
         _usersRepositoryMock
             .Setup(x => x.GetUserRolesAsync(user, ct))
             .ReturnsAsync(roles);
-        
+
         _mapperMock
             .Setup(x => x.Map<UserProfileGetDto>(
-                user, 
+                user,
                 It.IsAny<Action<IMappingOperationOptions<object, UserProfileGetDto>>>()))
             .Returns((Domain.Models.User src, Action<IMappingOperationOptions<object, UserProfileGetDto>> opts) =>
             {
                 var optionsMock = new Mock<IMappingOperationOptions<object, UserProfileGetDto>>();
                 var itemsDict = new Dictionary<string, object>();
-            
+
                 optionsMock
                     .Setup(o => o.Items)
                     .Returns(itemsDict);
-                
+
                 opts(optionsMock.Object);
-            
+
                 itemsDict.Should().ContainKey("Roles")
                     .And.Subject["Roles"].Should().BeEquivalentTo(roles);
-            
+
                 return new UserProfileGetDto
                 {
                     FirstName = src.Profile.FirstName,
@@ -63,7 +63,7 @@ public class GetUserProfileUseCaseTests
                     Roles = (List<string>)itemsDict["Roles"]
                 };
             });
-        
+
         // Act
         var result = await _getUserProfileUseCase.ExecuteAsync(username, ct);
 
@@ -72,7 +72,7 @@ public class GetUserProfileUseCaseTests
         result.FirstName.Should().Be(expectedDto.FirstName);
         result.LastName.Should().Be(expectedDto.LastName);
         result.Roles.Should().BeEquivalentTo(roles);
-        
+
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(username, ct), Times.Once);
         _usersRepositoryMock.Verify(x => x.GetUserRolesAsync(user, ct), Times.Once);
     }
@@ -129,7 +129,7 @@ public class GetUserProfileUseCaseTests
         // Assert
         var exception = await act.Should()
             .ThrowAsync<Exception>();
-            
+
         exception.Which.Message.Should().Be(expectedException.Message);
     }
 }

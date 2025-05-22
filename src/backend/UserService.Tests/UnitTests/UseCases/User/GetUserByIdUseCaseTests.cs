@@ -23,8 +23,8 @@ public class GetUserByIdUseCaseTests
     public async Task ExecuteAsync_UserExists_ReturnsMappedUserDto()
     {
         // Arrange
-        var userId = UseCasesTestData.ValidUserId;
-        var user = UseCasesTestData.ValidUser;
+        var userId = UserUseCasesTestData.ValidUserId;
+        var user = UserUseCasesTestData.ValidUser;
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -33,7 +33,7 @@ public class GetUserByIdUseCaseTests
 
         _mapperMock
             .Setup(x => x.Map<UserGetDto>(user))
-            .Returns(UseCasesTestData.ValidUserDto);
+            .Returns(UserUseCasesTestData.ValidUserDto);
 
         // Act
         var result = await _getUserByIdUseCase.ExecuteAsync(userId, ct);
@@ -122,9 +122,9 @@ public class GetUserByIdUseCaseTests
     public async Task ExecuteAsync_MapperThrowsException_PropagatesException()
     {
         // Arrange
-        var userId = UseCasesTestData.ValidUserId;
+        var userId = UserUseCasesTestData.ValidUserId;
         var ct = CancellationToken.None;
-        var user = UseCasesTestData.ValidUser;
+        var user = UserUseCasesTestData.ValidUser;
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _usersRepositoryMock

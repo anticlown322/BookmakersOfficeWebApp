@@ -23,11 +23,11 @@ public class GetUserByNameUseCaseTests
     public async Task ExecuteAsync_UserExists_ReturnsMappedUserDto()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
-        var userDto = UseCasesTestData.ValidUserDto;
+        var user = UserUseCasesTestData.ValidUser;
+        var userDto = UserUseCasesTestData.ValidUserDto;
         var username = user.UserName;
         var ct = CancellationToken.None;
-        
+
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ReturnsAsync(user);
@@ -41,11 +41,11 @@ public class GetUserByNameUseCaseTests
 
         // Assert
         result.UserName.Should().Be(userDto.UserName);
-        
+
         _usersRepositoryMock.Verify(
             x => x.GetUserByNameAsync(username, ct),
             Times.Once);
-        
+
         _mapperMock.Verify(
             x => x.Map<UserGetDto>(user),
             Times.Once);
@@ -57,7 +57,7 @@ public class GetUserByNameUseCaseTests
         // Arrange
         var username = "nonExistingUser";
         var ct = CancellationToken.None;
-        
+
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ReturnsAsync((Domain.Models.User?)null);
@@ -70,11 +70,11 @@ public class GetUserByNameUseCaseTests
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {username} does not exist in the database.");
 
-        
+
         _usersRepositoryMock.Verify(
             x => x.GetUserByNameAsync(username, ct),
             Times.Once);
-        
+
         _mapperMock.Verify(
             x => x.Map<UserGetDto>(It.IsAny<Domain.Models.User>()),
             Times.Never);
@@ -84,7 +84,7 @@ public class GetUserByNameUseCaseTests
     public async Task ExecuteAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = UserUseCasesTestData.ValidUser.UserName;
         var ct = new CancellationToken(canceled: true);
 
         // Act
@@ -92,7 +92,7 @@ public class GetUserByNameUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
-        
+
         _usersRepositoryMock.Verify(
             x => x.GetUserByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Never);
@@ -102,7 +102,7 @@ public class GetUserByNameUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = UserUseCasesTestData.ValidUser.UserName;
         var ct = CancellationToken.None;
         var expectedException = new Exception("Database error");
 
@@ -123,7 +123,7 @@ public class GetUserByNameUseCaseTests
     public async Task ExecuteAsync_MapperThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = UserUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var expectedException = new AutoMapperMappingException("Mapping failed");
@@ -143,6 +143,5 @@ public class GetUserByNameUseCaseTests
         var exception = await act.Should().ThrowAsync<AutoMapperMappingException>();
 
         exception.Which.Message.Should().Be(expectedException.Message);
-
     }
 }

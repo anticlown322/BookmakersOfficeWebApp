@@ -24,7 +24,7 @@ public class GetBetByIdQueryHandlerTests
         var query = new GetBetByIdQuery(existingBetId);
         var cancellationToken = CancellationToken.None;
 
-        var expectedBet = UseCasesTestData.CreateTestBet(existingBetId);
+        var expectedBet = BetsUseCasesTestData.CreateTestBet(existingBetId);
         _betRepositoryMock
             .Setup(x => x.GetByIdAsync(existingBetId, cancellationToken))
             .ReturnsAsync(expectedBet);
@@ -73,8 +73,8 @@ public class GetBetByIdQueryHandlerTests
         var query = new GetBetByIdQuery(targetBetId);
         var cancellationToken = CancellationToken.None;
 
-        var targetBet = UseCasesTestData.CreateTestBet(targetBetId);
-        var otherBet = UseCasesTestData.CreateTestBet(otherBetId);
+        var targetBet = BetsUseCasesTestData.CreateTestBet(targetBetId);
+        var otherBet = BetsUseCasesTestData.CreateTestBet(otherBetId);
 
         _betRepositoryMock
             .Setup(x => x.GetByIdAsync(targetBetId, cancellationToken))

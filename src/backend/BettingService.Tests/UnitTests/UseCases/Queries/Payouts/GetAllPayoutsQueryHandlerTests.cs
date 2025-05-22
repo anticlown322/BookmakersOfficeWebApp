@@ -29,7 +29,7 @@ public class GetAllPayoutsQueryHandlerTests
         var query = new GetAllPayoutsQuery(parameters);
         var cancellationToken = CancellationToken.None;
 
-        var pagedPayouts = UseCasesTestData.GetTestPagedPayouts(parameters);
+        var pagedPayouts = PayoutsUseCasesTestData.GetTestPagedPayouts(parameters);
         var testPayouts = pagedPayouts.ToList();
 
         var expectedDtos = testPayouts.Select(p => new GetPayoutDto(

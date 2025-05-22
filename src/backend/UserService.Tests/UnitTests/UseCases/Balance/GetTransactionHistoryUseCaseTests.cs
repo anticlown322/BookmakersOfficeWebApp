@@ -25,12 +25,12 @@ public class GetTransactionHistoryUseCaseTests
     public async Task ExecuteAsync_ValidRequest_ReturnsMappedTransactions()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var transactionParameters = new TransactionParameters();
-        var transactions = UseCasesTestData.CreateTestTransactions(3);
-        var transactionDtos = UseCasesTestData.CreateTestTransactionDtos(3);
+        var transactions = BalanceUseCasesTestData.CreateTestTransactions(3);
+        var transactionDtos = BalanceUseCasesTestData.CreateTestTransactionDtos(3);
 
         _usersRepositoryMock
             .Setup(x => x.GetUserByNameAsync(username, ct))
@@ -81,7 +81,7 @@ public class GetTransactionHistoryUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedBeforeUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var username = UseCasesTestData.ValidUser.UserName;
+        var username = BalanceUseCasesTestData.ValidUser.UserName;
         var ct = new CancellationToken(canceled: true);
         var transactionParameters = new TransactionParameters();
 
@@ -96,7 +96,7 @@ public class GetTransactionHistoryUseCaseTests
     public async Task ExecuteAsync_CancellationRequestedAfterUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var cts = new CancellationTokenSource();
         var transactionParameters = new TransactionParameters();
@@ -117,7 +117,7 @@ public class GetTransactionHistoryUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var transactionParameters = new TransactionParameters();
@@ -134,18 +134,17 @@ public class GetTransactionHistoryUseCaseTests
         var exception = await act.Should().ThrowAsync<Exception>();
 
         exception.Which.Message.Should().Be(expectedException.Message);
-
     }
 
     [Fact]
     public async Task ExecuteAsync_MapperThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.ValidUser;
+        var user = BalanceUseCasesTestData.ValidUser;
         var username = user.UserName;
         var ct = CancellationToken.None;
         var transactionParameters = new TransactionParameters();
-        var transactions = UseCasesTestData.CreateTestTransactions(2);
+        var transactions = BalanceUseCasesTestData.CreateTestTransactions(2);
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _usersRepositoryMock
@@ -167,6 +166,5 @@ public class GetTransactionHistoryUseCaseTests
         var exception = await act.Should().ThrowAsync<AutoMapperMappingException>();
 
         exception.Which.Message.Should().Be(expectedException.Message);
-
     }
 }

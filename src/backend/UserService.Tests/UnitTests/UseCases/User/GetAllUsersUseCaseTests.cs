@@ -25,8 +25,8 @@ public class GetAllUsersUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var userParams = new UserParameters();
-        var testUsers = UseCasesTestData.CreateTestUsers(3);
-        var testUserDtos = UseCasesTestData.CreateTestUserDtos(3);
+        var testUsers = UserUseCasesTestData.CreateTestUsers(3);
+        var testUserDtos = UserUseCasesTestData.CreateTestUserDtos(3);
 
         _usersRepositoryMock
             .Setup(x => x.GetAllUsersAsync(userParams, ct))
@@ -58,8 +58,8 @@ public class GetAllUsersUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var userParams = new UserParameters();
-        var emptyUsers = UseCasesTestData.CreateTestUsers(0);
-        var emptyDtos = UseCasesTestData.CreateTestUserDtos(0);
+        var emptyUsers = UserUseCasesTestData.CreateTestUsers(0);
+        var emptyDtos = UserUseCasesTestData.CreateTestUserDtos(0);
 
         _usersRepositoryMock
             .Setup(x => x.GetAllUsersAsync(userParams, ct))
@@ -122,7 +122,7 @@ public class GetAllUsersUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var userParams = new UserParameters();
-        var testUsers = UseCasesTestData.CreateTestUsers(2);
+        var testUsers = UserUseCasesTestData.CreateTestUsers(2);
         var expectedException = new AutoMapperMappingException("Mapping failed");
 
         _usersRepositoryMock

@@ -20,7 +20,7 @@ public class ConfirmEmailUseCaseTests
     public async Task ExecuteAsync_ValidConfirmation_ConfirmsEmail()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var token = "email_confirmation_token";
@@ -59,8 +59,8 @@ public class ConfirmEmailUseCaseTests
             .ReturnsAsync((Domain.Models.User?)null);
 
         // Act and Assert
-        var exception = await FluentActions.Invoking(() => 
-            _confirmEmailUseCase.ExecuteAsync(username, ct))
+        var exception = await FluentActions.Invoking(() =>
+                _confirmEmailUseCase.ExecuteAsync(username, ct))
             .Should().ThrowAsync<UserNotFoundByNameException>();
 
         exception.Which.Message.Should().Be($"The user with name: {username} does not exist in the database.");
@@ -70,7 +70,7 @@ public class ConfirmEmailUseCaseTests
     public async Task ExecuteAsync_EmailAlreadyConfirmed_ThrowsEmailCanNotBeConfirmedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithConfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithConfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
 
@@ -79,8 +79,8 @@ public class ConfirmEmailUseCaseTests
             .ReturnsAsync(user);
 
         // Act and Assert
-        var exception = await FluentActions.Invoking(() => 
-            _confirmEmailUseCase.ExecuteAsync(username, ct))
+        var exception = await FluentActions.Invoking(() =>
+                _confirmEmailUseCase.ExecuteAsync(username, ct))
             .Should().ThrowAsync<EmailCanNotBeConfirmedException>();
 
         exception.Which.Message.Should().Contain("already confirmed");
@@ -90,7 +90,7 @@ public class ConfirmEmailUseCaseTests
     public async Task ExecuteAsync_ConfirmationFails_ThrowsEmailCanNotBeConfirmedException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var token = "email_confirmation_token";
@@ -110,8 +110,8 @@ public class ConfirmEmailUseCaseTests
             .ReturnsAsync(failedResult);
 
         // Act and Assert
-        await FluentActions.Invoking(() => 
-            _confirmEmailUseCase.ExecuteAsync(username, ct))
+        await FluentActions.Invoking(() =>
+                _confirmEmailUseCase.ExecuteAsync(username, ct))
             .Should().ThrowAsync<EmailCanNotBeConfirmedException>();
     }
 
@@ -123,8 +123,8 @@ public class ConfirmEmailUseCaseTests
         var ct = new CancellationToken(canceled: true);
 
         // Act and Assert
-        await FluentActions.Invoking(() => 
-            _confirmEmailUseCase.ExecuteAsync(username, ct))
+        await FluentActions.Invoking(() =>
+                _confirmEmailUseCase.ExecuteAsync(username, ct))
             .Should().ThrowAsync<OperationCanceledException>();
     }
 
@@ -132,7 +132,7 @@ public class ConfirmEmailUseCaseTests
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithUnconfirmedEmail();
+        var user = AccountUseCasesTestData.CreateUserWithUnconfirmedEmail();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var expectedException = new Exception("Database error");
@@ -142,8 +142,8 @@ public class ConfirmEmailUseCaseTests
             .ThrowsAsync(expectedException);
 
         // Act and Assert
-        var exception = await FluentActions.Invoking(() => 
-            _confirmEmailUseCase.ExecuteAsync(username, ct))
+        var exception = await FluentActions.Invoking(() =>
+                _confirmEmailUseCase.ExecuteAsync(username, ct))
             .Should().ThrowAsync<Exception>();
 
         exception.Which.Message.Should().Be(expectedException.Message);

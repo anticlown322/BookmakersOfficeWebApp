@@ -23,7 +23,7 @@ public class WithdrawFromUserBalanceUseCaseTests
     public async Task ExecuteAsync_ValidWithdraw_UpdatesUserBalance()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(1000m);
+        var user = BalanceUseCasesTestData.CreateUserWithBalance(1000m);
         var username = user.UserName;
         var ct = CancellationToken.None;
         var initialBalance = user.Balance.CurrentAmount;
@@ -47,7 +47,7 @@ public class WithdrawFromUserBalanceUseCaseTests
         user.Balance.Transactions.First().Amount.Should().Be(withdrawAmount);
         user.Balance.Transactions.First().OperationType.Should()
             .BeEquivalentTo(BalanceOperationTypesAndStatuses.WithdrawOperation);
-        
+
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(username, ct), Times.Once);
         _usersRepositoryMock.Verify(x => x.UpdateUserAsync(user, ct), Times.Once);
     }
@@ -71,14 +71,13 @@ public class WithdrawFromUserBalanceUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {username} does not exist in the database.");
-
     }
 
     [Fact]
     public async Task ExecuteAsync_BalanceIsNull_ThrowsBalanceDataIsNotFoundException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithoutBalance();
+        var user = BalanceUseCasesTestData.CreateUserWithoutBalance();
         var username = user.UserName;
         var ct = CancellationToken.None;
         var withdrawRequest = new WithdrawRequestDto(500m, "Test withdraw");
@@ -94,14 +93,13 @@ public class WithdrawFromUserBalanceUseCaseTests
         await act.Should()
             .ThrowAsync<BalanceDataIsNotFoundException>()
             .WithMessage($"Balance data is incorrect or balance can not be found for user {username}. ");
-
     }
 
     [Fact]
     public async Task ExecuteAsync_InsufficientFunds_ThrowsInvalidBalanceWithdrawException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(100m);
+        var user = BalanceUseCasesTestData.CreateUserWithBalance(100m);
         var username = user.UserName;
         var ct = CancellationToken.None;
         var withdrawRequest = new WithdrawRequestDto(500m, "Test withdraw");
@@ -115,7 +113,6 @@ public class WithdrawFromUserBalanceUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<InvalidBalanceWithdrawException>();
-
     }
 
     [Fact]
@@ -131,14 +128,13 @@ public class WithdrawFromUserBalanceUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
-
     }
 
     [Fact]
     public async Task ExecuteAsync_CancellationRequestedAfterUserLookup_ThrowsOperationCanceledException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(1000m);
+        var user = BalanceUseCasesTestData.CreateUserWithBalance(1000m);
         var username = user.UserName;
         var cts = new CancellationTokenSource();
         var withdrawRequest = new WithdrawRequestDto(500m, "Test withdraw");
@@ -153,14 +149,13 @@ public class WithdrawFromUserBalanceUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();
-
     }
 
     [Fact]
     public async Task ExecuteAsync_RepositoryThrowsException_PropagatesException()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(1000m);
+        var user = BalanceUseCasesTestData.CreateUserWithBalance(1000m);
         var username = user.UserName;
         var ct = CancellationToken.None;
         var withdrawRequest = new WithdrawRequestDto(500m, "Test withdraw");
@@ -177,14 +172,13 @@ public class WithdrawFromUserBalanceUseCaseTests
         var exception = await act.Should().ThrowAsync<Exception>();
 
         exception.Which.Message.Should().Be(expectedException.Message);
-
     }
 
     [Fact]
     public async Task ExecuteAsync_TransactionAddedCorrectly()
     {
         // Arrange
-        var user = UseCasesTestData.CreateUserWithBalance(1000m);
+        var user = BalanceUseCasesTestData.CreateUserWithBalance(1000m);
         user.Balance.Transactions = new List<BalanceTransaction>();
         var username = user.UserName;
         var ct = CancellationToken.None;
