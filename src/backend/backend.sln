@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.Tests", "UserSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BettingService.Tests", "BettingService.Tests\BettingService.Tests.csproj", "{98B74051-8BFB-44FE-8927-F64EC1E39058}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportDataService.Tests", "SportDataService.Tests\SportDataService.Tests.csproj", "{6E285821-AB3F-4D7F-9848-DFCB0515C4BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,7 @@ Global
 		{59319367-7C47-4329-BCFA-B70438E89FDA} = {F16F9D01-68A9-4EFE-8B4D-2432C7B350C0}
 		{A03887FD-B57D-451A-813D-47119E34355A} = {6C016A47-8128-457A-9CAC-E4827F68E39B}
 		{98B74051-8BFB-44FE-8927-F64EC1E39058} = {F2174BD1-C0DE-4E16-A6DA-A62852EE8AA2}
+		{6E285821-AB3F-4D7F-9848-DFCB0515C4BE} = {F16F9D01-68A9-4EFE-8B4D-2432C7B350C0}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C8E0F687-BEBC-4114-8DF4-8EE16581C189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -126,5 +129,9 @@ Global
 		{98B74051-8BFB-44FE-8927-F64EC1E39058}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98B74051-8BFB-44FE-8927-F64EC1E39058}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98B74051-8BFB-44FE-8927-F64EC1E39058}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E285821-AB3F-4D7F-9848-DFCB0515C4BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E285821-AB3F-4D7F-9848-DFCB0515C4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E285821-AB3F-4D7F-9848-DFCB0515C4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E285821-AB3F-4D7F-9848-DFCB0515C4BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

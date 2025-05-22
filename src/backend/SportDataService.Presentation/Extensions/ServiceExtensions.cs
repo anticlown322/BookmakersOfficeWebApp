@@ -79,6 +79,7 @@ public static class ServiceExtensions
         services.AddScoped<IResultsDataParser, ResultsDataParser>();
         services.AddScoped<IDataCollectionService, DataCollectionService>();
     }
+
     public static void ConfigureBackgroundJobService(this IServiceCollection services) =>
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
 

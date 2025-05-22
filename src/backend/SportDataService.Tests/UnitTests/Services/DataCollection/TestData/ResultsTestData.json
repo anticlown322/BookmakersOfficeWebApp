@@ -1,0 +1,62 @@
+{
+    "sports": [
+        {
+            "id": "29086",
+            "name": "Киберспорт",
+            "sortOrder": "1++-O++-4+54S"
+        }
+    ],
+    "competitions": [
+        {
+            "id": "100305",
+            "name": "Counter-Strike. H2H CS. 2X2. Москва. Bo1",
+            "sportId": "29086",
+            "sortOrder": "1++-O++-4+54S&zzzpw+0QD+6Fp+0QD+6Om+0QD+MTF",
+            "regionId": "0"
+        }
+    ],
+    "events": [
+        {
+            "id": "55544495",
+            "name": "NEO-NOIR BROS – ASIIMOV BOYS",
+            "kindId": "1",
+            "competitionId": "100305",
+            "sortOrder": "8nGK7v91Hsej",
+            "startTime": 1747716600,
+            "team1Id": "661011",
+            "team2Id": "661008",
+            "team1": "NEO-NOIR BROS",
+            "team2": "ASIIMOV BOYS",
+            "status": 2
+        },
+        {
+            "id": "55544494",
+            "name": "ASIIMOV BOYS – NEO-NOIR BROS",
+            "kindId": "1",
+            "competitionId": "100305",
+            "sortOrder": "8nGd7v81Hsei",
+            "startTime": 1747717740,
+            "team1Id": "661008",
+            "team2Id": "661011",
+            "team1": "ASIIMOV BOYS",
+            "team2": "NEO-NOIR BROS",
+            "status": 2
+        }
+    ],
+    "eventMiscs": [
+                {
+            "id": "55544495",
+            "score1": 7,
+            "score2": 9,
+            "subScores": [],
+            "winningTeam": 2
+        },
+                {
+            "id": "55544494",
+            "score1": 9,
+            "score2": 7,
+            "subScores": [],
+            "winningTeam": 1
+        }
+    ]
+}

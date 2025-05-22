@@ -1,0 +1,43 @@
+﻿{
+  "tournamentInfos": [
+    {
+      "id": 836,
+      "caption": "ESL Impact League"
+    }
+  ],
+  "sports": [
+    {
+      "id": 78380,
+      "parentId": 29086,
+      "name": "Counter-Strike. ESL Impact League. Bo1",
+      "tournamentInfoId": 836
+    }
+  ],
+  "events": [
+    {
+      "id": 55403827,
+      "sportId": 78380,
+      "rootKind": 1,
+      "team1Id": 617931,
+      "team2Id": 807126,
+      "team1": "FURIA Female (ж)",
+      "team2": "DMS (ж)",
+      "startTime": 1747933200
+    }
+  ],
+  "customFactors": [
+    {
+      "e": 55403827,
+      "factors": [
+        {
+          "f": 921,
+          "v": 1.57
+        },
+        {
+          "f": 923,
+          "v": 2.25
+        }
+      ]
+    }
+  ]
+}
