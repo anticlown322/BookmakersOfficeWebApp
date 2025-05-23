@@ -48,7 +48,8 @@ public class RegisterUserUseCaseTests
 
         // Act
         var result = await _registerUserUseCase.ExecuteAsync(registrationDto, ct);
-        
+
+        // Assert
         result.Succeeded.Should().BeTrue();
         user.Profile.UserId.Should().Be(user.Id);
         user.Balance.UserId.Should().Be(user.Id);
@@ -56,7 +57,8 @@ public class RegisterUserUseCaseTests
 
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(registrationDto.UserName, ct), Times.Once);
         _mapperMock.Verify(x => x.Map<Domain.Models.User>(registrationDto), Times.Once);
-        _usersRepositoryMock.Verify(x => x.CreateUserAsync(user, registrationDto.Password, registrationDto.Roles, ct), Times.Once);
+        _usersRepositoryMock.Verify(x => x.CreateUserAsync(user, registrationDto.Password, registrationDto.Roles, ct),
+            Times.Once);
         _usersRepositoryMock.Verify(x => x.UpdateUserAsync(user, ct), Times.Once);
     }
 
@@ -108,9 +110,8 @@ public class RegisterUserUseCaseTests
 
         // Assert
         await act.Should().ThrowAsync<UserCanNonBeRegistered>();
-
     }
-    
+
     [Fact]
     public async Task ExecuteAsync_EmptyRoles_CreatesUserWithEmptyRoles()
     {
@@ -141,6 +142,7 @@ public class RegisterUserUseCaseTests
 
         // Assert
         result.Succeeded.Should().BeTrue();
-        _usersRepositoryMock.Verify(x => x.CreateUserAsync(user, registrationDto.Password, new List<string>(), ct), Times.Once);
+        _usersRepositoryMock.Verify(x => x.CreateUserAsync(user, registrationDto.Password, new List<string>(), ct),
+            Times.Once);
     }
 }

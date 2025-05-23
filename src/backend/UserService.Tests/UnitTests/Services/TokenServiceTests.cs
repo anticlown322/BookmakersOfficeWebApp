@@ -10,6 +10,7 @@ namespace UserService.Tests.UnitTests.Services;
 public class TokenServiceTests
 {
     private readonly Mock<IUsersRepository> _usersRepositoryMock = new();
+
     private readonly JwtSettings _jwtSettings = new()
     {
         SecretKey = "SuperSecretKey1234567890GodDamnOppsWon'tFindIt",

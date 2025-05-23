@@ -23,7 +23,7 @@ public class RefreshTokenForAuthUseCaseTests
 
         _jwtSettingsMock = new Mock<IOptions<JwtSettings>>();
         _jwtSettingsMock.Setup(x => x.Value).Returns(AuthUseCasesTestData.ValidJwtSettings);
-        
+
         _refreshTokenUseCase = new RefreshTokenForAuthUseCase(
             _jwtSettingsMock.Object,
             _usersRepositoryMock.Object,
@@ -52,7 +52,7 @@ public class RefreshTokenForAuthUseCaseTests
 
         // Assert
         result.Should().BeEquivalentTo(newAccessToken);
-        
+
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(user.UserName, ct), Times.Once);
         _tokenServiceMock.Verify(x => x.CreateAccessToken(user), Times.Once);
     }
@@ -61,7 +61,8 @@ public class RefreshTokenForAuthUseCaseTests
     public async Task ExecuteAsync_UserNotFound_ThrowsRefreshTokenBadRequest()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken,
+            AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -80,7 +81,8 @@ public class RefreshTokenForAuthUseCaseTests
     {
         // Arrange
         var user = AuthUseCasesTestData.CreateAuthenticatedUser();
-        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken,
+            AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         _usersRepositoryMock
@@ -108,8 +110,7 @@ public class RefreshTokenForAuthUseCaseTests
             .ReturnsAsync(user);
 
         // Act and Assert
-        await Assert.ThrowsAsync<RefreshTokenBadRequest>(
-            () => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
+        await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
     }
 
     [Fact]
@@ -135,30 +136,29 @@ public class RefreshTokenForAuthUseCaseTests
         await act.Should()
             .ThrowAsync<TokenNotCreatedException>()
             .WithMessage($"Cannot create access or refresh token {nameof(tokensDto.AccessToken)}.");
-
     }
 
     [Fact]
     public async Task ExecuteAsync_CancellationRequested_ThrowsOperationCanceledException()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken,
+            AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = new CancellationToken(canceled: true);
 
         // Act and Assert
-        await Assert.ThrowsAsync<OperationCanceledException>(
-            () => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
     }
 
     [Fact]
     public async Task ExecuteAsync_InvalidAccessToken_ThrowsSecurityTokenException()
     {
         // Arrange
-        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken, AuthUseCasesTestData.ValidTokens.RefreshToken);
+        var tokensDto = new TokensRefreshDto(AuthUseCasesTestData.ValidTokens.AccessToken,
+            AuthUseCasesTestData.ValidTokens.RefreshToken);
         var ct = CancellationToken.None;
 
         // Act and Assert
-        await Assert.ThrowsAsync<RefreshTokenBadRequest>(
-            () => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
+        await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _refreshTokenUseCase.ExecuteAsync(tokensDto, ct));
     }
 }

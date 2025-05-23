@@ -7,7 +7,7 @@ namespace UserService.Tests.UnitTests.UseCases.User;
 public static class UserUseCasesTestData
 {
     public static Guid ValidUserId = Guid.NewGuid();
-    
+
     public static Domain.Models.User ValidUser => new()
     {
         Id = ValidUserId.ToString(),
@@ -18,8 +18,8 @@ public static class UserUseCasesTestData
     public static UserGetDto ValidUserDto => new()
     {
         UserName = "testUser"
-    };   
-    
+    };
+
     public static PagedList<Domain.Models.User> CreateTestUsers(int count)
     {
         var users = Enumerable.Range(1, count)
@@ -36,5 +36,4 @@ public static class UserUseCasesTestData
     public static IEnumerable<UserGetDto> CreateTestUserDtos(int count) =>
         Enumerable.Range(1, count)
             .Select(i => new UserGetDto { UserName = $"user{i}" });
-
 }

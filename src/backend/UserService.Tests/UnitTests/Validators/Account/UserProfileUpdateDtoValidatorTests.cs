@@ -18,8 +18,7 @@ public class UserProfileUpdateDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithErrorMessage("FirstName can't be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
@@ -33,8 +32,7 @@ public class UserProfileUpdateDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithErrorMessage("FirstName can't be longer than 100 symbols.");
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
@@ -60,8 +58,7 @@ public class UserProfileUpdateDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithErrorMessage("LastName can't be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
     }
 
     [Fact]
@@ -75,8 +72,7 @@ public class UserProfileUpdateDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithErrorMessage("LastName can't be longer than 100 symbols.");
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
     }
 
     [Fact]

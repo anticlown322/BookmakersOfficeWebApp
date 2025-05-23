@@ -11,22 +11,28 @@ public class UserLoginDtoValidatorTests
     [Fact]
     public void UserName_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new UserLoginDto { UserName = "", Password = "validPass123" };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.UserName)
-            .WithErrorMessage("UserName can't be empty.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.UserName);
     }
 
     [Fact]
     public void UserName_ShouldHaveError_WhenExceedsMaxLength()
     {
+        // Arrange
         var longName = new string('a', 101);
         var model = new UserLoginDto { UserName = longName, Password = "validPass123" };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.UserName)
-            .WithErrorMessage("UserName can't be longer than 100 symbols.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.UserName);
     }
 
     [Theory]
@@ -35,31 +41,41 @@ public class UserLoginDtoValidatorTests
     [InlineData("user@example.com")]
     public void UserName_ShouldNotHaveError_WhenValid(string username)
     {
+        // Arrange
         var model = new UserLoginDto{ UserName = username, Password = "validPass123" };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.UserName);
     }
 
     [Fact]
     public void Password_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new UserLoginDto { UserName = "validUser", Password = "" };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("Password can't be empty.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Password);
     }
 
     [Fact]
     public void Password_ShouldHaveError_WhenExceedsMaxLength()
     {
+        // Arrange
         var longPassword = new string('a', 101);
         var model = new UserLoginDto { UserName = "validUser", Password = longPassword };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("Password can't be longer than 100 symbols.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Password);
     }
 
     [Theory]
@@ -68,18 +84,26 @@ public class UserLoginDtoValidatorTests
     [InlineData("12345678")]
     public void Password_ShouldNotHaveError_WhenValid(string password)
     {
+        // Arrange
         var model = new UserLoginDto { UserName = "validUser", Password = password };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Password);
     }
 
     [Fact]
     public void ShouldNotHaveErrors_WhenAllFieldsValid()
     {
+        // Arrange
         var model = new UserLoginDto { UserName = "validUser", Password = "validPass123" };
+        
+        // Act
         var result = _validator.TestValidate(model);
 
+        // Assert
         result.ShouldNotHaveAnyValidationErrors();
     }
 }

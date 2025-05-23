@@ -18,7 +18,7 @@ public class GetTournamentResultByIdUseCaseTests
         _tournamentResultRepositoryMock = new Mock<ITournamentResultRepository>();
         _mapperMock = new Mock<IMapper>();
         _getTournamentResultByIdUseCase = new GetTournamentResultByIdUseCase(
-            _tournamentResultRepositoryMock.Object, 
+            _tournamentResultRepositoryMock.Object,
             _mapperMock.Object);
     }
 

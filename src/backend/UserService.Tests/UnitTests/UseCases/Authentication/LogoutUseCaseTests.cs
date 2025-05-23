@@ -23,7 +23,7 @@ public class LogoutUseCaseTests
         var user = AuthUseCasesTestData.CreateAuthenticatedUser();
         user.RefreshToken = "valid_refresh_token";
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(1);
-        
+
         var logoutDto = new UserLogoutDto { UserName = user.UserName };
         var ct = CancellationToken.None;
 
@@ -41,7 +41,7 @@ public class LogoutUseCaseTests
         // Assert
         user.RefreshToken.Should().BeNull();
         user.RefreshTokenExpiryTime.Should().BeOnOrBefore(DateTime.UtcNow);
-        
+
         _usersRepositoryMock.Verify(x => x.GetUserByNameAsync(logoutDto.UserName, ct), Times.Once);
         _usersRepositoryMock.Verify(x => x.UpdateUserAsync(user, ct), Times.Once);
     }
@@ -64,8 +64,6 @@ public class LogoutUseCaseTests
         await act.Should()
             .ThrowAsync<UserNotFoundByNameException>()
             .WithMessage($"The user with name: {logoutDto.UserName} does not exist in the database.");
-
-
     }
 
     [Fact]
@@ -100,8 +98,7 @@ public class LogoutUseCaseTests
 
         // Assert
         var exception = await act.Should().ThrowAsync<Exception>();
-            
-        exception.Which.Message.Should().Be(expectedException.Message);
 
+        exception.Which.Message.Should().Be(expectedException.Message);
     }
 }

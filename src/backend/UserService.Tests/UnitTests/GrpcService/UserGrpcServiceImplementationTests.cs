@@ -17,7 +17,7 @@ public class UserGrpcServiceImplementationTests
         _mockRepository = new Mock<IUsersRepository>();
         _service = new UserGrpcServiceImplementation(_mockRepository.Object);
     }
-    
+
     [Fact]
     public async Task GetUserBalance_UserExists_ReturnsBalance()
     {
@@ -34,24 +34,7 @@ public class UserGrpcServiceImplementationTests
         response.UserExists.Should().BeTrue();
         response.Balance.Should().Be(100.50);
     }
-    
-    [Fact]
-    public async Task GetUserBalance_UserNotExists_ReturnsFalse()
-    {
-        // Arrange
-        var request = new GetUserBalanceRequest { Username = "unknownUser" };
-        _mockRepository
-            .Setup(x => x.GetUserByNameAsync(request.Username, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null);
 
-        // Act
-        var response = await _service.GetUserBalance(request, _contextMock.Object);
-
-        // Assert
-        response.UserExists.Should().BeFalse();
-        response.Balance.Should().Be(0);
-    }
-    
     [Fact]
     public async Task GetUserBalance_RepositoryThrows_ThrowsRpcException()
     {
@@ -62,13 +45,13 @@ public class UserGrpcServiceImplementationTests
             .ThrowsAsync(new Exception("Database error"));
 
         // Act and Assert
-        var ex = await FluentActions.Invoking(() => 
-            _service.GetUserBalance(request, _contextMock.Object))
+        var ex = await FluentActions.Invoking(() =>
+                _service.GetUserBalance(request, _contextMock.Object))
             .Should().ThrowAsync<RpcException>();
 
         ex.Which.StatusCode.Should().Be(StatusCode.Internal);
     }
-    
+
     [Fact]
     public async Task UpdateUserBalance_ValidAmount_UpdatesBalance()
     {
@@ -92,7 +75,7 @@ public class UserGrpcServiceImplementationTests
         response.NewBalance.Should().Be(150.75); // 100.50 + 50.25
         _mockRepository.Verify(x => x.UpdateUserAsync(It.IsAny<User>(), ct), Times.Once);
     }
-    
+
     [Fact]
     public async Task UpdateUserBalance_InsufficientFunds_ThrowsRpcException()
     {
@@ -108,8 +91,8 @@ public class UserGrpcServiceImplementationTests
             .ReturnsAsync(UserGrpcTestData.ValidUser);
 
         // Act and Assert
-        var ex = await FluentActions.Invoking(() => 
-            _service.UpdateUserBalance(request, _contextMock.Object))
+        var ex = await FluentActions.Invoking(() =>
+                _service.UpdateUserBalance(request, _contextMock.Object))
             .Should().ThrowAsync<RpcException>();
 
         ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);

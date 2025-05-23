@@ -12,18 +12,18 @@ public class PrematchDataParserFileTests
     {
         _parser = new PrematchDataParser();
     }
-    
+
     private JToken LoadTestData(string fileName)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = $"SportDataService.Tests.UnitTests.Services.DataCollection.TestData.{fileName}";
-    
+
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {
             throw new FileNotFoundException($"Resource {resourceName} not found");
         }
-    
+
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
         return JToken.Parse(json);

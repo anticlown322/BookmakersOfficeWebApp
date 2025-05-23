@@ -17,7 +17,8 @@ public class GetTournamentByTournamentIdUseCaseTests
     {
         _tournamentRepositoryMock = new Mock<ITournamentRepository>();
         _mapperMock = new Mock<IMapper>();
-        _getTournamentByTournamentIdUseCase = new GetTournamentByTournamentIdUseCase(_tournamentRepositoryMock.Object, _mapperMock.Object);
+        _getTournamentByTournamentIdUseCase =
+            new GetTournamentByTournamentIdUseCase(_tournamentRepositoryMock.Object, _mapperMock.Object);
     }
 
     [Fact]

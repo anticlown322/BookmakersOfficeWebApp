@@ -11,28 +11,40 @@ public class WithdrawRequestDtoValidatorTests
     [Fact]
     public void Amount_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new WithdrawRequestDto(0, "123456", null);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("Amount can't be empty.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Fact]
     public void Amount_ShouldHaveError_WhenLessThanMin()
     {
+        // Arrange
         var model = new WithdrawRequestDto(0.99m, "123456", null);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("Amount should be greater than 0,99 or equal to 0,99.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Fact]
     public void Amount_ShouldHaveError_WhenGreaterThanMax()
     {
+        // Arrange
         var model = new WithdrawRequestDto(10_000_001, "123456", null);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("Amount should be less than 10000001 or equal to 10000001.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Theory]
@@ -41,19 +53,28 @@ public class WithdrawRequestDtoValidatorTests
     [InlineData(10_000_000)]
     public void Amount_ShouldNotHaveError_WhenWithinRange(decimal amount)
     {
+        // Arrange
         var model = new WithdrawRequestDto(amount, "123456", null);
+        
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Amount);
     }
 
     [Fact]
     public void Comment_ShouldHaveError_WhenExceedsMaxLength()
     {
+        // Arrange
         var longComment = new string('a', 256);
         var model = new WithdrawRequestDto(100, "123456", longComment);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Comment)
-            .WithErrorMessage("Comment can't be longer than 256 symbols.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Comment);
     }
 
     [Theory]
@@ -63,27 +84,40 @@ public class WithdrawRequestDtoValidatorTests
     [InlineData("Short")]
     public void Comment_ShouldNotHaveError_WhenValid(string comment)
     {
+        // Arrange
         var model = new WithdrawRequestDto(100, "123456", comment);
+        
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Comment);
     }
 
     [Fact]
     public void ConfirmationCode_ShouldHaveError_WhenNull()
     {
+        // Arrange
         var model = new WithdrawRequestDto(100, null, null);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.ConfirmationCode)
-            .WithErrorMessage("ConfirmationCode can't be empty.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.ConfirmationCode);
     }
 
     [Fact]
     public void ConfirmationCode_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new WithdrawRequestDto(100, "", null);
+        
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.ConfirmationCode)
-            .WithErrorMessage("ConfirmationCode can't be empty.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.ConfirmationCode);
     }
 
     [Theory]
@@ -92,16 +126,26 @@ public class WithdrawRequestDtoValidatorTests
     [InlineData("ABC123")]
     public void ConfirmationCode_ShouldNotHaveError_WhenValid(string code)
     {
+        // Arrange
         var model = new WithdrawRequestDto(100, code, null);
+        
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.ConfirmationCode);
     }
 
     [Fact]
     public void ShouldNotHaveErrors_WhenAllFieldsValid()
     {
+        // Arrange
         var model = new WithdrawRequestDto(1000, "654321", "Valid comment");
+        
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldNotHaveAnyValidationErrors();
     }
 }

@@ -29,10 +29,10 @@ public static class TournamentResultUseCasesTestData
         {
             MetaData = metaData
         };
-        
+
         return result;
     }
-    
+
     public static PagedList<Domain.Models.Results.TournamentResult> CreateTestTournamentResultsWithMetadata(int count)
     {
         var results = Enumerable.Range(1, count)
@@ -65,7 +65,7 @@ public static class TournamentResultUseCasesTestData
         {
             MetaData = metaData
         };
-        
+
         return result;
     }
 

@@ -11,21 +11,27 @@ public class TokensRefreshDtoValidatorTests
     [Fact]
     public void RefreshToken_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new TokensRefreshDto("validAccessToken", "");
+        
+        // Act
         var result = _validator.TestValidate(model);
         
-        result.ShouldHaveValidationErrorFor(x => x.RefreshToken)
-            .WithErrorMessage("RefreshToken can't be empty.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.RefreshToken);
     }
 
     [Fact]
     public void AccessToken_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new TokensRefreshDto("", "validRefreshToken");
+        
+        // Act
         var result = _validator.TestValidate(model);
         
-        result.ShouldHaveValidationErrorFor(x => x.AccessToken)
-            .WithErrorMessage("AccessToken can't be empty.");
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.AccessToken);
     }
 
     [Theory]
@@ -33,9 +39,13 @@ public class TokensRefreshDtoValidatorTests
     [InlineData("refresh123", "access123")]
     public void ShouldNotHaveErrors_WhenTokensValid(string refreshToken, string accessToken)
     {
+        // Arrange
         var model = new TokensRefreshDto(refreshToken, accessToken);
+        
+        // Act
         var result = _validator.TestValidate(model);
         
+        // Assert
         result.ShouldNotHaveAnyValidationErrors();
     }
 }

@@ -22,7 +22,7 @@ public class DataCollectionServiceTests
             _prematchParserMock.Object,
             _resultsParserMock.Object);
     }
-    
+
     [Fact]
     public async Task GetTournamentsInfoAsync_ShouldReturnTournaments_WhenDataIsValid()
     {
@@ -46,7 +46,7 @@ public class DataCollectionServiceTests
         _prematchParserMock.Setup(x => x.LinkMatchesToTournaments(
                 It.IsAny<List<Tournament>>(),
                 It.IsAny<List<Match>>()))
-            .Callback<List<Tournament>, List<Match>>((t, m) => 
+            .Callback<List<Tournament>, List<Match>>((t, m) =>
             {
                 var tournamentDict = t.ToDictionary(t => t.TournamentId);
                 foreach (var match in m)
@@ -97,7 +97,7 @@ public class DataCollectionServiceTests
         _resultsParserMock.Setup(x => x.LinkMatchResultsToTournamentResults(
                 It.IsAny<List<TournamentResult>>(),
                 It.IsAny<List<MatchResult>>()))
-            .Callback<List<TournamentResult>, List<MatchResult>>((tr, mr) => 
+            .Callback<List<TournamentResult>, List<MatchResult>>((tr, mr) =>
             {
                 var tournamentDict = tr.ToDictionary(t => t.TournamentId);
                 foreach (var matchResult in mr)
@@ -146,12 +146,12 @@ public class DataCollectionServiceTests
         // Arrange
         var expectedDate = DateTime.Now.ToString("yyyy-MM-dd");
         var rawData = JToken.Parse("{}");
-        
+
         _apiDataServiceMock.Setup(x => x.GetResultsDataAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(rawData)
             .Callback<CancellationToken>(ct =>
             {
-                _apiDataServiceMock.Verify(x => 
+                _apiDataServiceMock.Verify(x =>
                     x.GetResultsDataAsync(It.Is<CancellationToken>(c => c == ct)), Times.Once);
             });
 
@@ -167,7 +167,7 @@ public class DataCollectionServiceTests
     {
         // Arrange
         var rawData = JToken.Parse("{}");
-        
+
         _apiDataServiceMock.Setup(x => x.GetMarketsDataAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(rawData);
         _prematchParserMock.Setup(x => x.ParseTournamentsPrematchData(rawData))

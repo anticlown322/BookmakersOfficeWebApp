@@ -42,7 +42,7 @@ public class GetAllUserBetsQueryHandlerTests
             parameters.PageSize);
 
         var expectedDtos = userBets.Select(b => new GetBetDto(
-            b.Id, b.Username, "match1", b.Amount, 1.5m, 
+            b.Id, b.Username, "match1", b.Amount, 1.5m,
             BetStatus.Pending, DateTime.Now, null));
 
         _betRepositoryMock

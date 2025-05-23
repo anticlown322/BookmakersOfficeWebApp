@@ -7,7 +7,6 @@ namespace SportDataService.Tests.UnitTests.UseCases.Match;
 
 public static class MatchUseCasesTestData
 {
-    
     public static PagedList<Domain.Models.Prematch.Match> CreateTestMatchesWithMetadata(int count)
     {
         var matches = Enumerable.Range(1, count)

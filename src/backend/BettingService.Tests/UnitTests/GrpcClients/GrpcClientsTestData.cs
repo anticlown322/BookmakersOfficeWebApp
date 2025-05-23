@@ -21,7 +21,7 @@ public static class GrpcClientsTestData
             NewBalance = newBalance
         };
     }
-    
+
     public static ValidateBetResponse CreateValidBetResponse(bool isValid = true, double odds = 2.0)
     {
         return new ValidateBetResponse
@@ -58,6 +58,7 @@ public static class GrpcClientsTestData
                 Status = ResultStatus.Ended
             });
         }
+
         return response;
     }
 }

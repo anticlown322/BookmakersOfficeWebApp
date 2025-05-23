@@ -34,11 +34,11 @@ public class HangfireJobExecutorTests
 
         // Assert
         _refreshTournamentsMock.Verify(
-            x => x.ExecuteAsync(It.IsAny<CancellationToken>()), 
+            x => x.ExecuteAsync(It.IsAny<CancellationToken>()),
             Times.Once);
-        
+
         _refreshResultsMock.Verify(
-            x => x.ExecuteAsync(It.IsAny<CancellationToken>()), 
+            x => x.ExecuteAsync(It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -56,11 +56,11 @@ public class HangfireJobExecutorTests
 
         // Assert
         _refreshResultsMock.Verify(
-            x => x.ExecuteAsync(It.IsAny<CancellationToken>()), 
+            x => x.ExecuteAsync(It.IsAny<CancellationToken>()),
             Times.Once);
-        
+
         _refreshTournamentsMock.Verify(
-            x => x.ExecuteAsync(It.IsAny<CancellationToken>()), 
+            x => x.ExecuteAsync(It.IsAny<CancellationToken>()),
             Times.Never);
     }
 

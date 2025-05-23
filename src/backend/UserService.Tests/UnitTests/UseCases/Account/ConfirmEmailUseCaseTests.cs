@@ -58,12 +58,13 @@ public class ConfirmEmailUseCaseTests
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ReturnsAsync((Domain.Models.User?)null);
 
-        // Act and Assert
-        var exception = await FluentActions.Invoking(() =>
-                _confirmEmailUseCase.ExecuteAsync(username, ct))
-            .Should().ThrowAsync<UserNotFoundByNameException>();
+        // Act
+        var act = () => _confirmEmailUseCase.ExecuteAsync(username, ct);
 
-        exception.Which.Message.Should().Be($"The user with name: {username} does not exist in the database.");
+        // Assert
+        await act.Should()
+            .ThrowAsync<UserNotFoundByNameException>()
+            .WithMessage($"The user with name: {username} does not exist in the database.");
     }
 
     [Fact]
@@ -78,12 +79,13 @@ public class ConfirmEmailUseCaseTests
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ReturnsAsync(user);
 
-        // Act and Assert
-        var exception = await FluentActions.Invoking(() =>
-                _confirmEmailUseCase.ExecuteAsync(username, ct))
-            .Should().ThrowAsync<EmailCanNotBeConfirmedException>();
+        // Act
+        var act = () => _confirmEmailUseCase.ExecuteAsync(username, ct);
 
-        exception.Which.Message.Should().Contain("already confirmed");
+        // Assert
+        await act.Should()
+            .ThrowAsync<EmailCanNotBeConfirmedException>()
+            .WithMessage("already confirmed");
     }
 
     [Fact]
@@ -109,10 +111,12 @@ public class ConfirmEmailUseCaseTests
             .Setup(x => x.ConfirmEmailAsync(user, token, ct))
             .ReturnsAsync(failedResult);
 
-        // Act and Assert
-        await FluentActions.Invoking(() =>
-                _confirmEmailUseCase.ExecuteAsync(username, ct))
-            .Should().ThrowAsync<EmailCanNotBeConfirmedException>();
+        // Act
+        var act = () => _confirmEmailUseCase.ExecuteAsync(username, ct);
+
+        // Assert
+        await act.Should()
+            .ThrowAsync<EmailCanNotBeConfirmedException>();
     }
 
     [Fact]
@@ -122,10 +126,12 @@ public class ConfirmEmailUseCaseTests
         var username = "testUser";
         var ct = new CancellationToken(canceled: true);
 
-        // Act and Assert
-        await FluentActions.Invoking(() =>
-                _confirmEmailUseCase.ExecuteAsync(username, ct))
-            .Should().ThrowAsync<OperationCanceledException>();
+        // Act
+        var act = () => _confirmEmailUseCase.ExecuteAsync(username, ct);
+
+        // Assert
+        await act.Should()
+            .ThrowAsync<OperationCanceledException>();
     }
 
     [Fact]
@@ -141,11 +147,12 @@ public class ConfirmEmailUseCaseTests
             .Setup(x => x.GetUserByNameAsync(username, ct))
             .ThrowsAsync(expectedException);
 
-        // Act and Assert
-        var exception = await FluentActions.Invoking(() =>
-                _confirmEmailUseCase.ExecuteAsync(username, ct))
-            .Should().ThrowAsync<Exception>();
+        // Act
+        var act = () => _confirmEmailUseCase.ExecuteAsync(username, ct);
 
-        exception.Which.Message.Should().Be(expectedException.Message);
+        // Assert
+        await act.Should()
+            .ThrowAsync<Exception>()
+            .WithMessage(expectedException.Message);
     }
 }

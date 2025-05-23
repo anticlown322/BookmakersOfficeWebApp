@@ -9,6 +9,7 @@ namespace UserService.Tests.UnitTests.Services;
 public class EmailServiceTests
 {
     private readonly Mock<IFluentEmail> _fluentEmailMock = new();
+
     private readonly EmailSettings _emailSettings = new()
     {
         SenderEmail = "noreply@test.com",
@@ -31,9 +32,9 @@ public class EmailServiceTests
         // Arrange
         const string email = "user@test.com";
         const string confirmationLink = "https://example.com/confirm?token=123";
-        const string expectedHtmlBody = $"Please, follow this link to confirm your account: <a href='{confirmationLink}'>Confirm</a>";
+        const string expectedHtmlBody =
+            $"Please, follow this link to confirm your account: <a href='{confirmationLink}'>Confirm</a>";
 
-        // Настраиваем цепочку вызовов:
         _fluentEmailMock
             .Setup(x => x.To(It.IsAny<string>()))
             .Returns(_fluentEmailMock.Object);
@@ -67,7 +68,6 @@ public class EmailServiceTests
         const string email = "user@test.com";
         const string resetCode = "ABC123";
 
-        // Настраиваем цепочку вызовов:
         _fluentEmailMock
             .Setup(x => x.To(It.IsAny<string>()))
             .Returns(_fluentEmailMock.Object);

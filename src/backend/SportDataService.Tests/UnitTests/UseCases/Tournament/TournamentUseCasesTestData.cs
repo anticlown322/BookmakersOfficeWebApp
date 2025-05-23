@@ -38,7 +38,7 @@ public static class TournamentUseCasesTestData
         {
             MetaData = metaData
         };
-        
+
         return result;
     }
 

@@ -38,12 +38,12 @@ public class GetAllBetsQueryHandlerTests
         };
 
         var pagedList = PagedList<Bet>.ToPagedList(
-            bets.AsQueryable(), 
-            parameters.PageNumber, 
+            bets.AsQueryable(),
+            parameters.PageNumber,
             parameters.PageSize);
 
         var expectedDtos = bets.Select(b => new GetBetDto(
-            b.Id, "testUser", "match1", b.Amount, b.Odds, 
+            b.Id, "testUser", "match1", b.Amount, b.Odds,
             BetStatus.Pending, DateTime.Now, null));
 
         _betRepositoryMock
@@ -65,11 +65,11 @@ public class GetAllBetsQueryHandlerTests
         result.MetaData.TotalCount.Should().Be(bets.Count);
 
         _betRepositoryMock.Verify(
-            x => x.GetAllBetsAsync(parameters, cancellationToken), 
+            x => x.GetAllBetsAsync(parameters, cancellationToken),
             Times.Once);
 
         _mapperMock.Verify(
-            x => x.Map<GetBetDto>(It.IsAny<Bet>()), 
+            x => x.Map<GetBetDto>(It.IsAny<Bet>()),
             Times.Exactly(bets.Count));
     }
 
@@ -83,8 +83,8 @@ public class GetAllBetsQueryHandlerTests
 
         var emptyBets = new List<Bet>();
         var emptyPagedList = PagedList<Bet>.ToPagedList(
-            emptyBets.AsQueryable(), 
-            parameters.PageNumber, 
+            emptyBets.AsQueryable(),
+            parameters.PageNumber,
             parameters.PageSize);
 
         _betRepositoryMock
@@ -102,11 +102,11 @@ public class GetAllBetsQueryHandlerTests
         result.MetaData.TotalCount.Should().Be(0);
 
         _betRepositoryMock.Verify(
-            x => x.GetAllBetsAsync(parameters, cancellationToken), 
+            x => x.GetAllBetsAsync(parameters, cancellationToken),
             Times.Once);
 
         _mapperMock.Verify(
-            x => x.Map<GetBetDto>(It.IsAny<Bet>()), 
+            x => x.Map<GetBetDto>(It.IsAny<Bet>()),
             Times.Never);
     }
 }

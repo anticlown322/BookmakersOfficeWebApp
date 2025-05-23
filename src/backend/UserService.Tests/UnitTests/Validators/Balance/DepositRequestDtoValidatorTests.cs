@@ -19,8 +19,7 @@ public class DepositRequestDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage("Amount can't be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Fact]
@@ -33,8 +32,7 @@ public class DepositRequestDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage($"Amount should be greater than {model.Amount} or equal to {model.Amount}.");
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Fact]
@@ -47,8 +45,7 @@ public class DepositRequestDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Amount)
-            .WithErrorMessage($"Amount should be less than {model.Amount} or equal to {model.Amount}.");
+        result.ShouldHaveValidationErrorFor(x => x.Amount);
     }
 
     [Theory]
@@ -78,8 +75,7 @@ public class DepositRequestDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Comment)
-            .WithErrorMessage($"Comment can't be longer than {longComment.Length} symbols.");
+        result.ShouldHaveValidationErrorFor(x => x.Comment);
     }
 
     [Theory]

@@ -74,7 +74,7 @@ public class ProcessPayoutsCommandHandlerTests
         };
 
         var response = new UpdateUserBalanceResponse { Success = true };
-        
+
         _payoutRepositoryMock
             .Setup(x => x.FindByConditionAsync(
                 p => p.Status == PayoutStatus.Pending,
@@ -84,8 +84,8 @@ public class ProcessPayoutsCommandHandlerTests
 
         _userGrpcClientMock
             .Setup(x => x.UpdateUserBalanceAsync(
-                It.Is<UpdateUserBalanceRequest>(r => 
-                    r.Username == username && 
+                It.Is<UpdateUserBalanceRequest>(r =>
+                    r.Username == username &&
                     r.Amount == (double)(payoutAmount * 2)),
                 null,
                 null,
@@ -103,8 +103,8 @@ public class ProcessPayoutsCommandHandlerTests
 
         // Assert
         result.Should().Be(Unit.Value);
-        
-        pendingPayouts.ForEach(p => 
+
+        pendingPayouts.ForEach(p =>
         {
             p.Status.Should().Be(PayoutStatus.Completed);
             p.ProcessedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -159,14 +159,14 @@ public class ProcessPayoutsCommandHandlerTests
                 () => [],
                 () => { }
             ));
-        
+
         // Act
         var result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Should().Be(Unit.Value);
-        
-        pendingPayouts.ForEach(p => 
+
+        pendingPayouts.ForEach(p =>
         {
             p.Status.Should().Be(PayoutStatus.Failed);
             p.ProcessedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -196,7 +196,7 @@ public class ProcessPayoutsCommandHandlerTests
                 Status = PayoutStatus.Pending
             }
         };
-        
+
         var response = new UpdateUserBalanceResponse { Success = false };
 
         _payoutRepositoryMock
@@ -225,8 +225,8 @@ public class ProcessPayoutsCommandHandlerTests
 
         // Assert
         result.Should().Be(Unit.Value);
-        
-        pendingPayouts.ForEach(p => 
+
+        pendingPayouts.ForEach(p =>
         {
             p.Status.Should().Be(PayoutStatus.Failed);
             p.ErrorReason.Should().Be(errorMessage);

@@ -72,7 +72,6 @@ public class UserGrpcClientTests
 
         // Assert
         result.UserExists.Should().BeFalse();
-        // Если нужно проверять исключение, то тест будет другим (см. ниже)
     }
 
     [Fact]

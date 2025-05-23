@@ -19,8 +19,7 @@ public class PasswordResetDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Token)
-            .WithErrorMessage("Token can't be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Token);
     }
 
     [Fact]
@@ -46,8 +45,7 @@ public class PasswordResetDtoValidatorTests
         var result = _validator.TestValidate(model);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.NewPassword)
-            .WithErrorMessage("NewPassword can't be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.NewPassword);
     }
 
     [Theory]

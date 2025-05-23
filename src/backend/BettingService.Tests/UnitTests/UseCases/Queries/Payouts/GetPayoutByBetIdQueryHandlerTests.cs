@@ -45,11 +45,11 @@ public class GetPayoutByBetIdQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(testPayout);
-        
+
         _betRepositoryMock.Verify(
             r => r.GetByIdAsync(testPayout.BetId, cancellationToken),
             Times.Once);
-        
+
         _payoutRepositoryMock.Verify(
             r => r.GetByBetIdAsync(testPayout.BetId, cancellationToken),
             Times.Once);
@@ -73,11 +73,11 @@ public class GetPayoutByBetIdQueryHandlerTests
         // Assert
         await act.Should().ThrowAsync<BetNotFoundByIdException>()
             .WithMessage($"The bet with id: {nonExistingBetId} does not exist in the database.");
-        
+
         _betRepositoryMock.Verify(
             r => r.GetByIdAsync(nonExistingBetId, cancellationToken),
             Times.Once);
-        
+
         _payoutRepositoryMock.Verify(
             r => r.GetByBetIdAsync(It.IsAny<Guid>(), cancellationToken),
             Times.Never);
@@ -105,11 +105,11 @@ public class GetPayoutByBetIdQueryHandlerTests
         // Assert
         await act.Should().ThrowAsync<PayoutNotFoundByBetIdException>()
             .WithMessage($"The payout with bet id: {testBet.Id} does not exist in the database.");
-        
+
         _betRepositoryMock.Verify(
             r => r.GetByIdAsync(testBet.Id, cancellationToken),
             Times.Once);
-        
+
         _payoutRepositoryMock.Verify(
             r => r.GetByBetIdAsync(testBet.Id, cancellationToken),
             Times.Once);
@@ -141,7 +141,7 @@ public class GetPayoutByBetIdQueryHandlerTests
                 It.Is<Guid>(id => id == testPayout.BetId),
                 cancellationToken),
             Times.Once);
-        
+
         _payoutRepositoryMock.Verify(
             r => r.GetByBetIdAsync(
                 It.Is<Guid>(id => id == testPayout.BetId),

@@ -17,7 +17,7 @@ public class ResultsDataParserTests
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = "SportDataService.Tests.UnitTests.Services.DataCollection.TestData.ResultsTestData.json";
-        
+
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream == null)
         {
@@ -25,7 +25,7 @@ public class ResultsDataParserTests
             throw new FileNotFoundException(
                 $"Resource '{resourceName}' not found. Available resources: {availableResources}");
         }
-        
+
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
         return JToken.Parse(json);

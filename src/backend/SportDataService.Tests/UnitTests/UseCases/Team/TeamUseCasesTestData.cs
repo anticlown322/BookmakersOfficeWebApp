@@ -6,7 +6,6 @@ namespace SportDataService.Tests.UnitTests.UseCases.Team;
 
 public static class TeamUseCasesTestData
 {
-    
     public static PagedList<Domain.Models.Common.Team> CreateTestTeamsWithMetadata(int count)
     {
         var teams = Enumerable.Range(1, count)
@@ -30,7 +29,7 @@ public static class TeamUseCasesTestData
         {
             MetaData = metaData
         };
-        
+
         return result;
     }
 

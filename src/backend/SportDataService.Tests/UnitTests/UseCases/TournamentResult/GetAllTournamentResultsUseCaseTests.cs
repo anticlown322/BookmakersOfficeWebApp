@@ -18,7 +18,7 @@ public class GetAllTournamentResultsUseCaseTests
         _tournamentResultRepositoryMock = new Mock<ITournamentResultRepository>();
         _mapperMock = new Mock<IMapper>();
         _getAllTournamentResultsUseCase = new GetAllTournamentResultsUseCase(
-            _tournamentResultRepositoryMock.Object, 
+            _tournamentResultRepositoryMock.Object,
             _mapperMock.Object);
     }
 

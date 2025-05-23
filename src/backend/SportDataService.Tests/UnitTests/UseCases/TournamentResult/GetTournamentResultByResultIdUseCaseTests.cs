@@ -18,7 +18,7 @@ public class GetTournamentResultByResultIdUseCaseTests
         _tournamentResultRepositoryMock = new Mock<ITournamentResultRepository>();
         _mapperMock = new Mock<IMapper>();
         _getTournamentResultByResultIdUseCase = new GetTournamentResultByResultIdUseCase(
-            _tournamentResultRepositoryMock.Object, 
+            _tournamentResultRepositoryMock.Object,
             _mapperMock.Object);
     }
 
@@ -55,7 +55,8 @@ public class GetTournamentResultByResultIdUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_NonExistentTournamentResultId_ThrowsTournamentResultNotFoundByTournamentResultIdException()
+    public async Task
+        ExecuteAsync_NonExistentTournamentResultId_ThrowsTournamentResultNotFoundByTournamentResultIdException()
     {
         // Arrange
         var nonExistentTournamentResultId = "10099999";

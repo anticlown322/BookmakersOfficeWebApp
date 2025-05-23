@@ -40,7 +40,7 @@ public class SportDataGrpcClientTests
 
         // Act
         var result = await _clientMock.Object.ValidateBetAsync(
-            request, 
+            request,
             cancellationToken: CancellationToken.None);
 
         // Assert
@@ -81,15 +81,15 @@ public class SportDataGrpcClientTests
     public async Task GetMatchResultsBatchAsync_MultipleMatches_ReturnsResults()
     {
         // Arrange
-        var request = new GetMatchResultsBatchRequest 
-        { 
-            MatchIds = { "match1", "match2" } 
+        var request = new GetMatchResultsBatchRequest
+        {
+            MatchIds = { "match1", "match2" }
         };
-        
+
         var response = GrpcClientsTestData.CreateBatchMatchResults("match1", "match2");
 
         _clientMock.Setup(c => c.GetMatchResultsBatchAsync(
-                It.Is<GetMatchResultsBatchRequest>(r => 
+                It.Is<GetMatchResultsBatchRequest>(r =>
                     r.MatchIds.Count == 2 &&
                     r.MatchIds.Contains("match1") &&
                     r.MatchIds.Contains("match2")),

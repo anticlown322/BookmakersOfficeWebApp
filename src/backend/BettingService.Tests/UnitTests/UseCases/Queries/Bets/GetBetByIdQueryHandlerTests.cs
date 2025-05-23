@@ -58,7 +58,7 @@ public class GetBetByIdQueryHandlerTests
         // Assert
         await act.Should().ThrowAsync<BetNotFoundByIdException>()
             .WithMessage($"The bet with id: {nonExistingBetId} does not exist in the database.");
-        
+
         _betRepositoryMock.Verify(
             x => x.GetByIdAsync(nonExistingBetId, cancellationToken),
             Times.Once);

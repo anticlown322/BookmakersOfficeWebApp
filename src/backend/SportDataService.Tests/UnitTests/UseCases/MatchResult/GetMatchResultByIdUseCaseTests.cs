@@ -17,7 +17,8 @@ public class GetMatchResultByIdUseCaseTests
     {
         _matchResultRepositoryMock = new Mock<IMatchResultRepository>();
         _mapperMock = new Mock<IMapper>();
-        _getMatchResultByIdUseCase = new GetMatchResultByIdUseCase(_matchResultRepositoryMock.Object, _mapperMock.Object);
+        _getMatchResultByIdUseCase =
+            new GetMatchResultByIdUseCase(_matchResultRepositoryMock.Object, _mapperMock.Object);
     }
 
     [Fact]

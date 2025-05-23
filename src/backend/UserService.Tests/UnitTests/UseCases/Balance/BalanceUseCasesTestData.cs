@@ -20,7 +20,7 @@ public static class BalanceUseCasesTestData
     {
         UserName = "testUser"
     };
-    
+
     public static PagedList<BalanceTransaction> CreateTestTransactions(int count)
     {
         var transactions = Enumerable.Range(1, count)
@@ -46,7 +46,7 @@ public static class BalanceUseCasesTestData
                 Amount = i * 10,
                 CreatedAt = DateTime.UtcNow.AddDays(-i)
             });
-    
+
     public static Domain.Models.User CreateUserWithBalance(decimal initialAmount)
     {
         return new Domain.Models.User

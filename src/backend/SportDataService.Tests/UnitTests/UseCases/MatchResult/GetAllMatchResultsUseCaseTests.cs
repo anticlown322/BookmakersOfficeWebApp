@@ -17,7 +17,8 @@ public class GetAllMatchResultsUseCaseTests
     {
         _matchResultRepositoryMock = new Mock<IMatchResultRepository>();
         _mapperMock = new Mock<IMapper>();
-        _getAllMatchResultsUseCase = new GetAllMatchResultsUseCase(_matchResultRepositoryMock.Object, _mapperMock.Object);
+        _getAllMatchResultsUseCase =
+            new GetAllMatchResultsUseCase(_matchResultRepositoryMock.Object, _mapperMock.Object);
     }
 
     [Fact]

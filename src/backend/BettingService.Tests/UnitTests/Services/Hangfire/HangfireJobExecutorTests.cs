@@ -25,8 +25,8 @@ public class HangfireJobExecutorTests
 
         // Assert
         _mediatorMock.Verify(x => x.Send(
-                It.IsAny<IRequest<Unit>>(), 
-                It.IsAny<CancellationToken>()), 
+                It.IsAny<IRequest<Unit>>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

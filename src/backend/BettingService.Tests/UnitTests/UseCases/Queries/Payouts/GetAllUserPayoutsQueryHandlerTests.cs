@@ -133,7 +133,8 @@ public class GetAllUserPayoutsQueryHandlerTests
         // Assert
         _payoutRepositoryMock.Verify(
             r => r.GetUserPayoutsAsync(
-                It.Is<PayoutParameters>(p => p.PageNumber == parameters.PageNumber && p.PageSize == parameters.PageSize),
+                It.Is<PayoutParameters>(p =>
+                    p.PageNumber == parameters.PageNumber && p.PageSize == parameters.PageSize),
                 expectedUsername,
                 cancellationToken),
             Times.Once);

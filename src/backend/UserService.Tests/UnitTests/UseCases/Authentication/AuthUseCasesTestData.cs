@@ -15,7 +15,7 @@ public static class AuthUseCasesTestData
         UserName = "testUser",
         Password = "validPassword123"
     };
-    
+
     public static JwtSettings ValidJwtSettings = new JwtSettings
     {
         SecretKey = "Sellin' my soul to my dreams and my goals but I won't ever stop until I'm on the stretcher",
@@ -74,8 +74,8 @@ public static class AuthUseCasesTestData
             RefreshTokenExpiryTime = DateTime.Now.AddMinutes(30)
         };
     }
-    
-    
+
+
     public static UserRegistrationDto ValidRegistrationDto => new()
     {
         UserName = "newUser",

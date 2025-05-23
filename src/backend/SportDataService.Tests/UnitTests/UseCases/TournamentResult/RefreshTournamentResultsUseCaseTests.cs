@@ -32,7 +32,7 @@ public class RefreshTournamentResultsUseCaseTests
         // Arrange
         var ct = CancellationToken.None;
         var testTournament = TournamentResultUseCasesTestData.CreateTestTournamentResultsWithMetadata(1).First();
-        
+
         _dataCollectionServiceMock
             .Setup(x => x.GetTournamentsResultsInfoAsync(ct))
             .ReturnsAsync(new List<Domain.Models.Results.TournamentResult> { testTournament });
@@ -46,8 +46,10 @@ public class RefreshTournamentResultsUseCaseTests
 
         // Assert
         _teamRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<Domain.Models.Common.Team>(), ct), Times.Exactly(2));
-        _matchResultRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<Domain.Models.Results.MatchResult>(), ct), Times.Once);
-        _tournamentResultRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<Domain.Models.Results.TournamentResult>(), ct), Times.Once);
+        _matchResultRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<Domain.Models.Results.MatchResult>(), ct),
+            Times.Once);
+        _tournamentResultRepositoryMock.Verify(
+            x => x.CreateAsync(It.IsAny<Domain.Models.Results.TournamentResult>(), ct), Times.Once);
     }
 
     [Fact]
@@ -59,7 +61,7 @@ public class RefreshTournamentResultsUseCaseTests
         var existingTournament = tournaments[0];
         var newTournament = tournaments[1];
         newTournament.TournamentName = "Updated Name";
-        
+
         _dataCollectionServiceMock
             .Setup(x => x.GetTournamentsResultsInfoAsync(ct))
             .ReturnsAsync(new List<Domain.Models.Results.TournamentResult> { newTournament });
@@ -73,7 +75,7 @@ public class RefreshTournamentResultsUseCaseTests
 
         // Assert
         _tournamentResultRepositoryMock.Verify(x => x.UpdateAsync(
-            It.Is<Domain.Models.Results.TournamentResult>(t => t.TournamentName == "Updated Name"), 
+            It.Is<Domain.Models.Results.TournamentResult>(t => t.TournamentName == "Updated Name"),
             ct), Times.Once);
     }
 
@@ -99,7 +101,7 @@ public class RefreshTournamentResultsUseCaseTests
         var existingTournament = tournaments[0];
         var newTournament = tournaments[1];
         newTournament.Matches.Clear();
-        
+
         _dataCollectionServiceMock
             .Setup(x => x.GetTournamentsResultsInfoAsync(ct))
             .ReturnsAsync(new List<Domain.Models.Results.TournamentResult> { newTournament });
@@ -112,7 +114,7 @@ public class RefreshTournamentResultsUseCaseTests
         await _refreshUseCase.ExecuteAsync(ct);
 
         // Assert
-        _matchResultRepositoryMock.Verify(x => 
+        _matchResultRepositoryMock.Verify(x =>
             x.DeleteAsync(It.IsAny<string>(), ct), Times.Once);
     }
 
@@ -125,7 +127,7 @@ public class RefreshTournamentResultsUseCaseTests
         var existingTeam = TournamentResultUseCasesTestData.CreateTestTeamsWithMetadata(1).First();
         existingTeam.Name = "Old Name";
         testTournament.Matches[0].Team1.Name = "New Name";
-        
+
         _dataCollectionServiceMock
             .Setup(x => x.GetTournamentsResultsInfoAsync(ct))
             .ReturnsAsync(new List<Domain.Models.Results.TournamentResult> { testTournament });
@@ -139,7 +141,7 @@ public class RefreshTournamentResultsUseCaseTests
 
         // Assert
         _teamRepositoryMock.Verify(x => x.UpdateAsync(
-            It.Is<Domain.Models.Common.Team>(t => t.Name == "New Name"), 
+            It.Is<Domain.Models.Common.Team>(t => t.Name == "New Name"),
             ct), Times.Once);
     }
 }

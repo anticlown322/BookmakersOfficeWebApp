@@ -15,6 +15,7 @@ public class ApiDataServiceTests
     private readonly Mock<HttpMessageHandler> _handlerMock;
     private readonly HttpClient _httpClient;
     private readonly ApiDataService _service;
+
     private readonly DataCollectionServiceSettings _settings = new()
     {
         MarketsUrl = "https://api.example.com/markets",
@@ -64,7 +65,7 @@ public class ApiDataServiceTests
         _handlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
-                ItExpr.Is<HttpRequestMessage>(r => 
+                ItExpr.Is<HttpRequestMessage>(r =>
                     r.RequestUri == new Uri(_settings.ResultsUrl + expectedDate)),
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(new HttpResponseMessage
@@ -95,7 +96,7 @@ public class ApiDataServiceTests
             });
 
         // Act & Assert
-        await Assert.ThrowsAsync<HttpRequestException>(() => 
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
             _service.GetMarketsDataAsync(CancellationToken.None));
     }
 
@@ -114,7 +115,7 @@ public class ApiDataServiceTests
             });
 
         // Act & Assert
-        await Assert.ThrowsAsync<HttpRequestException>(() => 
+        await Assert.ThrowsAsync<HttpRequestException>(() =>
             _service.GetResultsDataAsync(CancellationToken.None));
     }
 
@@ -150,6 +151,7 @@ public class ApiDataServiceTests
         {
             writer.Write(data);
         }
+
         return memoryStream.ToArray();
     }
 }

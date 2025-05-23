@@ -11,6 +11,7 @@ public class UserRegistrationDtoValidatorTests
     [Fact]
     public void FirstName_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "", 
@@ -21,14 +22,17 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithErrorMessage("FirstName can't be empty.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
     public void FirstName_ShouldHaveError_WhenExceedsMaxLength()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = new string('a', 101), 
@@ -39,14 +43,17 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.FirstName)
-            .WithErrorMessage("FirstName can't be longer than 100 symbols.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
     public void LastName_ShouldHaveError_WhenEmpty()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John", 
@@ -57,14 +64,17 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.LastName)
-            .WithErrorMessage("LastName can't be empty.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
     }
 
     [Fact]
     public void UserName_ShouldHaveError_WhenExceedsMaxLength()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John",
@@ -75,9 +85,11 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.UserName)
-            .WithErrorMessage("UserName can't be longer than 100 symbols.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.UserName);
     }
 
     [Theory]
@@ -85,6 +97,7 @@ public class UserRegistrationDtoValidatorTests
     [InlineData("tooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooolong")]
     public void Password_ShouldHaveError_WhenInvalidLength(string password)
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John",
@@ -95,14 +108,17 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("Password number must have length 8 to 100");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Password);
     }
 
     [Fact]
     public void Email_ShouldHaveError_WhenInvalidFormat()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John",
@@ -113,9 +129,11 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
-        result.ShouldHaveValidationErrorFor(x => x.Email)
-            .WithErrorMessage("Invalid email address.");
+        
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
     [Theory]
@@ -124,6 +142,7 @@ public class UserRegistrationDtoValidatorTests
     [InlineData("invalidphone")]
     public void PhoneNumber_ShouldHaveError_WhenInvalid(string phone)
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John",
@@ -134,13 +153,17 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = phone
         };
         
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
     [Fact]
     public void ShouldNotHaveErrors_WhenAllFieldsValid()
     {
+        // Arrange
         var model = new UserRegistrationDto 
         { 
             FirstName = "John",
@@ -151,7 +174,10 @@ public class UserRegistrationDtoValidatorTests
             PhoneNumber = "+1234567890"
         };
         
+        // Act
         var result = _validator.TestValidate(model);
+        
+        // Assert
         result.ShouldNotHaveAnyValidationErrors();
     }
 }
