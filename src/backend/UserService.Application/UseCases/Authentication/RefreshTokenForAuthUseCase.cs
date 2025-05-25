@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Contracts;
@@ -19,13 +20,16 @@ namespace UserService.Application.UseCases.Authentication;
 public class RefreshTokenForAuthUseCase(
     IOptions<JwtSettings> jwtSettings,
     IUsersRepository usersRepository,
-    ITokenService tokenService)
+    ITokenService tokenService,
+    ILogger<RefreshTokenForAuthUseCase> logger)
     : IRefreshTokenForAuthUseCase
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
     public async Task<string> ExecuteAsync(TokensRefreshDto tokensGetDto, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Refreshing access token for refresh token {tokensGetDto.RefreshToken}...");
+
         cancellationToken.ThrowIfCancellationRequested();
 
         var principal = GetPrincipalFromExpiredToken(tokensGetDto.AccessToken);
@@ -34,6 +38,8 @@ public class RefreshTokenForAuthUseCase(
         if (user == null || user.RefreshToken != tokensGetDto.RefreshToken ||
             user.RefreshTokenExpiryTime <= DateTime.Now)
         {
+            logger.LogWarning($"Refresh token for {tokensGetDto.RefreshToken} was expired");
+
             throw new RefreshTokenBadRequest();
         }
 
@@ -42,14 +48,20 @@ public class RefreshTokenForAuthUseCase(
         var newAccessToken = await tokenService.CreateAccessToken(user);
         if (newAccessToken is null)
         {
+            logger.LogWarning($"New access token for {tokensGetDto.RefreshToken} is null");
+
             throw new TokenNotCreatedException(nameof(tokensGetDto.AccessToken));
         }
+
+        logger.LogInformation($"Refreshed access token for {tokensGetDto.RefreshToken}");
 
         return newAccessToken;
     }
 
     private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
+        logger.LogInformation($"Validating token {token}...");
+
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
@@ -66,11 +78,15 @@ public class RefreshTokenForAuthUseCase(
 
         var jwtSecurityToken = securityToken as JwtSecurityToken;
         if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(
-            SecurityAlgorithms.HmacSha256,
-            StringComparison.InvariantCultureIgnoreCase))
+                SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase))
         {
+            logger.LogWarning($"Invalid token");
+
             throw new SecurityTokenException("Invalid token");
         }
+
+        logger.LogInformation($"Validated token {token}");
 
         return principal;
     }

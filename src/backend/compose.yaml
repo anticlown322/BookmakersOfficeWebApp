@@ -40,6 +40,51 @@
       start_period: 30s
       retries: 5
 
+  # ELK
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - bookmaker-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kibana
+    environment:
+      - LS_JAVA_OPTS=-Xmx256m -Xms256m
+      - NODE_OPTIONS=--openssl-legacy-provider
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - bookmaker-net
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.14.3
+    container_name: logstash
+    environment:
+      - LOGSTASH_HTTP_HOST=0.0.0.0
+      - LOGSTASH_HTTP_PORT=5788
+      - LS_JAVA_OPTS=-Xmx256m -Xms256m
+    ports:
+      - 5788:5788
+    volumes:
+      - ./deploy/inits/logstash-init.conf:/usr/share/logstash/pipeline/logstash.config:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - bookmaker-net
+
   # Сервис ставок
   betting-service:
     container_name: bookmaker-betting-service
@@ -187,6 +232,7 @@
 volumes:
   postgres_data:
   mongodb_data:
+  elasticsearch_data:
 
 networks:
   bookmaker-net:

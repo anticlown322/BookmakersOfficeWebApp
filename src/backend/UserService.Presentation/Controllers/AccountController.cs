@@ -16,7 +16,8 @@ public class AccountController(
     ISendResetPasswordEmailUseCase sendResetPasswordEmailUseCase,
     IResetPasswordUseCase resetPasswordUseCase,
     IGetUserProfileUseCase getUserProfileUseCase,
-    IUpdateUserProfileUseCase updateUserProfileUseCase)
+    IUpdateUserProfileUseCase updateUserProfileUseCase,
+    ILogger<AccountController> logger)
     : ControllerBase
 {
     [HttpGet("confirm-email")]
@@ -24,19 +25,24 @@ public class AccountController(
         [FromRoute] string username,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Confirm email for user {username}...");
+
         await confirmEmailUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok();
     }
 
     [HttpPost("send-confirmation-email")]
-    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
+    [Authorize(Policy = AuthorizationPolicies.AllUsers)]
     public async Task<ActionResult> SendConfirmationEmail(
         [FromRoute] string username,
         [FromServices] IHttpContextAccessor httpContextAccessor,
         CancellationToken cancellationToken)
     {
-        var baseUrl = $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+        logger.LogInformation($"Send confirmation email for user {username}...");
+
+        var baseUrl =
+            $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
         await sendConfirmationEmailUseCase.ExecuteAsync(username, baseUrl, cancellationToken);
 
         return Ok();
@@ -47,6 +53,8 @@ public class AccountController(
         [FromRoute] string username,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Send password reset email for user {username}...");
+
         await sendResetPasswordEmailUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok();
@@ -58,30 +66,36 @@ public class AccountController(
         [FromBody] PasswordResetDto passwordResetDto,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Reset password for user {username}...");
+
         await resetPasswordUseCase.ExecuteAsync(username, passwordResetDto, cancellationToken);
 
         return Ok();
     }
 
     [HttpGet("profile")]
-    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
+    [Authorize(Policy = AuthorizationPolicies.AllUsers)]
     public async Task<ActionResult> GetUserProfile(
         [FromRoute] string username,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Get profile of user {username}...");
+
         var result = await getUserProfileUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok(result);
     }
 
     [HttpPut("profile")]
-    [Authorize(Policy= AuthorizationPolicies.AllUsers)]
+    [Authorize(Policy = AuthorizationPolicies.AllUsers)]
     [ValidationFilter<UserProfileUpdateDto>]
     public async Task<ActionResult> UpdateUserProfile(
         [FromRoute] string username,
         [FromBody] UserProfileUpdateDto userProfileDto,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Update profile of user {username}...");
+
         await updateUserProfileUseCase.ExecuteAsync(username, userProfileDto, cancellationToken);
         return NoContent();
     }
