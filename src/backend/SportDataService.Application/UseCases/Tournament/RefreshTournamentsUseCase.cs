@@ -1,4 +1,5 @@
-﻿using SportDataService.Application.Contracts.Services;
+﻿using Microsoft.Extensions.Logging;
+using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Tournament;
 using SportDataService.Domain.RepositoryContracts;
 
@@ -12,19 +13,26 @@ public class RefreshTournamentsUseCase(
     IDataCollectionService dataCollectionService,
     ITournamentRepository tournamentRepository,
     IMatchRepository matchRepository,
-    ITeamRepository teamRepository)
+    ITeamRepository teamRepository,
+    ILogger<RefreshTournamentsUseCase> logger)
     : IRefreshTournamentsUseCase
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Refreshing tournaments...");
+
         cancellationToken.ThrowIfCancellationRequested();
 
         var apiAnswer = await dataCollectionService.GetTournamentsInfoAsync(cancellationToken);
         await UpdateDatabase(apiAnswer, cancellationToken);
+
+        logger.LogInformation("Tournaments successfully refreshed");
     }
 
     private async Task UpdateDatabase(List<Tournament> apiAnswer, CancellationToken ct)
     {
+        logger.LogInformation("Updating tournaments...");
+
         foreach (var tournament in apiAnswer)
         {
             ct.ThrowIfCancellationRequested();
@@ -56,11 +64,18 @@ public class RefreshTournamentsUseCase(
 
         ct.ThrowIfCancellationRequested();
 
+        logger.LogInformation("Removing started matches...");
+
         await RemoveStartedMatches(ct);
+
+        logger.LogInformation("Successfully removed started matches");
+        logger.LogInformation("Tournaments successfully updated");
     }
 
     private async Task UpdateTeams(Tournament tournament, CancellationToken ct)
     {
+        logger.LogInformation("Updating teams...");
+
         var allTeams = tournament.Matches
             .SelectMany(m => new[] { m.Opponent1, m.Opponent2 })
             .ToList();
@@ -81,10 +96,14 @@ public class RefreshTournamentsUseCase(
                 await teamRepository.CreateAsync(team, ct);
             }
         }
+
+        logger.LogInformation("Teams successfully updated");
     }
 
     private async Task UpdateMatches(Tournament tournament, CancellationToken ct)
     {
+        logger.LogInformation("Updating matches...");
+
         var allMatches = tournament.Matches.ToList();
 
         foreach (var match in allMatches)
@@ -111,6 +130,8 @@ public class RefreshTournamentsUseCase(
                 await matchRepository.CreateAsync(match, ct);
             }
         }
+
+        logger.LogInformation("Matches successfully updated");
     }
 
     private async Task UpdateExistingTournament(

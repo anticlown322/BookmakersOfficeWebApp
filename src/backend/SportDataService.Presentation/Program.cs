@@ -1,5 +1,6 @@
 using Hangfire;
 using Microsoft.Extensions.Options;
+using Serilog;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Infrastructure.Configs;
@@ -16,6 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddAppSettings(builder.Configuration);
 
+    builder.Services.ConfigureLogging(builder.Configuration);
+    builder.Host.UseSerilog();
+
     builder.Services.ConfigureAuth(builder.Configuration);
     builder.Services.AddAuthorizationPolicies();
     builder.Services.AddHttpContextAccessor();
@@ -25,9 +29,6 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSportDataDb();
     builder.Services.AddHostedService<MongoDbInitializer>();
     builder.Services.AddRepositories();
-
-    builder.Services.ConfigureNLog();
-    builder.Services.ConfigureLoggerService();
 
     builder.Services.ConfigureDataCollectionService();
     builder.Services.ConfigureUseCases();
@@ -44,8 +45,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    var logger = app.Services.GetService<ILoggerService>();
-    app.ConfigureExceptionHandler(logger);
+    app.ConfigureExceptionHandler();
 
     app.UseAuthentication();
     app.UseAuthorization();

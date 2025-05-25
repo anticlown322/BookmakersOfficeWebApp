@@ -8,7 +8,7 @@ namespace SportDataService.Presentation.Extensions;
 
 public static class ExceptionMiddlewareExtensions
 {
-    public static void ConfigureExceptionHandler(this WebApplication app, ILoggerService logger)
+    public static void ConfigureExceptionHandler(this WebApplication app)
     {
         app.UseExceptionHandler(appError =>
         {
@@ -26,8 +26,6 @@ public static class ExceptionMiddlewareExtensions
                         UnauthorizedException => StatusCodes.Status401Unauthorized,
                         _ => StatusCodes.Status500InternalServerError
                     };
-
-                    logger.LogError($"Something went wrong: {contextFeature.Error}");
 
                     await context.Response.WriteAsync(new ErrorDetails
                     {

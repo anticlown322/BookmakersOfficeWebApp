@@ -10,12 +10,17 @@ namespace SportDataService.Presentation.Controllers;
 public class TeamController(
     IGetAllTeamsUseCase getAllTeamsUseCase,
     IGetTeamByIdUseCase getTeamByIdUseCase,
-    IGetTeamByTeamIdUseCase getTeamByTeamIdUseCase)
+    IGetTeamByTeamIdUseCase getTeamByTeamIdUseCase,
+    ILogger<TeamController> logger)
     : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetTeams([FromQuery] TeamParameters teamParameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTeams(
+        [FromQuery] TeamParameters teamParameters,
+        CancellationToken cancellationToken)
     {
+        logger.LogInformation("Getting teams...");
+
         var pagedResult = await getAllTeamsUseCase.ExecuteAsync(teamParameters, cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));
@@ -26,6 +31,8 @@ public class TeamController(
     [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetTeamById(string id, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting team by id {id}...");
+
         var teamToGet = await getTeamByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(teamToGet);
@@ -34,7 +41,10 @@ public class TeamController(
     [HttpGet("by-team-id/{teamId}")]
     public async Task<IActionResult> GetTeamByTeamId(string teamId, CancellationToken ct)
     {
+        logger.LogInformation($"Getting team by team id {teamId}...");
+
         var team = await getTeamByTeamIdUseCase.ExecuteAsync(teamId, ct);
+
         return Ok(team);
     }
 }

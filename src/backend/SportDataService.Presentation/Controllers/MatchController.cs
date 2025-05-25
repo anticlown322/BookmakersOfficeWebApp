@@ -10,12 +10,17 @@ namespace SportDataService.Presentation.Controllers;
 public class MatchController(
     IGetAllMatchesUseCase getAllMatchesUseCase,
     IGetMatchByIdUseCase getMatchByIdUseCase,
-    IGetMatchByMatchIdUseCase getMatchByMatchIdUseCase)
+    IGetMatchByMatchIdUseCase getMatchByMatchIdUseCase,
+    ILogger<MatchController> logger)
     : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetMatches([FromQuery] MatchParameters matchParameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMatches(
+        [FromQuery] MatchParameters matchParameters,
+        CancellationToken cancellationToken)
     {
+        logger.LogInformation("Getting matches...");
+
         var pagedResult = await getAllMatchesUseCase.ExecuteAsync(matchParameters, cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));
@@ -26,6 +31,8 @@ public class MatchController(
     [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetMatchById(string id, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting match by id {id}...");
+
         var matchToGet = await getMatchByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(matchToGet);
@@ -34,6 +41,8 @@ public class MatchController(
     [HttpGet("by-match-id/{matchId}")]
     public async Task<IActionResult> GetMatchByMatchId(string matchId, CancellationToken ct)
     {
+        logger.LogInformation($"Getting match by matchId {matchId}...");
+
         var match = await getMatchByMatchIdUseCase.ExecuteAsync(matchId, ct);
         return Ok(match);
     }

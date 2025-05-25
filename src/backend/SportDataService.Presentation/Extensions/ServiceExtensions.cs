@@ -9,6 +9,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using NLog;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.Contracts.UseCases.MatchResult;
@@ -55,20 +58,18 @@ public static class ServiceExtensions
         services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
     }
 
-    public static void ConfigureNLog(this IServiceCollection services)
+    public static void ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        const string configPath = "/app/Properties/nlog.config";
-        if (File.Exists(configPath))
-        {
-            LogManager.Setup().LoadConfigurationFromFile(configPath);
-            return;
-        }
-
-        throw new FileNotFoundException($"NLog config not found at: {configPath}");
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .WriteTo.Console()
+            .WriteTo.Http(
+                requestUri: configuration["Logstash:Uri"],
+                queueLimitBytes: null,
+                textFormatter: new JsonFormatter())
+            .CreateLogger();
     }
-
-    public static void ConfigureLoggerService(this IServiceCollection services) =>
-        services.AddSingleton<ILoggerService, LoggerService>();
 
     public static void ConfigureDataCollectionService(this IServiceCollection services) =>
         services.AddSingleton<IDataCollectionService, DataCollectionService>();
