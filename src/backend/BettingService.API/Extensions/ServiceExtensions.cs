@@ -33,18 +33,6 @@ public static class ServiceExtensions
         services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
     }
 
-    public static void ConfigureNLog(this IServiceCollection services)
-    {
-        const string configPath = "/app/Properties/nlog.config";
-        if (File.Exists(configPath))
-        {
-            LogManager.Setup().LoadConfigurationFromFile(configPath);
-            return;
-        }
-
-        throw new FileNotFoundException($"NLog config not found at: {configPath}");
-    }
-
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthentication(opt =>

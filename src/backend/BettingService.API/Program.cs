@@ -1,9 +1,9 @@
 using BettingService.API.Extensions;
 using BettingService.API.Middlewares;
 using BettingService.BLL;
-using BettingService.BLL.Contracts.Services;
 using BettingService.BLL.Services.Hangfire;
 using BettingService.DAL;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -15,10 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddAppSettings(builder.Configuration);
 
-    builder.Services.ConfigureNLog();
-
     builder.Services.AddDataAccessLayer(builder.Configuration);
     builder.Services.AddBusinessLogicLayer(builder.Configuration);
+    builder.Host.UseSerilog();
 
     builder.Services.ConfigureAuth(builder.Configuration);
     builder.Services.AddAuthorizationPolicies();
@@ -34,8 +33,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    var logger = app.Services.GetService<ILoggerService>();
-    app.ConfigureExceptionHandler(logger);
+    app.ConfigureExceptionHandler();
 
     await app.ApplyMigrations();
 

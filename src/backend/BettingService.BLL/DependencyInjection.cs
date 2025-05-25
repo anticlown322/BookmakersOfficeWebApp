@@ -17,6 +17,9 @@ using Hangfire.Mongo.Migration.Strategies.Backup;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
 namespace BettingService.BLL;
 
@@ -26,7 +29,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSingleton<ILoggerService, LoggerService>();
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .WriteTo.Console()
+            .WriteTo.Http(
+                requestUri: configuration["Logstash:Uri"],
+                queueLimitBytes: null,
+                textFormatter: new JsonFormatter())
+            .CreateLogger();
+
         services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
 
         services.AddMediatR(cfg =>

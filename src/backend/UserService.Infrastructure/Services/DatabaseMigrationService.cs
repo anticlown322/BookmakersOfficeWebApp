@@ -20,7 +20,5 @@ public class DatabaseMigrationService(
             await dbContext.Database.MigrateAsync(cancellationToken);
             logger.LogInformation("Successfully migrated database...");
         }
-
-        logger.LogInformation("No database migrations have been applied...");
     }
 }
