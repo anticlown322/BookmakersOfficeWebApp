@@ -85,6 +85,23 @@
     networks:
       - bookmaker-net
 
+  # API gateway
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: OcelotApiGateway/Dockerfile
+    ports:
+      - "5001:5001" # HTTP
+    volumes:
+      - ./deploy/configs/api-gateway/secrets.json:/app/Properties/secrets.json:ro
+    depends_on:
+      - user-service
+      - sport-data-service
+      - betting-service
+    networks:
+      - bookmaker-net
+
   # Сервис ставок
   betting-service:
     container_name: bookmaker-betting-service
@@ -104,7 +121,6 @@
     volumes:
       - ./deploy/certs/aspnetapp.crt:/app/Properties/aspnetapp.crt:ro
       - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro
-      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
     env_file:
       - .env
@@ -136,7 +152,6 @@
         condition: service_healthy
     volumes:
       - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
-      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
     env_file:
       - .env
@@ -164,7 +179,6 @@
         condition: service_healthy
     volumes:
       - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
-      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
     env_file:
       - .env
@@ -191,7 +205,6 @@
         condition: service_healthy
     volumes:
       - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
-      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
     env_file:
       - .env
@@ -217,7 +230,6 @@
         condition: service_healthy
     volumes:
       - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
-      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
       - ./deploy/certs/:/https/
     env_file:
       - .env

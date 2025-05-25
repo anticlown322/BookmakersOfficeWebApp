@@ -45,6 +45,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService.GrpcService", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportDataService.GrpcService", "SportDataService.GrpcService\SportDataService.GrpcService.csproj", "{59319367-7C47-4329-BCFA-B70438E89FDA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateway", "ApiGateway", "{09C71163-163C-4EDB-92D3-40B2EBE85002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcelotApiGateway", "OcelotApiGateway\OcelotApiGateway.csproj", "{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +70,7 @@ Global
 		{4865B53A-817C-406B-AE04-A46330CC422A} = {F2174BD1-C0DE-4E16-A6DA-A62852EE8AA2}
 		{0A4C423B-00F3-4701-83D9-915167D5A6F8} = {6C016A47-8128-457A-9CAC-E4827F68E39B}
 		{59319367-7C47-4329-BCFA-B70438E89FDA} = {F16F9D01-68A9-4EFE-8B4D-2432C7B350C0}
+		{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB} = {09C71163-163C-4EDB-92D3-40B2EBE85002}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C8E0F687-BEBC-4114-8DF4-8EE16581C189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -128,5 +133,9 @@ Global
 		{59319367-7C47-4329-BCFA-B70438E89FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59319367-7C47-4329-BCFA-B70438E89FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59319367-7C47-4329-BCFA-B70438E89FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88F3B9F3-A23C-4E24-AEA2-A3A214552FAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
