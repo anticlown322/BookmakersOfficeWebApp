@@ -1,4 +1,4 @@
-<header class="header">
+<header class="header" (document:click)="onDocumentClick()">
     <a class="logo" routerLink="/">
         <img src="assets/icons/logo.svg" alt="ScamBet logo" />
         <span>ScamBet</span>
@@ -12,7 +12,7 @@
 
     <div class="user-section">
         @if (authService.isAuthenticated()) {
-        <div class="user-profile" (click)="toggleProfileMenu()">
+        <div class="user-profile" (click)="toggleProfileMenu($event)">
             <span class="username">{{ currentUsername }}</span>
             <img
                 class="avatar"
@@ -22,13 +22,18 @@
 
             @if (isProfileMenuOpen) {
             <div class="profile-menu">
-                <button routerLink="/profile">Профиль</button>
+                <button
+                    routerLink="/profile"
+                    (click)="isProfileMenuOpen = false"
+                >
+                    Профиль
+                </button>
                 <button (click)="logout()">Выйти</button>
             </div>
             }
         </div>
         } @else {
-        <button class="login-btn" (click)="navigateToLogin()">Войти</button>
+        <button class="login-btn" routerLink="/login">Войти</button>
         }
     </div>
 </header>

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, catchError, map, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, throwError, of } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../../../environments/environment';
@@ -9,16 +10,20 @@ import { UserLoginRequest } from '../../models/user-service/requests/auth/login.
 import { TokensGetResponse } from '../../models/user-service/responses/auth/login.response';
 import { TokensRefreshRequest } from '../../models/user-service/requests/auth/refresh-token.request';
 import { UserLogoutRequest } from '../../models/user-service/requests/auth/logout.request';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private readonly baseURL = `${environment.apiUrl}/authentication`;
-    private authStateChangeSubject = new Subject<boolean>();
+    private authStateChangeSubject = new BehaviorSubject<boolean>(
+        this.isAuthenticated()
+    );
     public authStateChanged$ = this.authStateChangeSubject.asObservable();
 
     constructor(
         private http: HttpClient,
-        private cookieService: CookieService
+        private cookieService: CookieService,
+        private router: Router
     ) {}
 
     register(userData: UserRegistrationRequest): Observable<void> {
@@ -29,12 +34,38 @@ export class AuthService {
         return this.http
             .post<TokensGetResponse>(`${this.baseURL}/login`, credentials)
             .pipe(
-                map((response) => {
+                tap((response) => {
                     this.storeTokens(response);
                     this.notifyAuthStateChange(true);
-                    return response;
+                }),
+                catchError((error) => {
+                    this.clearTokens();
+                    return throwError(() => error);
                 })
             );
+    }
+
+    logout(logoutData?: UserLogoutRequest): Observable<void> {
+        const request = logoutData
+            ? this.http.post<void>(`${this.baseURL}/logout`, logoutData)
+            : of(undefined);
+
+        return request.pipe(
+            tap({
+                next: () => {
+                    this.clearTokens();
+                    this.notifyAuthStateChange(false);
+                    this.router.navigate(['/']);
+                },
+                error: (error) => {
+                    this.clearTokens();
+                    this.notifyAuthStateChange(false);
+                },
+            }),
+            catchError((error) => {
+                return throwError(() => error);
+            })
+        );
     }
 
     refreshTokens(tokens: TokensRefreshRequest): Observable<string> {
@@ -46,15 +77,6 @@ export class AuthService {
             catchError((error) => {
                 this.clearTokens();
                 return throwError(() => error);
-            })
-        );
-    }
-
-    logout(logoutData: UserLogoutRequest): Observable<void> {
-        return this.http.post<void>(`${this.baseURL}/logout`, logoutData).pipe(
-            map(() => {
-                this.clearTokens();
-                this.notifyAuthStateChange(false);
             })
         );
     }
@@ -130,15 +152,31 @@ export class AuthService {
         }
     }
 
-    getCurrentUsername(): string | undefined {
+    getCurrentUsername(): string | null {
         const token = this.getCurrentAccessToken();
-        if (!token) return undefined;
+        if (!token) return null;
 
         try {
             const decoded = jwtDecode<{ username?: string }>(token);
-            return decoded.username;
+            return decoded.username || null;
         } catch {
-            return undefined;
+            return null;
+        }
+    }
+
+    getCurrentUserId(): string | null {
+        return this.getTokenClaims<string>('sub');
+    }
+
+    getTokenExpirationDate(): Date | null {
+        const token = this.getCurrentAccessToken();
+        if (!token) return null;
+
+        try {
+            const decoded = jwtDecode(token);
+            return new Date(decoded.exp! * 1000);
+        } catch {
+            return null;
         }
     }
 }
