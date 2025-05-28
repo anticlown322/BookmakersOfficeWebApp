@@ -2,38 +2,32 @@
 using System.Net.Mail;
 using System.Text;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using NLog;
-using UserService.Application.Contracts;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 using UserService.Application.Contracts.Services;
-using UserService.Application.Contracts.UseCases;
 using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.Contracts.UseCases.Authentication;
 using UserService.Application.Contracts.UseCases.Balance;
 using UserService.Application.Contracts.UseCases.User;
-using UserService.Application.DTO;
 using UserService.Application.DTO.Account;
 using UserService.Application.DTO.Authentication;
 using UserService.Application.DTO.Balance;
 using UserService.Application.DTO.MappingProfiles;
-using UserService.Application.UseCases;
 using UserService.Application.UseCases.Account;
 using UserService.Application.UseCases.Authentication;
 using UserService.Application.UseCases.Balance;
 using UserService.Application.UseCases.User;
-using UserService.Application.Validation.Validators;
 using UserService.Application.Validation.Validators.Account;
 using UserService.Application.Validation.Validators.Authentication;
 using UserService.Application.Validation.Validators.Balance;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
-using UserService.Infrastructure;
 using UserService.Infrastructure.Repository;
 using UserService.Infrastructure.Repository.Repositories;
 using UserService.Infrastructure.Services;
@@ -63,20 +57,18 @@ public static class ServiceExtensions
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
     }
 
-    public static void ConfigureNLog(this IServiceCollection services)
+    public static void ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        const string configPath = "/app/Properties/nlog.config";
-        if (File.Exists(configPath))
-        {
-            LogManager.Setup().LoadConfigurationFromFile(configPath);
-            return;
-        }
-
-        throw new FileNotFoundException($"NLog config not found at: {configPath}");
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .WriteTo.Console()
+            .WriteTo.Http(
+                requestUri: configuration["Logstash:Uri"],
+                queueLimitBytes: null,
+                textFormatter: new JsonFormatter())
+            .CreateLogger();
     }
-
-    public static void ConfigureLoggerService(this IServiceCollection services) =>
-        services.AddSingleton<ILoggerService, LoggerService>();
 
     public static void AddTokenService(this IServiceCollection services) =>
         services.AddScoped<ITokenService, TokenService>();

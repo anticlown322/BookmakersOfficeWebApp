@@ -5,14 +5,19 @@ using BettingService.BLL.UseCases.Payouts.Commands.ProcessPayouts;
 using BettingService.DAL.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BettingService.BLL.Services.Hangfire;
 
-public class HangfireJobExecutor(IMediator mediator)
+public class HangfireJobExecutor(
+    IMediator mediator,
+    ILogger<HangfireJobExecutor> logger)
     : IBackgroundJobExecutor
 {
     public async Task ExecuteAsync(string jobId)
     {
+        logger.LogInformation($"Executing job with id {jobId}.");
+
         switch (jobId)
         {
             case HangfireJobNames.UpdatePendingBets:
@@ -33,5 +38,7 @@ public class HangfireJobExecutor(IMediator mediator)
                 break;
             }
         }
+
+        logger.LogInformation($"Job with id {jobId} has been executed.");
     }
 }

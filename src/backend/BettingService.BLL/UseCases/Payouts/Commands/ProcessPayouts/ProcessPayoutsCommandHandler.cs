@@ -2,16 +2,20 @@
 using BettingService.DAL.Models.Entities;
 using BettingService.Protos;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace BettingService.BLL.UseCases.Payouts.Commands.ProcessPayouts;
 
 public class ProcessPayoutsCommandHandler(
     IPayoutRepository payoutRepository,
-    UserGrpcService.UserGrpcServiceClient userGrpcClient)
+    UserGrpcService.UserGrpcServiceClient userGrpcClient,
+    ILogger<ProcessPayoutsCommandHandler> logger)
     : IRequestHandler<ProcessPayoutsCommand, Unit>
 {
     public async Task<Unit> Handle(ProcessPayoutsCommand request, CancellationToken cancellationToken)
     {
+        logger.LogInformation("Start processing pending payouts...");
+
         var pendingPayouts = await payoutRepository.FindByConditionAsync(
             p => p.Status == PayoutStatus.Pending,
             trackChanges: true,
@@ -19,15 +23,21 @@ public class ProcessPayoutsCommandHandler(
 
         if (!pendingPayouts.Any())
         {
+            logger.LogInformation("No pending payouts found");
+
             return Unit.Value;
         }
 
         var payoutsByUser = pendingPayouts.GroupBy(p => p.Username);
 
+        logger.LogInformation("Updating payouts status...");
+
         foreach (var userGroup in payoutsByUser)
         {
             var username = userGroup.Key;
             var totalAmount = userGroup.Sum(p => p.Amount);
+
+            logger.LogInformation($"Updating payout status for {username}");
 
             try
             {
@@ -35,12 +45,13 @@ public class ProcessPayoutsCommandHandler(
                     new UpdateUserBalanceRequest
                     {
                         Username = username,
-                        Amount = (double)totalAmount
+                        Amount = (double)totalAmount,
                     },
                     cancellationToken: cancellationToken);
 
                 if (!updateResponse.Success)
                 {
+                    logger.LogWarning($"Failed to update user balance for {username}");
                     await MarkPayoutsAsFailed(userGroup, "Balance update failed", cancellationToken);
                     continue;
                 }
@@ -49,9 +60,12 @@ public class ProcessPayoutsCommandHandler(
             }
             catch (Exception ex)
             {
+                logger.LogWarning(ex, $"Failed to update user balance for {username}");
                 await MarkPayoutsAsFailed(userGroup, ex.Message, cancellationToken);
             }
         }
+
+        logger.LogInformation("Finished processing pending payouts");
 
         return Unit.Value;
     }

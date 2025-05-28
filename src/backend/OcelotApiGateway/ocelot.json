@@ -1,0 +1,556 @@
+﻿{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/matches",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/matches",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/matches/by-id/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/matches/by-id/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/matches/by-match-id/{matchId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/matches/by-match-id/{matchId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets/pending",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets/pending",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets/active",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets/active",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets/my",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets/my",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/bets/{betId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/bets/{betId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts/not-completed",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts/not-completed",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts/my",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts/my",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts/{payoutId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts/{payoutId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/payouts/by-bet-id/{betId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "betting-service",
+          "Port": 50011
+        }
+      ],
+      "UpstreamPathTemplate": "/api/payouts/by-bet-id/{betId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/match-results",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/match-results",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/match-results/by-id/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/match-results/by-id/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/match-results/by-result-id/{matchResultId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/match-results/by-result-id/{matchResultId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/teams",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/teams",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/teams/by-id/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/teams/by-id/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/teams/by-team-id/{teamId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/teams/by-team-id/{teamId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournaments",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournaments",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournaments/by-id/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournaments/by-id/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournaments/by-tournament-id/{tournamentId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournaments/by-tournament-id/{tournamentId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournaments",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournaments",
+      "UpstreamHttpMethod": [ "POST" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": [ "admin" ]
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournament-results",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournament-results",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournament-results/by-id/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournament-results/by-id/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournament-results/by-result-id/{tournamentResultId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournament-results/by-result-id/{tournamentResultId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/tournament-results",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "sport-data-service",
+          "Port": 50012
+        }
+      ],
+      "UpstreamPathTemplate": "/api/tournament-results",
+      "UpstreamHttpMethod": [ "POST" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": [ "admin" ]
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/account/confirm-email/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/confirm-email/{username}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/account/send-confirmation-email/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/send-confirmation-email/{username}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/account/send-reset-email/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/send-reset-email/{username}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/account/reset-password/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/reset-password/{username}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/account/profile/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/account/profile/{username}",
+      "UpstreamHttpMethod": [ "GET", "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{username}/balance/current",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{username}/balance",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{username}/balance/deposit",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{username}/balance/deposit",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{username}/balance/withdraw",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{username}/balance/withdraw",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{username}/balance/history",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{username}/balance/history",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/authentication/register",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/register",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/authentication/login",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/login",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/authentication/refresh",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/refresh",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/authentication/logout",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/logout",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/users/{username}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "user-service",
+          "Port": 50013
+        }
+      ],
+      "UpstreamPathTemplate": "/api/users/{username}",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5001",
+    "RequestIdKey": "OcRequestId"
+  }
+}

@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="14.0.0" />
+      <PackageReference Include="Elastic.Serilog.Sinks" Version="8.18.0" />
       <PackageReference Include="FluentValidation" Version="11.11.0" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
       <PackageReference Include="Google.Protobuf" Version="3.31.0-rc1" />
@@ -27,6 +28,9 @@
       <PackageReference Include="Hangfire.Mongo" Version="1.11.5" />
       <PackageReference Include="MediatR" Version="12.5.0" />
       <PackageReference Include="NLog" Version="5.4.0" />
+      <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+      <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+      <PackageReference Include="Serilog.Sinks.Http" Version="9.1.1" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

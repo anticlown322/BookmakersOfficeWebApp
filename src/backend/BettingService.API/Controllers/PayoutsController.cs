@@ -18,7 +18,9 @@ namespace BettingService.API.Controllers;
 
 [ApiController]
 [Route("api/payouts")]
-public class PayoutsController(IMediator mediator)
+public class PayoutsController(
+    IMediator mediator,
+    ILogger<PayoutsController> logger)
     : ControllerBase
 {
     [HttpPost]
@@ -28,6 +30,9 @@ public class PayoutsController(IMediator mediator)
         CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
+
+        logger.LogInformation($"Requesting payout for {username}");
+
         var command = new RequestPayoutCommand(username, payoutDto);
         await mediator.Send(command, cancellationToken);
 
@@ -38,6 +43,8 @@ public class PayoutsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> ProcessPayouts(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Processing not payed payouts...");
+
         await mediator.Send(new ProcessPayoutsCommand(), cancellationToken);
 
         return Created();
@@ -49,6 +56,8 @@ public class PayoutsController(IMediator mediator)
         [FromQuery] PayoutParameters payoutParameters,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation("Getting all payouts...");
+
         var result = await mediator.Send(new GetAllPayoutsQuery(payoutParameters), cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(result.MetaData));
@@ -63,6 +72,9 @@ public class PayoutsController(IMediator mediator)
         CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
+
+        logger.LogInformation($"Getting all payouts for {username}");
+
         var query = new GetAllUserPayoutsQuery(payoutParameters, username);
         var result = await mediator.Send(query, cancellationToken);
 
@@ -76,6 +88,8 @@ public class PayoutsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetPayoutById([FromRoute] Guid payoutId, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting payout by id {payoutId}");
+
         var result = await mediator.Send(new GetPayoutByIdQuery(payoutId), cancellationToken);
 
         return Ok(result);
@@ -86,6 +100,8 @@ public class PayoutsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetPayoutByBetId([FromRoute] Guid betId, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting payout by bet id {betId}");
+
         var result = await mediator.Send(new GetPayoutByBetIdQuery(betId), cancellationToken);
 
         return Ok(result);

@@ -9,7 +9,7 @@ namespace BettingService.API.Middlewares;
 
 public static class ExceptionMiddleware
 {
-    public static void ConfigureExceptionHandler(this WebApplication app, ILoggerService logger)
+    public static void ConfigureExceptionHandler(this WebApplication app)
     {
         app.UseExceptionHandler(appError =>
         {
@@ -24,8 +24,6 @@ public static class ExceptionMiddleware
                     {
                         var (statusCode, message) = MapRpcException(rpcException);
                         context.Response.StatusCode = statusCode;
-
-                        logger.LogError($"gRPC call failed: {rpcException.Status}");
 
                         await context.Response.WriteAsJsonAsync(
                             new ErrorDetails
@@ -52,8 +50,6 @@ public static class ExceptionMiddleware
 
                         return;
                     }
-
-                    logger.LogError($"Something went wrong: {contextFeature.Error}");
 
                     await context.Response.WriteAsync(
                         new ErrorDetails

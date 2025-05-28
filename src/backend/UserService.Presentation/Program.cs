@@ -1,3 +1,4 @@
+using Serilog;
 using UserService.Application.Contracts.Services;
 using UserService.Presentation.Extensions;
 
@@ -11,8 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddAppSettings(builder.Configuration);
 
-    builder.Services.ConfigureNLog();
-    builder.Services.ConfigureLoggerService();
+    builder.Services.ConfigureLogging(builder.Configuration);
+    builder.Host.UseSerilog();
 
     builder.Services.AddDatabaseMigrationService();
     builder.Services.ConfigureSqlContext(builder.Configuration);
@@ -35,8 +36,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 {
-    var logger = app.Services.GetRequiredService<ILoggerService>();
-    app.ConfigureExceptionHandler(logger);
+    app.ConfigureExceptionHandler();
 
     await app.ApplyMigrations();
 

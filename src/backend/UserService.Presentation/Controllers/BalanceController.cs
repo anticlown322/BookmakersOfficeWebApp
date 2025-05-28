@@ -15,15 +15,18 @@ public class BalanceController(
     IGetUserBalanceUseCase getUserBalanceUseCase,
     IDepositToUserBalanceUseCase depositToUserBalanceUseCase,
     IWithdrawFromUserBalanceUseCase withdrawFromUserBalanceUseCase,
-    IGetTransactionHistory getTransactionHistory)
+    IGetTransactionHistory getTransactionHistory,
+    ILogger<UsersController> logger)
     : ControllerBase
 {
     [HttpGet("current")]
-    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
     public async Task<IActionResult> GetCurrentBalance(
         [FromRoute] string username,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Get current balance for user {username}...");
+
         var userBalance = await getUserBalanceUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok(userBalance);
@@ -36,31 +39,37 @@ public class BalanceController(
         [FromBody] DepositRequestDto dto,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Deposit for balance of user {username}...");
+
         await depositToUserBalanceUseCase.ExecuteAsync(username, dto, cancellationToken);
 
         NoContent();
     }
 
     [HttpPost("withdraw")]
-    [Authorize(Policy= AuthorizationPolicies.GamblerOnly)]
+    [Authorize(Policy = AuthorizationPolicies.GamblerOnly)]
     [ValidationFilter<WithdrawRequestDto>]
     public async Task Withdraw(
         [FromRoute] string username,
         [FromBody] WithdrawRequestDto dto,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Withdraw from balance of user {username}...");
+
         await withdrawFromUserBalanceUseCase.ExecuteAsync(username, dto, cancellationToken);
 
         NoContent();
     }
 
     [HttpGet("history")]
-    [Authorize(Policy= AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
+    [Authorize(Policy = AuthorizationPolicies.AdministratorOrModeratorOrGambler)]
     public async Task<IActionResult> GetTransactionHistory(
         [FromRoute] string username,
         [FromQuery] TransactionParameters transactionParameters,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Get transaction history for user {username}...");
+
         var pagedResult = await getTransactionHistory.ExecuteAsync(username, transactionParameters, cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));

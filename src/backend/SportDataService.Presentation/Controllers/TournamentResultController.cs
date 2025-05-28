@@ -14,22 +14,30 @@ public class TournamentResultController(
     IRefreshTournamentResultsUseCase refreshTournamentResultsUseCase,
     IGetAllTournamentResultsUseCase getAllTournamentResultsUseCase,
     IGetTournamentResultByIdUseCase getTournamentResultByIdUseCase,
-    IGetTournamentResultByResultIdUseCase getTournamentResultByResultIdUseCase)
+    IGetTournamentResultByResultIdUseCase getTournamentResultByResultIdUseCase,
+    ILogger<TournamentResultController> logger)
     : ControllerBase
 {
     [HttpPost]
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> RefreshTournamentResults(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Refreshing tournament results...");
+
         await refreshTournamentResultsUseCase.ExecuteAsync(cancellationToken);
 
         return NoContent();
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTournamentResults([FromQuery] TournamentResultParameters tournamentResultParameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTournamentResults(
+        [FromQuery] TournamentResultParameters tournamentResultParameters,
+        CancellationToken cancellationToken)
     {
-        var pagedResult = await getAllTournamentResultsUseCase.ExecuteAsync(tournamentResultParameters, cancellationToken);
+        logger.LogInformation("Getting tournament results...");
+
+        var pagedResult =
+            await getAllTournamentResultsUseCase.ExecuteAsync(tournamentResultParameters, cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));
 
@@ -39,15 +47,22 @@ public class TournamentResultController(
     [HttpGet("by-id/{id}")]
     public async Task<IActionResult> GetTournamentResultById(string id, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting tournament result with id {id}...");
+
         var tournamentResultToGet = await getTournamentResultByIdUseCase.ExecuteAsync(id, cancellationToken);
 
         return Ok(tournamentResultToGet);
     }
 
     [HttpGet("by-result-id/{tournamentResultId}")]
-    public async Task<IActionResult> GetTournamentResultByTournamentResultId(string tournamentResultId, CancellationToken ct)
+    public async Task<IActionResult> GetTournamentResultByTournamentResultId(
+        string tournamentResultId,
+        CancellationToken ct)
     {
+        logger.LogInformation($"Getting tournament result with tournament result id {tournamentResultId}...");
+
         var tournamentResult = await getTournamentResultByResultIdUseCase.ExecuteAsync(tournamentResultId, ct);
+
         return Ok(tournamentResult);
     }
 }

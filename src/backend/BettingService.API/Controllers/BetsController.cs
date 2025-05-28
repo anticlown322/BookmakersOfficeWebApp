@@ -1,8 +1,6 @@
 ﻿using BettingService.BLL.UseCases.Bets.Commands.UpdateActiveBets;
 using BettingService.BLL.UseCases.Bets.Commands.UpdatePendingBets;
 using BettingService.BLL.UseCases.Bets.Queries.GetAllUserBets;
-using BettingService.BLL.Validation;
-using BettingService.BLL.Validation.Validators;
 
 namespace BettingService.API.Controllers;
 
@@ -20,7 +18,9 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/bets")]
-public class BetsController(IMediator mediator)
+public class BetsController(
+    IMediator mediator,
+    ILogger<BetsController> logger)
     : ControllerBase
 {
     [HttpPost]
@@ -28,6 +28,9 @@ public class BetsController(IMediator mediator)
     public async Task<IActionResult> PlaceBet([FromBody] PlaceBetDto placeBetDto, CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
+
+        logger.LogInformation($"Placing bet for {username}...");
+
         var command = new PlaceBetCommand(username, placeBetDto);
         await mediator.Send(command, cancellationToken);
 
@@ -38,6 +41,8 @@ public class BetsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> UpdatePendingBets(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Updating pending bets...");
+
         await mediator.Send(new UpdatePendingBetsCommand(), cancellationToken);
 
         return Ok();
@@ -47,6 +52,8 @@ public class BetsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> UpdateActiveBets(CancellationToken cancellationToken)
     {
+        logger.LogInformation("Updating active bets...");
+
         await mediator.Send(new UpdateActiveBetsCommand(), cancellationToken);
 
         return Ok();
@@ -58,6 +65,8 @@ public class BetsController(IMediator mediator)
         [FromQuery] BetParameters betParameters,
         CancellationToken cancellationToken)
     {
+        logger.LogInformation("Getting all bets...");
+
         var result = await mediator.Send(new GetAllBetsQuery(betParameters), cancellationToken);
 
         Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(result.MetaData));
@@ -72,6 +81,9 @@ public class BetsController(IMediator mediator)
         CancellationToken cancellationToken)
     {
         var username = GetUsernameFromToken();
+
+        logger.LogInformation($"Getting all bets for {username}...");
+
         var query = new GetAllUserBetsQuery(betParameters, username);
         var result = await mediator.Send(query, cancellationToken);
 
@@ -85,6 +97,8 @@ public class BetsController(IMediator mediator)
     [Authorize(Policy = AuthorizationPolicies.AdministratorOnly)]
     public async Task<IActionResult> GetBetById([FromRoute] Guid betId, CancellationToken cancellationToken)
     {
+        logger.LogInformation($"Getting bet with id {betId}...");
+
         var result = await mediator.Send(new GetBetByIdQuery(betId), cancellationToken);
 
         return Ok(result);
