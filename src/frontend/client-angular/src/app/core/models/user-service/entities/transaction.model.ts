@@ -9,7 +9,7 @@ export enum TransactionStatus {
     FAILED = 'Failed',
 }
 
-export interface TransactionDto {
+export interface Transaction {
     transactionId: string;
     amount: number;
     operationType: OperationType;

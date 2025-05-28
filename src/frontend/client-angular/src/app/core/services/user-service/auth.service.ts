@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, catchError, map, throwError } from 'rxjs';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
-import { UserLoginRequest } from '../models/user-service/requests/auth/login.request';
-import { TokensRefreshRequest } from '../models/user-service/requests/auth/refresh-token.request';
-import { UserLogoutRequest } from '../models/user-service/requests/auth/logout.request';
-import { UserRegistrationRequest } from '../models/user-service/requests/auth/register.request';
-import { TokensGetResponse } from '../models/user-service/responses/auth/login.response';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
+import { UserRegistrationRequest } from '../../models/user-service/requests/auth/register.request';
+import { UserLoginRequest } from '../../models/user-service/requests/auth/login.request';
+import { TokensGetResponse } from '../../models/user-service/responses/auth/login.response';
+import { TokensRefreshRequest } from '../../models/user-service/requests/auth/refresh-token.request';
+import { UserLogoutRequest } from '../../models/user-service/requests/auth/logout.request';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

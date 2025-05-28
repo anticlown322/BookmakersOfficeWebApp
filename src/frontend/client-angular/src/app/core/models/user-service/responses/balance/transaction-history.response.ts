@@ -1,4 +1,4 @@
 import { PagedList } from '../../../shared/interfaces/paged-list';
-import { TransactionDto } from '../../entities/transaction.dto';
+import { Transaction } from '../../entities/transaction.model';
 
-export type TransactionHistoryResponse = PagedList<TransactionDto>;
+export type TransactionHistoryResponse = PagedList<Transaction>;

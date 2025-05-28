@@ -1,4 +1,4 @@
-export interface UserParameters {
+export interface PagedParams {
     pageNumber?: number;
     pageSize?: number;
 }
