@@ -473,7 +473,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/register",
+      "UpstreamPathTemplate": "/api/authentication/register",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -485,7 +485,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/login",
+      "UpstreamPathTemplate": "/api/authentication/login",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -497,7 +497,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/refresh",
+      "UpstreamPathTemplate": "/api/authentication/refresh",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -509,7 +509,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/logout",
+      "UpstreamPathTemplate": "/api/authentication/logout",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {

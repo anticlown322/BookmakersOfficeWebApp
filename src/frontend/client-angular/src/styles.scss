@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+@import "fonts";
+@import "icons";
+
+:root {
+  --primary-color: #4cc9f0;
+  --dark-bg: #1a1a2e;
+}
+
+body {
+  font-family: JetBrainsMono, sans-serif;
+  background: var(--dark-bg);
+}

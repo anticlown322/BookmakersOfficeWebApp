@@ -1,0 +1,34 @@
+<header class="header">
+    <a class="logo" routerLink="/">
+        <img src="assets/icons/logo.svg" alt="ScamBet logo" />
+        <span>ScamBet</span>
+    </a>
+
+    <nav class="nav">
+        <a routerLink="/matches" routerLinkActive="active">Матчи</a>
+        <a routerLink="/results" routerLinkActive="active">Результаты</a>
+        <a routerLink="/teams" routerLinkActive="active">Команды</a>
+    </nav>
+
+    <div class="user-section">
+        @if (authService.isAuthenticated()) {
+        <div class="user-profile" (click)="toggleProfileMenu()">
+            <span class="username">{{ currentUsername }}</span>
+            <img
+                class="avatar"
+                [src]="'assets/icons/user-default-icon.svg'"
+                alt="Profile"
+            />
+
+            @if (isProfileMenuOpen) {
+            <div class="profile-menu">
+                <button routerLink="/profile">Профиль</button>
+                <button (click)="logout()">Выйти</button>
+            </div>
+            }
+        </div>
+        } @else {
+        <button class="login-btn" (click)="navigateToLogin()">Войти</button>
+        }
+    </div>
+</header>
