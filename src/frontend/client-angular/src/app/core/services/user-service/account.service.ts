@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { UserProfile } from '../../models/user-service/entities/user-profile.model';
+import { PasswordResetRequest } from '../../models/user-service/requests/account/password-reset.request';
+import { UserProfileUpdateRequest } from '../../models/user-service/requests/account/user-profile-update.request';
 
 @Injectable({
     providedIn: 'root',
@@ -35,12 +37,11 @@ export class AccountService {
 
     resetPassword(
         username: string,
-        token: string,
-        newPassword: string
+        request: PasswordResetRequest
     ): Observable<void> {
         return this.http.post<void>(
             `${this.baseUrl}/${username}/account/reset-password`,
-            { token, newPassword }
+            request
         );
     }
 
@@ -52,11 +53,11 @@ export class AccountService {
 
     updateUserProfile(
         username: string,
-        profile: { firstName: string; lastName: string }
+        request: UserProfileUpdateRequest
     ): Observable<void> {
         return this.http.put<void>(
             `${this.baseUrl}/${username}/account/profile`,
-            profile
+            request
         );
     }
 }

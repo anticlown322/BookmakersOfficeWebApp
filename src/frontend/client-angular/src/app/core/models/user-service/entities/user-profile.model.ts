@@ -3,4 +3,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   roles: string[];              
+  phoneNumber: string;
+  email: string;
+  isEmailConfirmed: boolean;
 }

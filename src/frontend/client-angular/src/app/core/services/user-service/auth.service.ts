@@ -11,6 +11,7 @@ import { TokensGetResponse } from '../../models/user-service/responses/auth/logi
 import { TokensRefreshRequest } from '../../models/user-service/requests/auth/refresh-token.request';
 import { UserLogoutRequest } from '../../models/user-service/requests/auth/logout.request';
 import { Router } from '@angular/router';
+import { JwtToken } from '../../models/user-service/entities/jwtToken.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -142,6 +143,7 @@ export class AuthService {
 
     getTokenClaims<T>(claim: string): T | null {
         const token = this.getCurrentAccessToken();
+
         if (!token) return null;
 
         try {
@@ -157,15 +159,16 @@ export class AuthService {
         if (!token) return null;
 
         try {
-            const decoded = jwtDecode<{ username?: string }>(token);
-            return decoded.username || null;
-        } catch {
+            const decoded = jwtDecode<JwtToken>(token);
+            const username =
+                decoded[
+                    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+                ] || null;
+            return username;
+        } catch (error) {
+            console.error('Error decoding token:', error);
             return null;
         }
-    }
-
-    getCurrentUserId(): string | null {
-        return this.getTokenClaims<string>('sub');
     }
 
     getTokenExpirationDate(): Date | null {
