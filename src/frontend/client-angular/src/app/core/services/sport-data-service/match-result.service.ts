@@ -1,10 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { MatchResultParameters } from '../../models/sport-data-service/requests/match-result/match-result-parameters.request';
 import { PagedMatchResultResponse } from '../../models/sport-data-service/responses/match-result/paged-match-result.response';
 import { MatchResult } from '../../models/sport-data-service/entities/match-result/match-result.model';
+import { MetaData } from '../../models/shared/interfaces/meta-data';
 
 @Injectable({
     providedIn: 'root',
@@ -34,9 +35,27 @@ export class MatchResultService {
             }
         }
 
-        return this.http.get<PagedMatchResultResponse>(this.baseUrl, {
-            params,
-        });
+        return this.http
+            .get<MatchResult[]>(this.baseUrl, {
+                params,
+                observe: 'response',
+            })
+            .pipe(
+                map((response) => {
+                    const paginationHeader =
+                        response.headers.get('X-Pagination') ||
+                        response.headers.get('x-pagination');
+
+                    const pagination: MetaData = paginationHeader
+                        ? JSON.parse(paginationHeader)
+                        : null;
+
+                    return {
+                        items: response.body || [],
+                        metaData: pagination,
+                    };
+                })
+            );
     }
 
     getMatchResultById(id: string): Observable<MatchResult> {

@@ -1,0 +1,58 @@
+<div class="match-card" [class.expanded]="isDetailsExpanded">
+    <div class="match-header" (click)="toggleDetails()">
+        <span class="match-time">
+            {{ match.resultTime | date : "dd.MM.yyyy HH:mm" }}
+        </span>
+        <span class="match-status" [class]="getMatchStatusClass()">
+            {{ match.status | resultStatus }}
+        </span>
+    </div>
+
+    <div class="teams-container">
+        <div class="team">
+            <span class="team-name">{{ match.team1.name }}</span>
+            <span class="team-score">{{ match.team1TotalScore }}</span>
+        </div>
+
+        <div class="vs-divider">vs</div>
+
+        <div class="team">
+            <span class="team-score">{{ match.team2TotalScore }}</span>
+            <span class="team-name">{{ match.team2.name }}</span>
+        </div>
+    </div>
+
+    @if (isDetailsExpanded) {
+    <div class="match-details">
+        <div class="subscores">
+            @for (subScore of match.subScores; track subScore.subscorePosition)
+            {
+            <div class="subscore">
+                <span class="subscore-title">
+                    {{ (subScore.title ? (subScore.title | capitalize) : ('Раунд ' + subScore.subscorePosition)) }}
+                </span>
+                <span class="score"
+                    >{{ subScore.team1Score }} - {{ subScore.team2Score }}</span
+                >
+            </div>
+            }
+        </div>
+
+        <div class="events">
+            <h4>События</h4>
+            @if(match.eventResults.length === 0) {
+              <span class="no-events-span">Для этого матча нет событий</span>
+            } @else {            @for (event of match.eventResults; track event.id) {
+            <div class="event">
+                <span class="event-name">{{ event.eventName }}</span>
+                <span class="event-divider"> : </span>
+                <span class="event-score"
+                    >{{ event.team1TotalScore }} -
+                    {{ event.team2TotalScore }}</span
+                >
+            </div>
+            }}
+        </div>
+    </div>
+    }
+</div>

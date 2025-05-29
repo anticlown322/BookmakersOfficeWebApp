@@ -1,10 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { TournamentParameters } from '../../models/sport-data-service/requests/tournaments/tournament-parameters.request';
 import { PagedTournamentResponse } from '../../models/sport-data-service/responses/tournament/paged-tournament.response';
 import { Tournament } from '../../models/sport-data-service/entities/tournament/tournament.model';
+import { MetaData } from '../../models/shared/interfaces/meta-data';
 
 @Injectable({
     providedIn: 'root',
@@ -38,7 +39,27 @@ export class TournamentService {
             }
         }
 
-        return this.http.get<PagedTournamentResponse>(this.baseUrl, { params });
+        return this.http
+            .get<Tournament[]>(this.baseUrl, {
+                params,
+                observe: 'response',
+            })
+            .pipe(
+                map((response) => {
+                    const paginationHeader =
+                        response.headers.get('X-Pagination') ||
+                        response.headers.get('x-pagination');
+
+                    const pagination: MetaData = paginationHeader
+                        ? JSON.parse(paginationHeader)
+                        : null;
+
+                    return {
+                        items: response.body || [],
+                        metaData: pagination,
+                    };
+                })
+            );
     }
 
     getTournamentById(id: string): Observable<Tournament> {
