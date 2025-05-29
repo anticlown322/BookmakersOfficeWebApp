@@ -71,6 +71,21 @@ public static class ServiceExtensions
             .CreateLogger();
     }
 
+    public static void ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithExposedHeaders("X-Pagination");
+            });
+        });
+    }
+
     public static void ConfigureDataCollectionService(this IServiceCollection services) =>
         services.AddSingleton<IDataCollectionService, DataCollectionService>();
 

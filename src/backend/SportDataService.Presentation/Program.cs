@@ -39,6 +39,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureBackgroundJobExecutor();
     builder.Services.AddHostedService<HangfireJobScheduler>();
 
+    builder.Services.ConfigureCors();
+
     builder.Services.AddControllers();
     builder.Services.ConfigureApiBehaviorOptions();
 }
@@ -50,6 +52,7 @@ var app = builder.Build();
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseCors();
     app.ConfigureHangfireDashboard();
 
     app.MapControllers();
