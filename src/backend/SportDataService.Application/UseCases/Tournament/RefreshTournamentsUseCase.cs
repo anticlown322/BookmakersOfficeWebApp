@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using SportDataService.Application.Contracts.Services;
+using SportDataService.Application.Contracts.Services.Signaling;
 using SportDataService.Application.Contracts.UseCases.Tournament;
+using SportDataService.Application.DTO.Prematch;
 using SportDataService.Domain.RepositoryContracts;
+using SportDataService.Domain.RequestFeatures.Params;
 
 namespace SportDataService.Application.UseCases.Tournament;
 
@@ -14,7 +18,9 @@ public class RefreshTournamentsUseCase(
     ITournamentRepository tournamentRepository,
     IMatchRepository matchRepository,
     ITeamRepository teamRepository,
-    ILogger<RefreshTournamentsUseCase> logger)
+    ILogger<RefreshTournamentsUseCase> logger,
+    IPrematchNotificationService notifier,
+    IMapper mapper)
     : IRefreshTournamentsUseCase
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -25,6 +31,7 @@ public class RefreshTournamentsUseCase(
 
         var apiAnswer = await dataCollectionService.GetTournamentsInfoAsync(cancellationToken);
         await UpdateDatabase(apiAnswer, cancellationToken);
+        await NotifyClients(cancellationToken);
 
         logger.LogInformation("Tournaments successfully refreshed");
     }
@@ -165,5 +172,15 @@ public class RefreshTournamentsUseCase(
         ct.ThrowIfCancellationRequested();
 
         await tournamentRepository.CreateAsync(newTournament, ct);
+    }
+
+    private async Task NotifyClients(CancellationToken ct)
+    {
+        var tournamentParameters = new TournamentParameters();
+        var tournamentsWithMetaData =
+            await tournamentRepository.FindAllTournamentsAsync(tournamentParameters, ct);
+
+        var tournamentGetDtos = mapper.Map<IEnumerable<TournamentGetDto>>(tournamentsWithMetaData);
+        await notifier.NotifyPrematchUpdatedAsync(tournamentGetDtos, tournamentsWithMetaData.MetaData);
     }
 }

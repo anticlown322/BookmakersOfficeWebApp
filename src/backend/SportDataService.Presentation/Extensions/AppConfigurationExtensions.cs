@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using SportDataService.Application.Contracts.Services;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Infrastructure.Services.Hangfire;
+using SportDataService.Infrastructure.Services.SignalR.Implementations;
 
 namespace SportDataService.Presentation.Extensions;
 
@@ -25,5 +26,11 @@ public static class AppConfigurationExtensions
                     DashboardTitle = "SportData Jobs",
                 });
         }
+    }
+
+    public static void MapSingalR(this WebApplication app)
+    {
+        app.MapHub<PrematchHub>("/hubs/prematch");
+        app.MapHub<ResultsHub>("/hubs/results");
     }
 }

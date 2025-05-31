@@ -4,6 +4,7 @@ import { InfiniteScrollDirective } from '../../shared/ui/infinite-scroll.directi
 import { TournamentResultComponent } from './tournament-result/tournament-result.component';
 import { TournamentResult } from '../../core/models/sport-data-service/entities/tournament-result/tournament-result.model';
 import { TournamentResultService } from '../../core/services/sport-data-service/tournament-result.service';
+import { TournamentResultSignalrService } from '../../core/services/sport-data-service/tournament-result-signalr';
 
 @Component({
     selector: 'app-results-page',
@@ -22,10 +23,24 @@ export class ResultsPageComponent implements OnInit {
     MIN_LOADING_DISPLAY_TIME = 500;
     tournamentsCache: Record<number, TournamentResult[]> = {};
 
-    constructor(private resultsService: TournamentResultService) {}
+    constructor(
+        private resultsSignalrService: TournamentResultSignalrService,
+        private resultsService: TournamentResultService
+    ) {}
 
     ngOnInit(): void {
         this.loadInitialTournaments();
+
+        this.resultsSignalrService.startConnection();
+
+        this.resultsSignalrService.resultsUpdated$.subscribe((update) => {
+            if (update) {
+                this.tournaments = update.tournaments;
+                this.isLoading = false;
+                this.isTransitioning = false;
+                this.hasMore = update.tournaments.length === this.pageSize;
+            }
+        });
     }
 
     loadInitialTournaments(): void {
@@ -117,5 +132,9 @@ export class ResultsPageComponent implements OnInit {
 
     trackByTournamentId(index: number, tournament: TournamentResult): string {
         return tournament.id;
+    }
+
+    ngOnDestroy(): void {
+        this.resultsSignalrService.stopConnection();
     }
 }

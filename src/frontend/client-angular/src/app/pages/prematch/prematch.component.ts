@@ -5,13 +5,18 @@ import { TournamentPrematchComponent } from './tournament-prematch/tournament-pr
 import { InfiniteScrollDirective } from '../../shared/ui/infinite-scroll.directive';
 import { Tournament } from '../../core/models/sport-data-service/entities/tournament/tournament.model';
 import { AuthService } from '../../core/services/user-service/auth.service';
+import { TournamentSignalrService } from '../../core/services/sport-data-service/tournament-signalr';
 
 @Component({
-  selector: 'app-prematch',
-  templateUrl: './prematch.component.html',
-  styleUrls: ['./prematch.component.scss'],
-  standalone: true,
-  imports: [CommonModule, TournamentPrematchComponent, InfiniteScrollDirective],
+    selector: 'app-prematch',
+    templateUrl: './prematch.component.html',
+    styleUrls: ['./prematch.component.scss'],
+    standalone: true,
+    imports: [
+        CommonModule,
+        TournamentPrematchComponent,
+        InfiniteScrollDirective,
+    ],
 })
 export class PrematchComponent implements OnInit {
     tournaments: Tournament[] = [];
@@ -22,10 +27,25 @@ export class PrematchComponent implements OnInit {
     hasMore = true;
     MIN_LOADING_DISPLAY_TIME = 500;
 
-    constructor(private tournamentService: TournamentService, authService: AuthService) {}
+    constructor(
+        private tournamentSignalrService: TournamentSignalrService,
+        private tournamentService: TournamentService,
+        authService: AuthService
+    ) {}
 
     ngOnInit(): void {
         this.loadInitialTournaments();
+
+        this.tournamentSignalrService.startConnection();
+
+        this.tournamentSignalrService.prematchUpdated$.subscribe((update) => {
+            if (update) {
+                this.tournaments = update.tournaments;
+                this.isLoading = false;
+                this.isTransitioning = false;
+                this.hasMore = update.tournaments.length === this.pageSize;
+            }
+        });
     }
 
     loadInitialTournaments(): void {
@@ -51,7 +71,8 @@ export class PrematchComponent implements OnInit {
                         this.tournaments = tournaments.items;
                         this.isLoading = false;
                         this.isTransitioning = false;
-                        this.hasMore = tournaments.items.length === this.pageSize;
+                        this.hasMore =
+                            tournaments.items.length === this.pageSize;
                     }, remainingTime);
                 },
                 error: (error) => {
@@ -83,10 +104,14 @@ export class PrematchComponent implements OnInit {
                     );
 
                     setTimeout(() => {
-                        this.tournaments = [...this.tournaments, ...tournaments.items];
+                        this.tournaments = [
+                            ...this.tournaments,
+                            ...tournaments.items,
+                        ];
                         this.currentPage = nextPage;
                         this.isTransitioning = false;
-                        this.hasMore = tournaments.items.length === this.pageSize;
+                        this.hasMore =
+                            tournaments.items.length === this.pageSize;
                     }, remainingTime);
                 },
                 error: (error) => {
@@ -98,5 +123,9 @@ export class PrematchComponent implements OnInit {
 
     trackByTournamentId(index: number, tournament: Tournament): string {
         return tournament.id;
+    }
+
+    ngOnDestroy(): void {
+        this.tournamentSignalrService.stopConnection();
     }
 }

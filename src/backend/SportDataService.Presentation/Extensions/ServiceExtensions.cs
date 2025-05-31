@@ -13,6 +13,7 @@ using Serilog;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 using SportDataService.Application.Contracts.Services;
+using SportDataService.Application.Contracts.Services.Signaling;
 using SportDataService.Application.Contracts.UseCases.Match;
 using SportDataService.Application.Contracts.UseCases.MatchResult;
 using SportDataService.Application.Contracts.UseCases.Team;
@@ -31,6 +32,7 @@ using SportDataService.Infrastructure.Repository;
 using SportDataService.Infrastructure.Services;
 using SportDataService.Infrastructure.Services.DataCollection;
 using SportDataService.Infrastructure.Services.Hangfire;
+using SportDataService.Infrastructure.Services.SignalR.Implementations;
 using SportDataService.Infrastructure.Utility;
 using SportDataService.Presentation.Utility;
 
@@ -262,5 +264,13 @@ public static class ServiceExtensions
             options.Queues = new[] { "default", "critical" };
             options.WorkerCount = 1;
         });
+    }
+
+    public static void ConfigureSingalR(this IServiceCollection services)
+    {
+        services.AddSignalR();
+
+        services.AddScoped<IPrematchNotificationService, PrematchNotificationService>();
+        services.AddScoped<IResultsNotificationService, ResultsNotificationService>();
     }
 }
