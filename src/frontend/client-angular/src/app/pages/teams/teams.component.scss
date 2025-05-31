@@ -50,6 +50,12 @@
             animation: fadeOut 0.3s ease forwards !important;
         }
     }
+
+    .empty-message {
+        color: #4cc9f0;
+        font-size: 18px;
+        text-align: center;
+    }
 }
 
 .skeleton-card {
@@ -139,6 +145,12 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -9,6 +9,12 @@
         text-align: center;
         color: rgba(255, 255, 255, 0.7);
     }
+
+    .empty-message {
+        color: #4cc9f0;
+        font-size: 18px;
+        text-align: center;
+    }
 }
 
 .tournaments-list {
@@ -18,11 +24,12 @@
 }
 
 .skeleton-card {
-    height: 120px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
     background-size: 200% 100%;
     border-radius: 8px;
+    height: 80px;
     animation: shimmer 1.5s infinite linear;
+    opacity: 0.7;
 }
 
 .loading-overlay {

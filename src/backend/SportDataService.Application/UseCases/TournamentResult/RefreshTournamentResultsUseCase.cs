@@ -31,8 +31,6 @@ public class RefreshTournamentResultsUseCase(
 
     private async Task UpdateDatabase(List<TournamentResult> apiAnswer, CancellationToken ct)
     {
-        logger.LogInformation("Updating tournament results...");
-
         foreach (var tournamentResult in apiAnswer)
         {
             ct.ThrowIfCancellationRequested();
@@ -68,8 +66,6 @@ public class RefreshTournamentResultsUseCase(
 
     private async Task UpdateTeams(TournamentResult tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating teams...");
-
         var allTeams = tournament.Matches
             .SelectMany(m => new[] { m.Team1, m.Team2 })
             .ToList();
@@ -90,14 +86,10 @@ public class RefreshTournamentResultsUseCase(
                 await teamRepository.CreateAsync(team, ct);
             }
         }
-
-        logger.LogInformation("Teams successfully updated");
     }
 
     private async Task UpdateMatches(TournamentResult tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating matches...");
-
         var allMatches = tournament.Matches.ToList();
 
         foreach (var match in allMatches)
@@ -125,8 +117,6 @@ public class RefreshTournamentResultsUseCase(
                 await matchResultRepository.CreateAsync(match, ct);
             }
         }
-
-        logger.LogInformation("Matches successfully updated");
     }
 
     private async Task UpdateExistingTournamentResult(

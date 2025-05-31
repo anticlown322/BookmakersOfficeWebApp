@@ -30,6 +30,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddValidators();
     builder.Services.ConfigureAutoMapper();
 
+    builder.Services.ConfigureCors();
+
     builder.Services.AddControllers();
     builder.Services.ConfigureApiBehaviorOptions();
 }
@@ -43,6 +45,7 @@ var app = builder.Build();
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseCors();
     app.MapControllers();
 }
 

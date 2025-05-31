@@ -5,7 +5,7 @@
     </a>
 
     <nav class="nav">
-        <a routerLink="/matches" routerLinkActive="active">Матчи</a>
+        <a routerLink="/prematch" routerLinkActive="active">Матчи</a>
         <a routerLink="/results" routerLinkActive="active">Результаты</a>
         <a routerLink="/teams" routerLinkActive="active">Команды</a>
     </nav>
@@ -27,6 +27,18 @@
                     (click)="isProfileMenuOpen = false"
                 >
                     Профиль
+                </button>
+                <button
+                    routerLink="/balance"
+                    (click)="isProfileMenuOpen = false"
+                >
+                    Баланс
+                </button>
+                <button
+                    routerLink="/my-bets"
+                    (click)="isProfileMenuOpen = false"
+                >
+                    Мои ставки
                 </button>
                 <button (click)="logout()">Выйти</button>
             </div>

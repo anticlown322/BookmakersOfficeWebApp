@@ -62,20 +62,11 @@ public class RefreshTournamentsUseCase(
             }
         }
 
-        ct.ThrowIfCancellationRequested();
-
-        logger.LogInformation("Removing started matches...");
-
-        await RemoveStartedMatches(ct);
-
-        logger.LogInformation("Successfully removed started matches");
         logger.LogInformation("Tournaments successfully updated");
     }
 
     private async Task UpdateTeams(Tournament tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating teams...");
-
         var allTeams = tournament.Matches
             .SelectMany(m => new[] { m.Opponent1, m.Opponent2 })
             .ToList();
@@ -87,7 +78,11 @@ public class RefreshTournamentsUseCase(
             {
                 ct.ThrowIfCancellationRequested();
 
-                await UpdateExistingTeam(existingTeam, team, ct);
+                ct.ThrowIfCancellationRequested();
+
+                team.Id = existingTeam.Id;
+
+                await teamRepository.UpdateAsync(existingTeam, ct);
             }
             else
             {
@@ -96,33 +91,33 @@ public class RefreshTournamentsUseCase(
                 await teamRepository.CreateAsync(team, ct);
             }
         }
-
-        logger.LogInformation("Teams successfully updated");
     }
 
     private async Task UpdateMatches(Tournament tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating matches...");
-
         var allMatches = tournament.Matches.ToList();
 
         foreach (var match in allMatches)
         {
-            var team1 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent1.TeamId, ct);
-            var team2 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent2.TeamId, ct);
-
-            match.Opponent1.Id = team1?.Id;
-            match.Opponent2.Id = team2?.Id;
-
             var existingMatch = await matchRepository.GetMatchByMatchIdAsync(match.MatchId, ct);
             if (existingMatch != null)
             {
                 ct.ThrowIfCancellationRequested();
 
+                var team1 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent1.TeamId, ct);
+
+                ct.ThrowIfCancellationRequested();
+
+                var team2 = await teamRepository.GetTeamByTeamIdAsync(match.Opponent2.TeamId, ct);
+
+                match.Id = existingMatch.Id;
+                match.MatchId = existingMatch.MatchId;
                 match.Opponent1.Id = existingMatch.Opponent1.Id ?? team1?.Id;
                 match.Opponent2.Id = existingMatch.Opponent2.Id ?? team2?.Id;
 
-                await UpdateExistingMatch(existingMatch, match, ct);
+                ct.ThrowIfCancellationRequested();
+
+                await matchRepository.UpdateAsync(match, ct);
             }
             else
             {
@@ -130,8 +125,6 @@ public class RefreshTournamentsUseCase(
                 await matchRepository.CreateAsync(match, ct);
             }
         }
-
-        logger.LogInformation("Matches successfully updated");
     }
 
     private async Task UpdateExistingTournament(
@@ -139,64 +132,38 @@ public class RefreshTournamentsUseCase(
         Tournament newTournament,
         CancellationToken ct)
     {
-        existing.Name = newTournament.Name;
+        ct.ThrowIfCancellationRequested();
 
         var matchesToRemove = existing.Matches
-            .Where(em => !newTournament.Matches.Any(nm => nm.MatchId == em.MatchId))
+            .Where(em => newTournament.Matches.All(nm => nm.MatchId != em.MatchId))
             .ToList();
 
-        foreach (var match in matchesToRemove)
-        {
-            existing.Matches.Remove(match);
+        var updateTime = DateTime.UtcNow;
+        var startedMatches = existing.Matches
+            .Where(m => m.StartTime.Value.ToUniversalTime() <= updateTime.ToUniversalTime())
+            .ToList();
 
-            ct.ThrowIfCancellationRequested();
+        var allMatchesToRemove = matchesToRemove.Union(startedMatches).Distinct().ToList();
 
-            await matchRepository.DeleteAsync(match.Id, ct);
-        }
-
-        ct.ThrowIfCancellationRequested();
-
-        await tournamentRepository.UpdateAsync(existing, ct);
-    }
-
-    private async Task UpdateExistingTeam(
-        Team existing,
-        Team newTeam,
-        CancellationToken ct)
-    {
-        if (existing.Name == newTeam.Name)
-        {
-            return;
-        }
-
-        ct.ThrowIfCancellationRequested();
-
-        newTeam.Id = existing.Id;
-
-        await teamRepository.UpdateAsync(newTeam, ct);
-    }
-
-    private async Task UpdateExistingMatch(
-        Match existing,
-        Match newMatch,
-        CancellationToken ct)
-    {
-        ct.ThrowIfCancellationRequested();
-
-        newMatch.Id = existing.Id;
-
-        await matchRepository.UpdateAsync(newMatch, ct);
-    }
-
-    private async Task RemoveStartedMatches(CancellationToken ct)
-    {
-        var currentTime = DateTime.UtcNow.ToUniversalTime();
-        var startedMatches = await matchRepository.GetMatchesStartedBeforeAsync(currentTime, ct);
-
-        foreach (var match in startedMatches)
+        foreach (var match in allMatchesToRemove)
         {
             ct.ThrowIfCancellationRequested();
             await matchRepository.DeleteAsync(match.Id, ct);
+
+            newTournament.Matches.RemoveAll(m => m.MatchId == match.MatchId);
         }
+
+        newTournament.Id = existing.Id;
+        newTournament.Matches = newTournament.Matches
+            .Where(m => !allMatchesToRemove.Any(x => x.MatchId == m.MatchId))
+            .ToList();
+
+        ct.ThrowIfCancellationRequested();
+
+        await tournamentRepository.DeleteAsync(existing.Id, ct);
+
+        ct.ThrowIfCancellationRequested();
+
+        await tournamentRepository.CreateAsync(newTournament, ct);
     }
 }

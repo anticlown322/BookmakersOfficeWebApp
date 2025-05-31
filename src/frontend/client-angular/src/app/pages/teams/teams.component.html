@@ -2,26 +2,25 @@
     <h1>Список команд</h1>
 
     @if (teams.length === 0 && !isLoading && !isTransitioning) {
-        <div class="empty-message">Список команд пуст :(</div>
+    <div class="empty-message">Список команд пуст :(</div>
     }
-    
     <div class="teams-list">
-        @if (!isTransitioning || teams.length > 0) {
-            @for (team of teams; track trackByTeamId($index, team)) {
-                <div class="team-card" [class.fade-out]="isTransitioning && !teamsCache[currentPage]">
-                    <div class="team-id">№{{ team.teamId }}</div>
-                    <div class="team-name">{{ team.name }}</div>
-                </div>
-            }
-        }
-        
-        @if (isTransitioning && teams.length === 0) {
-            @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
-                <div class="skeleton-card"></div>
-            }
-        }
+        @if (!isTransitioning || teams.length > 0) { @for (team of teams; track
+        trackByTeamId($index, team)) {
+        <div
+            class="team-card"
+            [class.fade-out]="isTransitioning && !teamsCache[currentPage]"
+        >
+            <div class="team-id">№{{ team.teamId }}</div>
+            <div class="team-name">{{ team.name }}</div>
+        </div>
+        } } @if (isTransitioning && teams.length === 0) { @for (i of
+        [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <div class="skeleton-card"></div>
+        } }
     </div>
 
+    @if (!isTransitioning && teams.length > 0) {
     <div class="pagination">
         <button
             (click)="onPageChange(currentPage - 1)"
@@ -42,11 +41,6 @@
         >
             Вперед
         </button>
-    </div>
-
-    @if (isTransitioning) {
-    <div class="loading-overlay active">
-        <div class="spinner"></div>
     </div>
     }
 </div>

@@ -1,11 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { PlaceBetRequest } from '../../models/betting-serivce/requests/bet/place-bet.request';
 import { BetParameters } from '../../models/betting-serivce/requests/bet/bet-parameters.request';
 import { PagedBetResponse } from '../../models/betting-serivce/responses/bet/paged-bet.response';
 import { Bet } from '../../models/betting-serivce/entities/bet/bet.model';
+import { MetaData } from '../../models/shared/interfaces/meta-data';
 
 @Injectable({
     providedIn: 'root',
@@ -28,22 +29,6 @@ export class BetsService {
     }
 
     getAllBets(parameters?: BetParameters): Observable<PagedBetResponse> {
-        const params = this.createParams(parameters);
-        return this.http.get<PagedBetResponse>(this.baseUrl, { params });
-    }
-
-    getUserBets(parameters?: BetParameters): Observable<PagedBetResponse> {
-        const params = this.createParams(parameters);
-        return this.http.get<PagedBetResponse>(`${this.baseUrl}/my`, {
-            params,
-        });
-    }
-
-    getBetById(betId: string): Observable<Bet> {
-        return this.http.get<Bet>(`${this.baseUrl}/${betId}`);
-    }
-
-    private createParams(parameters?: BetParameters): HttpParams {
         let params = new HttpParams();
 
         if (parameters) {
@@ -61,6 +46,71 @@ export class BetsService {
             }
         }
 
-        return params;
+        return this.http
+            .get<Bet[]>(this.baseUrl, {
+                params,
+                observe: 'response',
+            })
+            .pipe(
+                map((response) => {
+                    const paginationHeader =
+                        response.headers.get('X-Pagination') ||
+                        response.headers.get('x-pagination');
+
+                    const pagination: MetaData = paginationHeader
+                        ? JSON.parse(paginationHeader)
+                        : null;
+
+                    return {
+                        items: response.body || [],
+                        metaData: pagination,
+                    };
+                })
+            );
+    }
+
+    getUserBets(parameters?: BetParameters): Observable<PagedBetResponse> {
+        let params = new HttpParams();
+
+        if (parameters) {
+            if (parameters.pageNumber) {
+                params = params.append(
+                    'pageNumber',
+                    parameters.pageNumber.toString()
+                );
+            }
+            if (parameters.pageSize) {
+                params = params.append(
+                    'pageSize',
+                    parameters.pageSize.toString()
+                );
+            }
+        }
+
+        return this.http
+            .get<Bet[]>(`${this.baseUrl}/my`, {
+                params,
+                observe: 'response',
+            })
+            .pipe(
+                map((response) => {
+                    const paginationHeader =
+                        response.headers.get('X-Pagination') ||
+                        response.headers.get('x-pagination');
+
+                    const pagination: MetaData = paginationHeader
+                        ? JSON.parse(paginationHeader)
+                        : null;
+
+                    return {
+                        items: response.body || [],
+                        metaData: pagination,
+                    };
+                })
+            );
+    }
+
+    getBetById(betId: string): Observable<Bet> {
+        return this.http.get<Bet>(`${this.baseUrl}/${betId}`);
     }
 }

@@ -1,1 +1,30 @@
-<p>prematch works!</p>
+<div class="prematch-container" appInfiniteScroll (scrolled)="loadMoreTournaments()">
+  <h1>Турниры</h1>
+  
+  <div class="tournaments-list">
+    @if (tournaments.length === 0 && !isLoading && !isTransitioning) {
+      <div class="empty-message">Список турниров пуст :(</div>
+    }
+    
+    @if (!isTransitioning || tournaments.length > 0) {
+      @for (tournament of tournaments; track trackByTournamentId($index, tournament)) {
+        <app-tournament-prematch-card 
+          [tournament]="tournament"
+          [class.fade-out]="isTransitioning">
+        </app-tournament-prematch-card >
+      }
+    }
+    
+    @if ((isLoading || isTransitioning) && tournaments.length === 0) {
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-card"></div>
+      }
+    }
+  </div>
+
+  @if (!hasMore && tournaments.length > 0) {
+    <div class="end-of-list">
+      Вы просмотрели все турниры!
+    </div>
+  }
+</div>

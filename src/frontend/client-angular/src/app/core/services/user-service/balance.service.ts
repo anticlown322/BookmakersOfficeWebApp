@@ -1,12 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CurrentBalanceResponse } from '../../models/user-service/responses/balance/current-balance.response';
 import { DepositRequest } from '../../models/user-service/requests/balance/deposit.request';
 import { WithdrawRequest } from '../../models/user-service/requests/balance/withdraw.request';
 import { TransactionParameters } from '../../models/user-service/requests/balance/transaction-parameters.request';
 import { TransactionHistoryResponse } from '../../models/user-service/responses/balance/transaction-history.response';
+import { MetaData } from '../../models/shared/interfaces/meta-data';
+import { Transaction } from '../../models/user-service/entities/transaction.model';
 
 @Injectable({ providedIn: 'root' })
 export class BalanceService {
@@ -36,34 +38,45 @@ export class BalanceService {
 
     getTransactionHistory(
         username: string,
-        params: TransactionParameters
+        parameters?: TransactionParameters
     ): Observable<TransactionHistoryResponse> {
-        let httpParams = new HttpParams();
+        let params = new HttpParams();
 
-        if (params.pageNumber) {
-            httpParams = httpParams.set(
-                'pageNumber',
-                params.pageNumber.toString()
+        if (parameters) {
+            if (parameters.pageNumber) {
+                params = params.append(
+                    'pageNumber',
+                    parameters.pageNumber.toString()
+                );
+            }
+            if (parameters.pageSize) {
+                params = params.append(
+                    'pageSize',
+                    parameters.pageSize.toString()
+                );
+            }
+        }
+
+        return this.http
+            .get<Transaction[]>(`${this.baseUrl}/${username}/balance/history`, {
+                params,
+                observe: 'response',
+            })
+            .pipe(
+                map((response) => {
+                    const paginationHeader =
+                        response.headers.get('X-Pagination') ||
+                        response.headers.get('x-pagination');
+
+                    const pagination: MetaData = paginationHeader
+                        ? JSON.parse(paginationHeader)
+                        : null;
+
+                    return {
+                        items: response.body || [],
+                        metaData: pagination,
+                    };
+                })
             );
-        }
-
-        if (params.pageSize) {
-            httpParams = httpParams.set('pageSize', params.pageSize.toString());
-        }
-
-        return this.http.get<TransactionHistoryResponse>(
-            `${this.baseUrl}/${username}/balance/history`,
-            { params: httpParams }
-        );
-    }
-
-    createTransactionParams(
-        pageNumber: number = 1,
-        pageSize: number = 10
-    ): TransactionParameters {
-        return {
-            pageNumber,
-            pageSize,
-        };
     }
 }

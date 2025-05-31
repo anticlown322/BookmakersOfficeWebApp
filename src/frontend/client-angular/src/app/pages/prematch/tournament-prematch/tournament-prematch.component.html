@@ -1,1 +1,17 @@
-<p>tournament-prematch works!</p>
+<div class="tournament-card" [class.expanded]="isExpanded">
+    <div class="tournament-header" (click)="toggleExpansion()">
+        <h3>{{ tournament.name }}</h3>
+        <span class="toggle-icon">{{ isExpanded ? "▲" : "▼" }}</span>
+    </div>
+
+    @if (isExpanded) {
+    <div class="matches-container">
+      @if(tournament.matches.length === 0) {
+        <span class="no-matches-span">Матчей пока нет...</span>
+      } @else {@for (match of tournament.matches; track match.id) {
+        <app-match-prematch [match]="match"></app-match-prematch>
+        }}
+        
+    </div>
+    }
+</div>

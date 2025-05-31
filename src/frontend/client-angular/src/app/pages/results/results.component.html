@@ -3,7 +3,7 @@
   
   <div class="tournaments-list">
     @if (tournaments.length === 0 && !isLoading && !isTransitioning) {
-      <div class="empty-message">Список турниров пуст :(</div>
+      <div class="empty-message">Список результатов пуст :(</div>
     }
     
     @if (!isTransitioning || tournaments.length > 0) {
@@ -30,7 +30,7 @@
 
   @if (!hasMore && tournaments.length > 0) {
     <div class="end-of-list">
-      Вы просмотрели все турниры
+      Вы просмотрели все результаты!
     </div>
   }
 </div>
