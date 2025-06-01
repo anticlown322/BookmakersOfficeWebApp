@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="Elastic.Serilog.Sinks" Version="8.18.0" />
+      <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
       <PackageReference Include="Hangfire" Version="1.8.18" />
       <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
@@ -21,6 +22,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.2" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Yaml" Version="2.0.0-preview2" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="NLog" Version="5.4.0" />

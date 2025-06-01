@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.Yaml;
+using Microsoft.Extensions.Options;
 using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.GrpcService.Exceptions;
+using UserService.GrpcService.Services;
 using UserService.Infrastructure.Repository;
 using UserService.Infrastructure.Repository.Repositories;
+using UserService.Infrastructure.Services.EventBus.Kafka.Abstractions;
+using UserService.Infrastructure.Services.EventBus.Kafka.Implementations;
+using UserService.Infrastructure.Services.EventBus.Kafka.Settings;
 
 namespace UserService.GrpcService.Extensions;
 
@@ -23,6 +28,11 @@ public static class ServiceExtensions
         }
     }
 
+    public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
+    }
+
     public static void ConfigureDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DbConnection");
@@ -37,6 +47,8 @@ public static class ServiceExtensions
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<ExceptionInterceptor>();
         });
+
+        services.AddScoped<UserGrpcServiceImplementation>();
     }
 
     public static void AddRepository(this IServiceCollection services)
@@ -49,5 +61,31 @@ public static class ServiceExtensions
         services.AddIdentityCore<User>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<RepositoryContext>();
+    }
+
+    public static void ConfigureMessageBroker(this IServiceCollection services)
+    {
+        services.AddSingleton<IEventProducer, KafkaEventProducer>();
+        services.AddSingleton<JsonSerializerOptions>(_ =>
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false,
+            });
+
+        services.AddSingleton<IEventConsumer<PayoutRequest>>(provider =>
+            new KafkaEventConsumer<PayoutRequest>(
+                provider.GetRequiredService<IOptions<KafkaSettings>>(),
+                provider.GetRequiredService<ILogger<KafkaEventConsumer<PayoutRequest>>>(),
+                provider.GetRequiredService<JsonSerializerOptions>()));
+
+        services.AddSingleton<IEventConsumer<UserValidationEvent>>(provider =>
+            new KafkaEventConsumer<UserValidationEvent>(
+                provider.GetRequiredService<IOptions<KafkaSettings>>(),
+                provider.GetRequiredService<ILogger<KafkaEventConsumer<UserValidationEvent>>>(),
+                provider.GetRequiredService<JsonSerializerOptions>()));
+
+        services.AddHostedService<PayoutRequestConsumer>();
+        services.AddHostedService<UserValidationConsumer>();
     }
 }

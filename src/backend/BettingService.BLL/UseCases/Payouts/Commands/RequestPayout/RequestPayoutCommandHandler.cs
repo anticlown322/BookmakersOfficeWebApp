@@ -1,10 +1,14 @@
-﻿using BettingService.BLL.Exceptions.Specific;
+﻿using BettingService.BLL.Contracts.Services;
+using BettingService.BLL.Exceptions.Specific;
 using BettingService.BLL.UseCases.Bets;
 using BettingService.DAL.Contracts.Repository;
 using BettingService.DAL.Models.Entities;
+using BettingService.DAL.Models.MessageBroker;
+using BettingService.DAL.Models.Settings.Kafka;
 using BettingService.Protos;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BettingService.BLL.UseCases.Payouts.Commands.RequestPayout;
 
@@ -12,9 +16,14 @@ public sealed class PlacePayoutCommandHandler(
     IPayoutRepository payoutRepository,
     IBetRepository betRepository,
     UserGrpcService.UserGrpcServiceClient userClient,
-    ILogger<PlacePayoutCommandHandler> logger)
+    ILogger<PlacePayoutCommandHandler> logger,
+    IKafkaProducerService kafkaProducer,
+    IKafkaConsumerService kafkaConsumer,
+    IOptions<KafkaSettings> kafkaSettings)
     : IRequestHandler<RequestPayoutCommand, Unit>
 {
+    private readonly KafkaSettings _kafkaSettings = kafkaSettings.Value;
+
     public async Task<Unit> Handle(RequestPayoutCommand request, CancellationToken cancellationToken)
     {
         logger.LogInformation($"Checking bet with id {request.RequestPayoutDto.BetId} for payout...");
@@ -27,7 +36,7 @@ public sealed class PlacePayoutCommandHandler(
             throw new BetNotFoundByIdException(request.RequestPayoutDto.BetId);
         }
 
-        if (!(bet.Status == BetStatus.Won))
+        if (bet.Status != BetStatus.Won)
         {
             logger.LogWarning($"Bet status is {bet.Status} and doesn't equal to {BetStatus.Won}");
 
@@ -38,8 +47,7 @@ public sealed class PlacePayoutCommandHandler(
 
         var existingPayout = await payoutRepository.GetByBetIdAsync(request.RequestPayoutDto.BetId, cancellationToken);
         if (existingPayout is not null &&
-            (existingPayout.Status == PayoutStatus.Pending
-             || existingPayout.Status == PayoutStatus.Completed))
+            (existingPayout.Status == PayoutStatus.Pending || existingPayout.Status == PayoutStatus.Completed))
         {
             logger.LogWarning($"Payout for bet {request.RequestPayoutDto.BetId} already exists");
 
@@ -79,17 +87,69 @@ public sealed class PlacePayoutCommandHandler(
             Username = request.Username,
             Amount = request.RequestPayoutDto.Amount,
             Status = PayoutStatus.Pending,
-            CreatedAt = DateTime.Now.ToUniversalTime(),
+            CreatedAt = DateTime.UtcNow.ToUniversalTime(),
         };
 
         payoutRepository.Create(payout);
+        await payoutRepository.SaveAsync(cancellationToken);
 
-        cancellationToken.ThrowIfCancellationRequested();
+        var payoutRequest = new PayoutRequest
+        {
+            PayoutId = payout.Id.ToString(),
+            CorrelationId = Guid.NewGuid().ToString(),
+            BetId = bet.Id.ToString(),
+            Username = request.Username,
+            Amount = request.RequestPayoutDto.Amount,
+        };
+
+        await kafkaProducer.ProduceAsync(
+            _kafkaSettings.Topics.PayoutRequests,
+            payoutRequest,
+            cancellationToken);
+
+        var payoutResult = await WaitForPayoutResult(
+            payoutRequest.CorrelationId,
+            TimeSpan.FromSeconds(_kafkaSettings.RequestTimeoutSeconds),
+            cancellationToken);
+
+        if (payoutResult.IsSuccess)
+        {
+            payout.Status = PayoutStatus.Completed;
+            payout.ProcessedAt = DateTime.UtcNow.ToUniversalTime();
+        }
+        else
+        {
+            payout.Status = PayoutStatus.Failed;
+            payout.ErrorReason = payoutResult.ErrorMessage;
+        }
 
         await payoutRepository.SaveAsync(cancellationToken);
 
         logger.LogInformation("Payout successfully placed and saved");
 
         return Unit.Value;
+    }
+
+    private async Task<PayoutResult> WaitForPayoutResult(
+        string correlationId,
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        var startTime = DateTime.UtcNow;
+
+        while (DateTime.UtcNow - startTime < timeout)
+        {
+            var message = await kafkaConsumer.ConsumeSingleMessageAsync<PayoutResult>(
+                _kafkaSettings.Topics.PayoutResults,
+                TimeSpan.FromSeconds(_kafkaSettings.ConsumeMsgTimeoutSeconds),
+                cancellationToken);
+
+            if (message != null && message.CorrelationId == correlationId)
+            {
+                return message;
+            }
+        }
+
+        throw new TimeoutException($"Payout result not received within {timeout.TotalMinutes} minutes");
     }
 }

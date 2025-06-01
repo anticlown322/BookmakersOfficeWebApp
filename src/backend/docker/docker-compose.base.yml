@@ -1,0 +1,8 @@
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  bookmaker-net:
+    driver: bridge

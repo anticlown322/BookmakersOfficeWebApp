@@ -13,13 +13,26 @@ public class UserGrpcServiceImplementation(IUsersRepository repository)
     {
         try
         {
-            var user = await repository.GetUserByNameAsync(request.Username);
+            var user = await repository.GetUserByNameAsync(request.Username, CancellationToken.None);
+
+            if (user is null)
+            {
+                return new GetUserBalanceResponse
+                {
+                    UserExists = false,
+                    Balance = 0,
+                };
+            }
 
             return new GetUserBalanceResponse
             {
                 UserExists = true,
                 Balance = (double)user.Balance.CurrentAmount,
             };
+        }
+        catch (GrpcExceptionBase)
+        {
+            throw;
         }
         catch (Exception ex) when (ex is not RpcException)
         {

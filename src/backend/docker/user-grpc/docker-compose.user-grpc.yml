@@ -1,0 +1,28 @@
+services:
+  user-grpc-service:
+    container_name: user-grpc
+    build:
+      context: ..
+      dockerfile: docker/user-grpc/Dockerfile
+    ports:
+      - "50023:50023" # HTTPS
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-grpc-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    environment:
+      - ASPNETCORE_URLS=https://+:50023
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    networks:
+      - bookmaker-net
+
+networks:
+  bookmaker-net:
+    external: true

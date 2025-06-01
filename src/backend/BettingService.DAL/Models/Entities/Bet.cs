@@ -13,6 +13,7 @@ public class Bet
     public decimal Odds { get; set; }
 
     public BetStatus Status { get; set; }
+    public string? RejectionReason { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime? AcceptedAt { get; set; }

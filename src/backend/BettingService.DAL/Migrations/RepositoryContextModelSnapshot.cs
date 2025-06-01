@@ -55,6 +55,9 @@ namespace BettingService.DAL.Migrations
                     b.Property<decimal>("Odds")
                         .HasColumnType("decimal(8, 2)");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("SettledAt")
                         .HasColumnType("timestamp with time zone");
 

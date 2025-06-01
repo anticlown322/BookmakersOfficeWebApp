@@ -35,8 +35,10 @@ using SportDataService.Infrastructure.Services.DataCollection.Abstractions;
 using SportDataService.Infrastructure.Services.DataCollection.Implementations;
 using SportDataService.Infrastructure.Services.Hangfire;
 using SportDataService.Infrastructure.Services.SignalR.Implementations;
+using SportDataService.Infrastructure.Services.Redis;
 using SportDataService.Infrastructure.Utility;
 using SportDataService.Presentation.Utility;
+using StackExchange.Redis;
 
 namespace SportDataService.Presentation.Extensions;
 
@@ -60,6 +62,7 @@ public static class ServiceExtensions
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<DataCollectionServiceSettings>(configuration.GetSection("DataCollectionServiceSettings"));
         services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
+        services.Configure<CacheSettings>(configuration.GetSection("RedisSettings"));
     }
 
     public static void ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
@@ -103,6 +106,9 @@ public static class ServiceExtensions
 
     public static void ConfigureBackgroundJobExecutor(this IServiceCollection services) =>
         services.AddScoped<IBackgroundJobExecutor, HangfireJobExecutor>();
+
+    public static void ConfigureCacheService(this IServiceCollection services) =>
+        services.AddScoped<ICacheService, RedisCacheService>();
 
     public static void ConfigureUseCases(this IServiceCollection services)
     {
@@ -171,22 +177,30 @@ public static class ServiceExtensions
         });
     }
 
+    public static void ConfigureRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("RedisConnection");
+        var settings = configuration.GetSection("RedisSettings").Get<CacheSettings>()!;
+
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+            ConnectionMultiplexer.Connect(connectionString));
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = connectionString;
+            options.InstanceName = settings.InstanceName;
+        });
+
+        services.AddSingleton<ISerializer, JsonRedisSerializer>();
+    }
+
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<ITournamentRepository>(sp =>
-            new TournamentsRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<ITeamRepository>(sp =>
-            new TeamRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchRepository>(sp =>
-            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<ITournamentResultRepository>(sp =>
-            new TournamentResultsRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchResultRepository>(sp =>
-            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
+        services.AddScoped<ITournamentRepository, TournamentsRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<ITournamentResultRepository, TournamentResultsRepository>();
+        services.AddScoped<IMatchRepository, MatchRepository>();
+        services.AddScoped<IMatchResultRepository, MatchResultRepository>();
     }
 
     public static void ConfigureAutoMapper(this IServiceCollection services)

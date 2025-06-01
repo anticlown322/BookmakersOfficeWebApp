@@ -1,0 +1,28 @@
+services:
+  user-service:
+    container_name: user
+    build:
+      context: ..
+      dockerfile: docker/user/Dockerfile
+    ports:
+      - "50003:50003" # HTTPS
+      - "50013:50013" # HTTP
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/user-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_HTTPS_PORTS=50003
+      - ASPNETCORE_HTTP_PORTS=50013
+      - ConnectionStrings__DbConnection=Server=postgres;Port=5432;Database=user_service;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD
+    networks:
+      - bookmaker-net
+
+networks:
+  bookmaker-net:
+    external: true

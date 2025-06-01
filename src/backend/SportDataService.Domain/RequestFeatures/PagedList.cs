@@ -1,6 +1,4 @@
-﻿using SportDataService.Domain.RequestFeatures;
-
-namespace UserService.Domain.RequestFeatures;
+﻿namespace SportDataService.Domain.RequestFeatures;
 
 public class PagedList<T> : List<T>
 {

@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Configuration.Yaml;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
 using SportDataService.Domain.Models.Settings;
 using SportDataService.Domain.RepositoryContracts;
 using SportDataService.GrpcService.Exceptions;
+using SportDataService.GrpcService.Services;
 using SportDataService.Infrastructure.Configs;
 using SportDataService.Infrastructure.Repository;
+using SportDataService.Infrastructure.Services.EventBus.Kafka.Abstractions;
+using SportDataService.Infrastructure.Services.EventBus.Kafka.Implementations;
 
 namespace SportDataService.GrpcService.Extensions;
 
@@ -28,6 +28,7 @@ public static class ServiceExtensions
     public static void AddAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SportDataDbSettings>(configuration.GetSection("DatabaseSettings"));
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
     }
     
     public static void ConfigureGrpc(this IServiceCollection services)
@@ -37,6 +38,8 @@ public static class ServiceExtensions
             options.EnableDetailedErrors = true;
             options.Interceptors.Add<ExceptionInterceptor>();
         });
+        
+        services.AddScoped<SportDataGrpcService>();
     }
     
     public static void ConfigureMongoDbMappings(this IServiceCollection services)
@@ -70,10 +73,19 @@ public static class ServiceExtensions
     
     public static void AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IMatchRepository>(sp =>
-            new MatchRepository(sp.GetRequiredService<IMongoDatabase>()));
-
-        services.AddScoped<IMatchResultRepository>(sp =>
-            new MatchResultRepository(sp.GetRequiredService<IMongoDatabase>()));
+        services.AddScoped<IMatchNoCacheRepository, MatchNoCacheRepository>();
+        services.AddScoped<IMatchResultNoCacheRepository, MatchResultNoCacheRepository>();
     }
+    
+
+    public static void ConfigureMessageBroker(this IServiceCollection services)
+    {
+        services.AddSingleton<IEventProducer, KafkaEventProducer>();
+        services.AddSingleton<IEventConsumer<SportValidationEvent>>(sp => 
+            new KafkaEventConsumer<SportValidationEvent>(
+                sp.GetRequiredService<IOptions<KafkaSettings>>(),
+                sp.GetRequiredService<ILogger<KafkaEventConsumer<SportValidationEvent>>>()));
+
+        services.AddHostedService<BetValidationConsumer>();
+    }   
 }

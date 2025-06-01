@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <PackageReference Include="Elastic.Serilog.Sinks" Version="8.18.0" />
+      <PackageReference Include="Confluent.Kafka" Version="2.10.0" />
       <PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.3" />

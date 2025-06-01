@@ -1,23 +1,19 @@
-﻿using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf.WellKnownTypes;
 using MongoDB.Bson;
-using MongoDB.Driver;
 using SportDataService.Application.Validation.Exceptions.Specific;
 using SportDataService.Domain.Models.Prematch;
 using SportDataService.Domain.Models.Prematch.Lines;
 using SportDataService.Domain.Models.Results;
 using SportDataService.Domain.RepositoryContracts;
-using SportDataService.Domain.RequestFeatures.Params;
 using SportDataService.GrpcService.Exceptions;
-using SportDataService.GrpcService.Utility;
 
 namespace SportDataService.GrpcService.Services;
 
 using Grpc.Core;
 
 public class SportDataGrpcService(
-    IMatchRepository matchRepository,
-    IMatchResultRepository matchResultRepository)
+    IMatchNoCacheRepository matchRepository,
+    IMatchResultNoCacheRepository matchResultRepository)
     : SportDataService.SportDataServiceBase
 {
     public override async Task<ValidateBetResponse> ValidateBet(
@@ -71,9 +67,9 @@ public class SportDataGrpcService(
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not RpcException)
         {
-            throw new SportDataServiceException(ex.Message);
+            throw new RpcException(new Status(StatusCode.Internal, ex.Message));
         }
     }
 

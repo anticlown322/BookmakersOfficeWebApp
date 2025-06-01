@@ -23,6 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.ConfigureMongoDbContext(builder.Configuration);
     builder.Services.AddSportDataDb(builder.Configuration);
     builder.Services.AddRepositories();
+    builder.Services.ConfigureMessageBroker();
 }
 
 var app = builder.Build();

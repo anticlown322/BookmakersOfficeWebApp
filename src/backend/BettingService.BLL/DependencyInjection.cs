@@ -1,20 +1,18 @@
 ﻿using System.Reflection;
 using BettingService.BLL.Contracts.Services;
-using BettingService.BLL.DTO.Bet;
 using BettingService.BLL.DTO.MappingProfiles;
-using BettingService.BLL.DTO.Payout;
 using BettingService.BLL.Services;
 using BettingService.BLL.Services.Hangfire;
+using BettingService.BLL.Services.Kafka;
 using BettingService.BLL.Validation;
 using BettingService.BLL.Validation.Validators;
 using BettingService.DAL.Models.Settings;
-using BettingService.Protos;
+using BettingService.DAL.Models.Settings.Kafka;
 using FluentValidation;
 using Hangfire;
 using Hangfire.Mongo;
 using Hangfire.Mongo.Migration.Strategies;
 using Hangfire.Mongo.Migration.Strategies.Backup;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -57,6 +55,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(typeof(PlaceBetCommandValidator).Assembly);
 
+        services.Configure<HangfireSettings>(configuration.GetSection("HangfireSettings"));
         services.AddSingleton<IBackgroundJobService, HangfireBackgroundJobService>();
         services.AddSingleton<IBackgroundJobExecutor, HangfireJobExecutor>();
 
@@ -87,6 +86,10 @@ public static class DependencyInjection
             options.WorkerCount = 1;
         });
 
+        services.Configure<KafkaSettings>(configuration.GetSection("Kafka"));
+        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+        services.AddSingleton<IKafkaConsumerService, KafkaConsumerService>();
+        
         return services;
     }
 }

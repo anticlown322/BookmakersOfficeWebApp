@@ -40,4 +40,4 @@ publish/
 
 # Docker
 src/backend/.env
-/src/backend/deploy
+/src/backend/docker/deploy

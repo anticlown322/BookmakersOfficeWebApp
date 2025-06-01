@@ -1,0 +1,31 @@
+services:
+  sport-data-service:
+    container_name: sport-data
+    build:
+      context: ..
+      dockerfile: docker/sport-data/Dockerfile
+    ports:
+      - "50002:50002" # HTTPS
+      - "50012:50012" # HTTP
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
+      - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro
+      - ./deploy/certs/:/https/
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=$CERTIFICATE_PASSWORD
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTPS_PORTS=50002
+      - ASPNETCORE_HTTP_PORTS=50012
+      - ConnectionStrings__DbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data?authSource=admin
+      - ConnectionStrings__HangfireDbConnection=mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/sport_data_hangfire_db?authSource=admin
+      - ConnectionStrings__RedisConnection=redis:6379,password=$REDIS_PASSWORD,abortConnect=false,connectTimeout=5000,syncTimeout=2000
+    networks:
+      - bookmaker-net
+
+networks:
+  bookmaker-net:
+    external: true
