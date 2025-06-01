@@ -357,7 +357,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/account/confirm-email/{username}",
+      "DownstreamPathTemplate": "/api/users/{username}/account/confirm-email",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -365,11 +365,11 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/account/confirm-email/{username}",
+      "UpstreamPathTemplate": "/api/users/{username}/account/confirm-email",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/account/send-confirmation-email/{username}",
+      "DownstreamPathTemplate": "/api/users/{username}/account/send-confirmation-email",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -377,11 +377,11 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/account/send-confirmation-email/{username}",
+      "UpstreamPathTemplate": "/api/users/{username}/account/send-confirmation-email",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/account/send-reset-email/{username}",
+      "DownstreamPathTemplate": "/api/users/{username}/account/send-reset-email",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -389,11 +389,11 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/account/send-reset-email/{username}",
+      "UpstreamPathTemplate": "/api/users/{username}/account/send-reset-email",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/account/reset-password/{username}",
+      "DownstreamPathTemplate": "/api/users/{username}/account/reset-password",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -401,11 +401,11 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/account/reset-password/{username}",
+      "UpstreamPathTemplate": "/api/users/{username}/account/reset-password",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/account/profile/{username}",
+      "DownstreamPathTemplate": "/api/users/{username}/account/profile/",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -413,7 +413,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/account/profile/{username}",
+      "UpstreamPathTemplate": "/api/users/{username}/account/profile",
       "UpstreamHttpMethod": [ "GET", "PUT" ]
     },
     {
@@ -473,7 +473,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/register",
+      "UpstreamPathTemplate": "/api/authentication/register",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -485,7 +485,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/login",
+      "UpstreamPathTemplate": "/api/authentication/login",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -497,7 +497,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/refresh",
+      "UpstreamPathTemplate": "/api/authentication/refresh",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -509,7 +509,7 @@
           "Port": 50013
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/logout",
+      "UpstreamPathTemplate": "/api/authentication/logout",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {

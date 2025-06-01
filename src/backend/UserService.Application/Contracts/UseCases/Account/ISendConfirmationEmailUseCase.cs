@@ -2,5 +2,5 @@
 
 public interface ISendConfirmationEmailUseCase
 {
-    public Task ExecuteAsync(string username, string baseUrl, CancellationToken cancellationToken);
+    public Task ExecuteAsync(string username, CancellationToken cancellationToken);
 }

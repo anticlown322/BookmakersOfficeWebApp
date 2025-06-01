@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.DTO.Account;
 using UserService.Application.UseCases.Account;
 using UserService.Application.Validation;
+using UserService.Domain.Models;
 using UserService.Presentation.Utility;
 
 namespace UserService.Presentation.Controllers;
@@ -36,14 +38,11 @@ public class AccountController(
     [Authorize(Policy = AuthorizationPolicies.AllUsers)]
     public async Task<ActionResult> SendConfirmationEmail(
         [FromRoute] string username,
-        [FromServices] IHttpContextAccessor httpContextAccessor,
         CancellationToken cancellationToken)
     {
         logger.LogInformation($"Send confirmation email for user {username}...");
 
-        var baseUrl =
-            $"{httpContextAccessor.HttpContext!.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
-        await sendConfirmationEmailUseCase.ExecuteAsync(username, baseUrl, cancellationToken);
+        await sendConfirmationEmailUseCase.ExecuteAsync(username, cancellationToken);
 
         return Ok();
     }

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UserService.Application.Contracts.Services;
 using UserService.Application.Contracts.UseCases.Account;
 using UserService.Application.Validation.Exceptions.Specific;
+using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 
 namespace UserService.Application.UseCases.Account;
@@ -10,10 +12,11 @@ namespace UserService.Application.UseCases.Account;
 public class SendConfirmationEmailUseCase(
     IUsersRepository usersRepository,
     IEmailService emailService,
-    ILogger<SendConfirmationEmailUseCase> logger)
+    ILogger<SendConfirmationEmailUseCase> logger,
+    IOptions<EmailSettings> emailSettings)
     : ISendConfirmationEmailUseCase
 {
-    public async Task ExecuteAsync(string username, string baseUrl, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(string username, CancellationToken cancellationToken)
     {
         logger.LogInformation($"Sending confirmation email for {username}");
 
@@ -34,7 +37,7 @@ public class SendConfirmationEmailUseCase(
             throw new EmailCanNotBeConfirmedException($"Your email is already confirmed.");
         }
 
-        var confirmationLink = $"{baseUrl}/api/users/{username}/account/confirm-email";
+        var confirmationLink = $"{emailSettings.Value.ConfirmEmailBaseUrl}/email-confirmation/{username}";
 
         cancellationToken.ThrowIfCancellationRequested();
 

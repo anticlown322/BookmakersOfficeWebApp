@@ -1,0 +1,70 @@
+<div class="bets-container">
+  <h2>Ставки</h2>
+  <div class="bets-stats">
+    Всего ставок: {{ totalCount }}
+  </div>
+
+  @if (bets.length === 0 && !isLoading && !isTransitioning) {
+    <div class="empty-message">Список ставок пока пуст... Убыточно :(</div>
+  }
+
+  <div class="bets-list">
+    @if (!isTransitioning || bets.length > 0) {
+      <table class="bets-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Пользователь</th>
+            <th>Создана</th>
+            <th>Последнее обновление</th>
+            <th>ID Матча</th>
+            <th>Коэффициент</th>
+            <th>Сумма</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (bet of bets; track trackByBetId($index, bet)) {
+            <tr [class]="getBetStatusName(bet.status)"
+                [class.fade-out]="isTransitioning && !betsCache[currentPage]">
+              <td>{{ bet.id }}</td>
+              <td>{{ bet.username }}</td>
+              <td>{{ bet.createdAt | date:'short' }}</td>
+              <td>{{ bet.updatedAt | date:'short' }}</td>
+              <td>{{ bet.matchId }}</td>
+              <td>{{ bet.odds | number:'1.2-2' }}</td>
+              <td>{{ bet.amount }}</td>
+              <td>{{ getBetStatusName(bet.status) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isTransitioning && bets.length === 0) {
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    }
+  </div>
+
+  <div class="pagination">
+    <button (click)="onPageChange(currentPage - 1)" 
+            [disabled]="!hasPrevious || isTransitioning">
+      Назад
+    </button>
+    <span class="page-count">
+      Страница {{ currentPage }} @if (totalPages > 0) { из {{ totalPages }} }
+    </span>
+    <button (click)="onPageChange(currentPage + 1)" 
+            [disabled]="!hasNext || isTransitioning">
+      Вперед
+    </button>
+  </div>
+</div>
+
+@if (isTransitioning) {
+  <div class="loading-overlay active">
+    <div class="spinner"></div>
+  </div>
+}

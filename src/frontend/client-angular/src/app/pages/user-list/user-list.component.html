@@ -1,0 +1,59 @@
+<div class="users-container">
+  <h2>Список пользователей</h2>
+  <div class="users-stats">
+    Всего пользователей: {{ totalCount }}
+  </div>
+
+  @if (users.length === 0 && !isLoading && !isTransitioning) {
+    <div class="empty-message">Список пользователей пока пуст... В хорошее вермя живем...</div>
+  }
+
+  <div class="users-list">
+    @if (!isTransitioning || users.length > 0) {
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Имя</th>
+            <th>Электронная почта</th>
+            <th>Роли пользователя</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track trackByUserName($index, user)) {
+            <tr [class.fade-out]="isTransitioning && !usersCache[currentPage]">
+              <td>{{ user.userName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.roles }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isTransitioning && users.length === 0) {
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    }
+  </div>
+
+  <div class="pagination">
+    <button (click)="onPageChange(currentPage - 1)" 
+            [disabled]="!hasPrevious || isTransitioning">
+      Назад
+    </button>
+    <span class="page-count">
+      Страница {{ currentPage }} @if (totalPages > 0) { из {{ totalPages }} }
+    </span>
+    <button (click)="onPageChange(currentPage + 1)" 
+            [disabled]="!hasNext || isTransitioning">
+      Вперед
+    </button>
+  </div>
+</div>
+
+@if (isTransitioning) {
+  <div class="loading-overlay active">
+    <div class="spinner"></div>
+  </div>
+}

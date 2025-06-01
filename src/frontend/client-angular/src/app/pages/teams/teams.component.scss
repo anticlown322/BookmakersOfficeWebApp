@@ -1,0 +1,156 @@
+.teams-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+
+    h1 {
+        margin-bottom: 2rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .teams-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        opacity: 1;
+        transition: relative;
+
+        &.loading {
+            opacity: 0.5;
+        }
+    }
+
+    .team-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(99, 98, 98, 0.15);
+        padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(27, 105, 194, 0.1);
+        }
+
+        .team-id {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #4cc9f0;
+        }
+    }
+
+    &.transitioning {
+        .team-card {
+            animation: fadeOut 0.3s ease forwards !important;
+        }
+    }
+
+    .empty-message {
+        color: #4cc9f0;
+        font-size: 18px;
+        text-align: center;
+    }
+}
+
+.skeleton-card {
+    background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    border-radius: 8px;
+    height: 80px;
+    animation: shimmer 1.5s infinite linear;
+    opacity: 0.7;
+}
+
+.skeleton-card .team-id,
+.skeleton-card .team-name {
+    display: none;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+
+    .pagination-button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:not(:disabled) {
+            background-color: #4cc9f0;
+            color: white;
+
+            &:hover {
+                background-color: #3aa8d8;
+                transform: translateY(-2px);
+            }
+        }
+
+        &:disabled {
+            background-color: #e0e0e0;
+            color: #a0a0a0;
+            cursor: not-allowed;
+        }
+    }
+
+    .page-count {
+        font-size: 1.1rem;
+        color: #555;
+        min-width: 150px;
+        text-align: center;
+    }
+}
+
+.team-card {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.4s ease forwards;
+
+    @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+            animation-delay: $i * 0.05s;
+        }
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

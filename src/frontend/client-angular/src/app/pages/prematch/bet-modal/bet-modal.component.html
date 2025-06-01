@@ -1,0 +1,31 @@
+<div class="bet-modal-overlay">
+    <div class="bet-modal-content">
+        <h3>Размещение ставки</h3>
+
+        <div class="bet-info">
+            <p><strong>Тип:</strong> {{ betData.type }}</p>
+            <p><strong>Кэф:</strong> {{ betData.value | number : "1.2-2" }}</p>
+        </div>
+
+        <input
+            type="number"
+            [(ngModel)]="amount"
+            placeholder="Сумма ставки"
+            class="bet-input"
+            min="1"
+        />
+
+        <div class="modal-actions">
+            <button class="modal-button cancel" (click)="canceled.emit()">
+                Отмена
+            </button>
+            <button [disabled]="amount <= 0 || isLoading"
+            class="modal-button confirm"
+            (click)="confirmBet()">
+                @if (isLoading) {
+                <span class="spinner"></span>
+                } @else { Подтвердить }
+            </button>
+        </div>
+    </div>
+</div>

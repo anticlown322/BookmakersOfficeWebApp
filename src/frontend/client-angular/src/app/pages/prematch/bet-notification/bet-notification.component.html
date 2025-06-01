@@ -1,0 +1,71 @@
+@if(isOpen){
+<div class="notification-overlay">
+    <div class="notification-container">
+        @if (isLoading) {
+        <div class="loading-section">
+            <div class="spinner"></div>
+            <p>Размещение ставки...</p>
+        </div>
+        } @else {
+        <div class="result-section">
+            @if (isSuccess) {
+            <div class="success-message">
+                <svg
+                    class="checkmark"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 52 52"
+                >
+                    <circle
+                        class="checkmark__circle"
+                        cx="26"
+                        cy="26"
+                        r="25"
+                        fill="none"
+                    />
+                    <path
+                        class="checkmark__check"
+                        fill="none"
+                        d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                    />
+                </svg>
+                <h3>Ставка принята!</h3>
+                <p>{{ message || "Ваша ставка успешно размещена" }}</p>
+            </div>
+            } @else {
+            <div class="error-message">
+                <svg
+                    class="crossmark"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 52 52"
+                >
+                    <circle
+                        class="crossmark__circle"
+                        cx="26"
+                        cy="26"
+                        r="25"
+                        fill="none"
+                    />
+                    <path
+                        class="crossmark__cross"
+                        fill="none"
+                        d="M16 16 36 36 M36 16 16 36"
+                    />
+                </svg>
+                <h3>Ошибка</h3>
+                <p>{{ message || "Не удалось разместить ставку" }}</p>
+            </div>
+            }
+        </div>
+        }
+
+        <button
+            class="close-button"
+            (click)="closeNotification()"
+            [disabled]="isLoading"
+        >
+            @if (!isLoading) { Закрыть }
+        </button>
+    </div>
+</div>
+
+}

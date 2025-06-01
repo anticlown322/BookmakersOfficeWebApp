@@ -1,0 +1,111 @@
+<div class="home-page">
+    <div class="promo-slider">
+        <div class="slide active" [class.active]="currentSlide === 0">
+            <div class="slide-content">
+                <div class="slide-text">
+                    <h2>Приветственный бонус</h2>
+                    <h1>80 BYN фрибет</h1>
+                    <p>Для новых клиентов!</p>
+                    <button routerLink="/prematch" class="cta-button">
+                        Сделать ставку
+                    </button>
+                </div>
+                <div class="slide-image">
+                    <img
+                        src="assets/imgs/promo1.png"
+                        alt="Приветственный бонус"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" [class.active]="currentSlide === 1">
+            <div class="slide-content">
+                <div class="slide-text">
+                    <h1>200 000 BYN</h1>
+                    <h2>на пути к финалу</h2>
+                    <p>Месяц киберспорта от ScamBet!</p>
+                    <button routerLink="/prematch" class="cta-button">
+                        Сделать ставку
+                    </button>
+                </div>
+                <div class="slide-image">
+                    <img src="assets/imgs/promo2.png" alt="200 000 BYN" />
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" [class.active]="currentSlide === 2">
+            <div class="slide-content">
+                <div class="slide-text">
+                    <h1>Страховка ставки</h1>
+                    <h2>50% на финальные матчи</h2>
+                    <p>Не упусти выгоду!</p>
+                    <button routerLink="/prematch" class="cta-button">
+                        Сделать ставку
+                    </button>
+                </div>
+                <div class="slide-image">
+                    <img
+                        src="assets/imgs/promo3.png"
+                        alt="50% страховка ставки"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" [class.active]="currentSlide === 3">
+            <div class="slide-content">
+                <div class="slide-text">
+                    <h1>20 000 BYN</h1>
+                    <h2>в киберспортивных турнирах</h2>
+                    <p>Делайте ставки на DreamLeague!</p>
+                    <button routerLink="/prematch" class="cta-button">
+                        Сделать ставку
+                    </button>
+                </div>
+                <div class="slide-image">
+                    <img src="assets/imgs/promo4.png" alt="DreamLeague" />
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-dots">
+            <span
+                class="dot active"
+                [class.active]="currentSlide === 0"
+                (click)="goToSlide(0)"
+            ></span>
+            <span
+                class="dot"
+                [class.active]="currentSlide === 1"
+                (click)="goToSlide(1)"
+            ></span>
+            <span
+                class="dot"
+                [class.active]="currentSlide === 2"
+                (click)="goToSlide(2)"
+            ></span>
+            <span
+                class="dot"
+                [class.active]="currentSlide === 3"
+                (click)="goToSlide(3)"
+            ></span>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <button class="link-card" routerLink="/prematch">
+            <h3>Матчи</h3>
+            <p>Актуальные события для ставок</p>
+        </button>
+        <button class="link-card" routerLink="/results">
+            <h3>Результаты</h3>
+            <p>История завершенных матчей</p>
+        </button>
+        <button class="link-card" routerLink="/teams">
+            <h3>Команды</h3>
+            <p>Все топовые коллективы в одном месте</p>
+        </button>
+    </div>
+</div>

@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using SportDataService.Application.Contracts.Services;
+using SportDataService.Application.Contracts.Services.Signaling;
 using SportDataService.Application.Contracts.UseCases.TournamentResult;
+using SportDataService.Application.DTO.Results;
 using SportDataService.Domain.RepositoryContracts;
+using SportDataService.Domain.RequestFeatures.Params;
 
 namespace SportDataService.Application.UseCases.TournamentResult;
 
@@ -14,7 +18,9 @@ public class RefreshTournamentResultsUseCase(
     ITournamentResultRepository tournamentResultRepository,
     IMatchResultRepository matchResultRepository,
     ITeamRepository teamRepository,
-    ILogger<RefreshTournamentResultsUseCase> logger)
+    ILogger<RefreshTournamentResultsUseCase> logger,
+    IResultsNotificationService notifier,
+    IMapper mapper)
     : IRefreshTournamentResultsUseCase
 {
     public async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -25,14 +31,13 @@ public class RefreshTournamentResultsUseCase(
 
         var apiAnswer = await dataCollectionService.GetTournamentsResultsInfoAsync(cancellationToken);
         await UpdateDatabase(apiAnswer, cancellationToken);
+        await NotifyClients(cancellationToken);
 
         logger.LogInformation("Tournament results refreshed");
     }
 
     private async Task UpdateDatabase(List<TournamentResult> apiAnswer, CancellationToken ct)
     {
-        logger.LogInformation("Updating tournament results...");
-
         foreach (var tournamentResult in apiAnswer)
         {
             ct.ThrowIfCancellationRequested();
@@ -68,8 +73,6 @@ public class RefreshTournamentResultsUseCase(
 
     private async Task UpdateTeams(TournamentResult tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating teams...");
-
         var allTeams = tournament.Matches
             .SelectMany(m => new[] { m.Team1, m.Team2 })
             .ToList();
@@ -90,14 +93,10 @@ public class RefreshTournamentResultsUseCase(
                 await teamRepository.CreateAsync(team, ct);
             }
         }
-
-        logger.LogInformation("Teams successfully updated");
     }
 
     private async Task UpdateMatches(TournamentResult tournament, CancellationToken ct)
     {
-        logger.LogInformation("Updating matches...");
-
         var allMatches = tournament.Matches.ToList();
 
         foreach (var match in allMatches)
@@ -125,8 +124,6 @@ public class RefreshTournamentResultsUseCase(
                 await matchResultRepository.CreateAsync(match, ct);
             }
         }
-
-        logger.LogInformation("Matches successfully updated");
     }
 
     private async Task UpdateExistingTournamentResult(
@@ -181,5 +178,15 @@ public class RefreshTournamentResultsUseCase(
         newMatch.Id = existing.Id;
 
         await matchResultRepository.UpdateAsync(newMatch, ct);
+    }
+
+    private async Task NotifyClients(CancellationToken ct)
+    {
+        var tournamentParameters = new TournamentResultParameters();
+        var tournamentsWithMetaData =
+            await tournamentResultRepository.FindAllTournamentResultsAsync(tournamentParameters, ct);
+
+        var tournamentGetDtos = mapper.Map<IEnumerable<TournamentResultGetDto>>(tournamentsWithMetaData);
+        await notifier.NotifyResultsUpdatedAsync(tournamentGetDtos, tournamentsWithMetaData.MetaData);
     }
 }

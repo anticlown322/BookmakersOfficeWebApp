@@ -1,0 +1,161 @@
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Регистрация в ScamBet</h2>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Имя</label>
+                    <input
+                        id="firstName"
+                        type="text"
+                        formControlName="firstName"
+                        placeholder="Ваше имя"
+                    />
+                    @if (registerForm.get('firstName')?.invalid &&
+                    registerForm.get('firstName')?.touched) {
+                    <div class="error">Минимум 2 символа</div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Фамилия</label>
+                    <input
+                        id="lastName"
+                        type="text"
+                        formControlName="lastName"
+                        placeholder="Ваша фамилия"
+                    />
+                    @if (registerForm.get('lastName')?.invalid &&
+                    registerForm.get('lastName')?.touched) {
+                    <div class="error">Минимум 2 символа</div>
+                    }
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="userName">Имя пользователя</label>
+                <input
+                    id="userName"
+                    type="text"
+                    formControlName="userName"
+                    placeholder="Придумайте username"
+                />
+                @if (registerForm.get('userName')?.invalid &&
+                registerForm.get('userName')?.touched) {
+                <div class="error">Минимум 4 символа</div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    placeholder="example@mail.com"
+                />
+                @if (registerForm.get('email')?.invalid &&
+                registerForm.get('email')?.touched) {
+                <div class="error">Введите корректный email</div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="phoneNumber">Телефон (необязательно)</label>
+                <input
+                    id="phoneNumber"
+                    type="tel"
+                    formControlName="phoneNumber"
+                    placeholder="+71234567890"
+                />
+                @if (registerForm.get('phoneNumber')?.invalid &&
+                registerForm.get('phoneNumber')?.touched) {
+                <div class="error">Формат: +71234567890</div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <div class="password-input">
+                    <input
+                        id="password"
+                        [type]="showPassword ? 'text' : 'password'"
+                        formControlName="password"
+                        placeholder="Не менее 8 символов"
+                    />
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        (click)="togglePasswordVisibility()"
+                    >
+                        {{ showPassword ? "🙈" : "👁️" }}
+                    </button>
+                </div>
+                @if (passwordControl && passwordControl.touched) {
+                <div class="password-hints">
+                    <span
+                        [class.valid]="
+                            passwordControl.value &&
+                            passwordControl.value.length >= 8
+                        "
+                        >8+ символов</span
+                    >
+                    <span
+                        [class.valid]="
+                            passwordControl.value &&
+                            hasUpperCase(passwordControl.value)
+                        "
+                        >Заглавная буква</span
+                    >
+                    <span
+                        [class.valid]="
+                            passwordControl.value &&
+                            hasNumber(passwordControl.value)
+                        "
+                        >Цифра</span
+                    >
+                </div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Подтвердите пароль</label>
+                <input
+                    id="confirmPassword"
+                    type="password"
+                    formControlName="confirmPassword"
+                    placeholder="Повторите пароль"
+                />
+                @if (registerForm.hasError('mismatch')) {
+                <div class="error">Пароли не совпадают</div>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="role">Роль</label>
+                <select id="role" formControlName="role">
+                    @for (role of roles; track role.value) {
+                    <option [value]="role.value">{{ role.label }}</option>
+                    }
+                </select>
+            </div>
+
+            @if (registrationError) {
+            <div class="error-message">{{ registrationError }}</div>
+            }
+
+            <button
+                type="submit"
+                class="submit-btn"
+                [disabled]="registerForm.invalid"
+            >
+                Зарегистрироваться
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Уже есть аккаунт? <a routerLink="/login">Войдите</a>
+        </div>
+    </div>
+</div>

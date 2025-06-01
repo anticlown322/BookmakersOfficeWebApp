@@ -1,0 +1,112 @@
+
+@if (isAuthenticated) {
+  @if (profile$ | async; as profile) {
+    <div class="profile-container">
+      <h2>Профиль пользователя</h2>
+      
+      @if (errorMessage) {
+        <div class="alert error">{{ errorMessage }} <button (click)="clearMessages()">×</button></div>
+      }
+      @if (successMessage) {
+        <div class="alert success">{{ successMessage }} <button (click)="clearMessages()">×</button></div>
+      }
+
+      <div class="profile-block primary-block">
+        <h3>Основная информация</h3>
+        <div class="block-content">
+          <p><strong>Логин: </strong> <span>{{ currentUsername }}</span></p>
+          <p><strong>Роли: </strong> <span>{{ profile.roles.join(', ') }}</span></p>
+        </div>
+      </div>
+
+      <div class="profile-block">
+        <h3>Личные данные</h3>
+        <div class="block-content">
+          @if (editMode) {
+            <form (ngSubmit)="updateProfile()">
+              <div class="form-group">
+                <label>Имя: </label>
+                <input type="text" [(ngModel)]="updateProfileRequest.firstName" name="firstName" [ngModelOptions]="{standalone: true}" required>
+              </div>
+              <div class="form-group">
+                <label>Фамилия: </label>
+                <input type="text" [(ngModel)]="updateProfileRequest.lastName" name="lastName" [ngModelOptions]="{standalone: true}"required>
+              </div>
+              <div class="form-actions">
+                <button type="submit" [disabled]="loading">Сохранить</button>
+                <button type="button" class="secondary" (click)="editMode = false">Отмена</button>
+              </div>
+            </form>
+          } @else {
+            <p><strong>Имя: </strong> <span>{{ profile.firstName }}</span></p>
+            <p><strong>Фамилия: </strong> <span>{{ profile.lastName }}</span></p>
+            <button (click)="editMode = true">Редактировать</button>
+          }
+        </div>
+      </div>
+
+      <div class="profile-block">
+        <h3>Контактная информация</h3>
+        <div class="block-content">
+          @if (profile.phoneNumber) {
+            <p><strong>Телефон: </strong> <span>{{ profile.phoneNumber }}</span></p>
+          }
+          @if (profile.email) {
+            <div>
+              <p><strong>Почта: </strong> <span>{{ profile.email }}</span></p>
+              <p class="confirmation-status" [class.confirmed]="profile.isEmailConfirmed">
+                {{ profile.isEmailConfirmed ? '✓ Подтверждена' : '✗ Не подтверждена' }}
+              </p>
+              @if (!profile.isEmailConfirmed) {
+                <button class="secondary" (click)="sendConfirmationEmail()">Подтвердить почту</button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="profile-block security-block">
+        <h3>Безопасность</h3>
+        <div class="block-content">
+          @if (resetPasswordMode) {
+            <div class="reset-password">
+              <form (ngSubmit)="resetPassword()">
+                <div class="form-group">
+                  <label>Токен из письма:</label>
+                  <input type="text" [(ngModel)]="resetPasswordRequest.token" [ngModelOptions]="{standalone: true}" required>
+                </div>
+                <div class="form-group">
+                  <label>Новый пароль:</label>
+                  <input type="password" [(ngModel)]="resetPasswordRequest.newPassword" [ngModelOptions]="{standalone: true}" required>
+                </div>
+                <div class="form-group">
+                  <label>Подтвердите пароль:</label>
+                  <input type="password" [(ngModel)]="confirmPassword" [ngModelOptions]="{standalone: true}" required>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" [disabled]="loading">Сменить пароль</button>
+                  <button type="button" class="secondary" (click)="resetPasswordMode = false">Отмена</button>
+                </div>
+              </form>
+            </div>
+          } @else if (!resetPasswordSuccess) {
+            <div class="security-actions">
+              <button class="secondary" (click)="sendResetPasswordEmail()">Сбросить пароль по email</button>
+              <button class="secondary" (click)="resetPasswordMode = true">Ввести токен вручную</button>
+            </div>
+          } @else {
+            <p class="success-text">Пароль успешно изменен</p>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="profile-container">
+      <p>Загрузка данных профиля...</p>
+    </div>
+  }
+} @else {
+  <div class="profile-container">
+    <p>Для просмотра профиля необходимо авторизоваться.</p>
+  </div>
+}
