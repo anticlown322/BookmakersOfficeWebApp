@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
 using UserService.Application.DTO.Account;
