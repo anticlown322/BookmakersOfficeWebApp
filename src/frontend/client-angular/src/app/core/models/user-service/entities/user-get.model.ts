@@ -1,5 +1,5 @@
 export interface UserGet {
-    userName?: string;
+    userName: string;
     email?: string;
     roles?: string[];
 }

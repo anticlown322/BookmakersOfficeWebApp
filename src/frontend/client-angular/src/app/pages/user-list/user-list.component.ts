@@ -1,21 +1,20 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Bet } from '../../core/models/betting-serivce/entities/bet/bet.model';
-import { BetsService } from '../../core/services/betting-service/bets.service';
+import { Component, OnInit } from '@angular/core';
+import { UsersService } from '../../core/services/user-service/users.service';
 import { AuthService } from '../../core/services/user-service/auth.service';
-import { BetStatus } from '../../core/models/betting-serivce/entities/bet/bet-status.enum';
 import { MetaData } from '../../core/models/shared/interfaces/meta-data';
+import { Role } from '../../core/models/shared/enums/role.enum';
+import { UserGet } from '../../core/models/user-service/entities/user-get.model';
 
 @Component({
-    selector: 'app-user-bets',
-    templateUrl: './user-bets.component.html',
-    styleUrls: ['./user-bets.component.scss'],
+    selector: 'app-user-list',
+    templateUrl: './user-list.component.html',
+    styleUrl: './user-list.component.scss',
     standalone: true,
     imports: [CommonModule],
 })
-export class UserBetsComponent implements OnInit {
-    currentUsername: string | null = null;
-    bets: Bet[] = [];
+export class UserListComponent implements OnInit {
+    users: UserGet[] = [];
     isLoading = true;
     isTransitioning = false;
     currentPage = 1;
@@ -26,29 +25,28 @@ export class UserBetsComponent implements OnInit {
     hasNext = false;
     MIN_LOADING_DISPLAY_TIME = 500;
 
-    betsCache: Record<number, { items: Bet[]; metaData: MetaData }> = {};
+    usersCache: Record<number, { items: UserGet[]; metaData: MetaData }> = {};
 
     constructor(
-        private betsService: BetsService,
+        private usersService: UsersService,
         private authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        this.currentUsername = this.authService.getCurrentUsername();
-        if (this.currentUsername && this.authService.isAuthenticated()) {
-            this.loadInitialBets();
+        if (this.authService.isAuthenticated() && this.authService.hasAnyRole([Role.Bookmaker, Role.Administrator])) {
+            this.loadInitialUsers();
         }
     }
 
-    loadInitialBets(): void {
+    loadInitialUsers(): void {
         const startTime = Date.now();
 
         this.isLoading = true;
         this.isTransitioning = true;
-        this.bets = [];
+        this.users = [];
 
-        this.betsService
-            .getUserBets({
+        this.usersService
+            .getAllUsers({
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
             })
@@ -67,27 +65,27 @@ export class UserBetsComponent implements OnInit {
                     }, remainingTime);
                 },
                 error: (error) => {
-                    console.error('Error loading bets:', error);
+                    console.error('Error loading users:', error);
                     this.isLoading = false;
                     this.isTransitioning = false;
                 },
             });
     }
 
-    loadBets(page: number): void {
+    loadUsers(page: number): void {
         if (this.isTransitioning || page === this.currentPage) return;
 
         const startTime = Date.now();
         this.isTransitioning = true;
-        this.bets = [];
+        this.users = [];
 
-        if (this.betsCache[page]) {
+        if (this.usersCache[page]) {
             this.applyCachedData(page);
             return;
         }
 
-        this.betsService
-            .getUserBets({
+        this.usersService
+            .getAllUsers({
                 pageNumber: page,
                 pageSize: this.pageSize,
             })
@@ -108,15 +106,15 @@ export class UserBetsComponent implements OnInit {
                     }, remainingTime);
                 },
                 error: (error) => {
-                    console.error('Error loading bets:', error);
+                    console.error('Error loading users:', error);
                     this.isTransitioning = false;
                 },
             });
     }
 
     private applyCachedData(page: number): void {
-        const cached = this.betsCache[page];
-        this.bets = cached.items;
+        const cached = this.usersCache[page];
+        this.users = cached.items;
         this.currentPage = page;
         this.totalPages = cached.metaData?.TotalPages || 0;
         this.totalCount = cached.metaData?.TotalCount || 0;
@@ -128,30 +126,17 @@ export class UserBetsComponent implements OnInit {
         }, 50);
     }
 
-    private cacheData(page: number, items: Bet[], metaData: MetaData): void {
-        this.betsCache[page] = { items, metaData };
+    private cacheData(page: number, items: UserGet[], metaData: MetaData): void {
+        this.usersCache[page] = { items, metaData };
         this.applyCachedData(page);
     }
 
-    trackByBetId(index: number, bet: Bet): string {
-        return bet.id;
-    }
-
-    getBetStatusName(status: BetStatus): string {
-        switch (status) {
-            case BetStatus.Won:
-                return 'won';
-            case BetStatus.Lost:
-                return 'lost';
-            case BetStatus.Pending:
-                return 'pending';
-            default:
-                return '';
-        }
+    trackByUserName(index: number, user: UserGet): string {
+        return user.userName;
     }
 
     onPageChange(page: number): void {
         if (page < 1 || page > this.totalPages) return;
-        this.loadBets(page);
+        this.loadUsers(page);
     }
 }

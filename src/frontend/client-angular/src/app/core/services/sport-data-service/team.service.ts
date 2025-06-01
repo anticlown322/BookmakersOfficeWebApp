@@ -7,6 +7,7 @@ import { PagedTeamResponse } from '../../models/sport-data-service/responses/tea
 import { TeamResponse } from '../../models/sport-data-service/responses/team/team.response';
 import { Team } from '../../models/sport-data-service/entities/team/team.model';
 import { MetaData } from '../../models/shared/interfaces/meta-data';
+import { createPagedRequest } from '../shared/create-paged-request.function';
 
 @Injectable({
     providedIn: 'root',
@@ -17,41 +18,12 @@ export class TeamService {
     constructor(private http: HttpClient) {}
 
     getTeams(parameters?: TeamParameters): Observable<PagedTeamResponse> {
-        let params = new HttpParams();
-
-        if (parameters) {
-            if (parameters.pageNumber) {
-                params = params.append(
-                    'pageNumber',
-                    parameters.pageNumber.toString()
-                );
-            }
-            if (parameters.pageSize) {
-                params = params.append(
-                    'pageSize',
-                    parameters.pageSize.toString()
-                );
-            }
-        }
-
-        return this.http
-            .get<Team[]>(this.baseUrl, { params, observe: 'response' })
-            .pipe(
-                map((response) => {
-                    const paginationHeader =
-                        response.headers.get('X-Pagination') ||
-                        response.headers.get('x-pagination');
-
-                    const pagination: MetaData = paginationHeader
-                        ? JSON.parse(paginationHeader)
-                        : null;
-
-                    return {
-                        items: response.body || [],
-                        metaData: pagination,
-                    };
-                })
-            );
+        return createPagedRequest<Team, TeamParameters>(
+            this.http,
+            this.baseUrl,
+            '',
+            parameters
+        );
     }
 
     getTeamById(id: string): Observable<TeamResponse> {

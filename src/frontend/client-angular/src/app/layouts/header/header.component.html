@@ -25,20 +25,44 @@
                 <button
                     routerLink="/profile"
                     (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler, Role.Administrator]"
                 >
                     Профиль
                 </button>
                 <button
                     routerLink="/balance"
                     (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler]"
                 >
                     Баланс
                 </button>
                 <button
                     routerLink="/my-bets"
                     (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler]"
                 >
                     Мои ставки
+                </button>
+                <button
+                    routerLink="/bet-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все ставки
+                </button>
+                <button
+                    routerLink="/user-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все пользователи
+                </button>
+                <button
+                    routerLink="/payout-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все выплаты
                 </button>
                 <button (click)="logout()">Выйти</button>
             </div>

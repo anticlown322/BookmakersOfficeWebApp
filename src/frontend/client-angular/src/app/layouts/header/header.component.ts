@@ -2,14 +2,17 @@ import { Component, OnDestroy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/user-service/auth.service';
 import { Subscription } from 'rxjs';
+import { Role } from '../../core/models/shared/enums/role.enum';
+import { HasRoleDirective } from '../../shared/ui/has-role.directive';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
-    imports: [RouterLink]
+    imports: [RouterLink, HasRoleDirective],
 })
 export class HeaderComponent implements OnDestroy {
+    Role = Role;
     isProfileMenuOpen = false;
     currentUsername: string | null = null;
     private authSub: Subscription;

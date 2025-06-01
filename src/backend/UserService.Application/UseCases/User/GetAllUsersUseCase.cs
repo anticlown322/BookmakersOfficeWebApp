@@ -3,7 +3,9 @@ using Domain.RequestFeatures;
 using Microsoft.Extensions.Logging;
 using UserService.Application.Contracts.UseCases.User;
 using UserService.Application.DTO;
+using UserService.Application.DTO.Account;
 using UserService.Application.DTO.User;
+using UserService.Domain.Models;
 using UserService.Domain.RepositoryContracts;
 using UserService.Domain.RequestFeatures;
 
@@ -24,7 +26,19 @@ public class GetAllUsersUseCase(
         cancellationToken.ThrowIfCancellationRequested();
 
         var usersWithMetaData = await usersRepository.GetAllUsersAsync(userParams, cancellationToken);
-        var usersDto = mapper.Map<IEnumerable<UserGetDto>>(usersWithMetaData);
+
+        List<UserGetDto> usersDto = [];
+        foreach (var user in usersWithMetaData)
+        {
+            var roles = await usersRepository.GetUserRolesAsync(user, cancellationToken);
+
+            var userGetDto = mapper.Map<UserGetDto>(
+                user,
+                opts =>
+                    opts.Items["Roles"] = roles.ToList());
+
+            usersDto.Add(userGetDto);
+        }
 
         logger.LogInformation($"Successfully retrieved {usersDto.Count()} users");
 

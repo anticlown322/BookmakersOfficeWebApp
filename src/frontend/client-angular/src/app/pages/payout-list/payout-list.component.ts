@@ -1,21 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Bet } from '../../core/models/betting-serivce/entities/bet/bet.model';
-import { BetsService } from '../../core/services/betting-service/bets.service';
-import { AuthService } from '../../core/services/user-service/auth.service';
-import { BetStatus } from '../../core/models/betting-serivce/entities/bet/bet-status.enum';
 import { MetaData } from '../../core/models/shared/interfaces/meta-data';
+import { AuthService } from '../../core/services/user-service/auth.service';
+import { CommonModule } from '@angular/common';
+import { Role } from '../../core/models/shared/enums/role.enum';
+import { Payout } from '../../core/models/betting-serivce/entities/payout/payout.model';
+import { PayoutsService } from '../../core/services/betting-service/payouts.service';
+import { PayoutStatus } from '../../core/models/betting-serivce/entities/payout/payout-status.enum';
 
 @Component({
-    selector: 'app-user-bets',
-    templateUrl: './user-bets.component.html',
-    styleUrls: ['./user-bets.component.scss'],
+    selector: 'app-payout-list',
+    templateUrl: './payout-list.component.html',
+    styleUrl: './payout-list.component.scss',
     standalone: true,
     imports: [CommonModule],
 })
-export class UserBetsComponent implements OnInit {
-    currentUsername: string | null = null;
-    bets: Bet[] = [];
+export class PayoutListComponent implements OnInit {
+    payouts: Payout[] = [];
     isLoading = true;
     isTransitioning = false;
     currentPage = 1;
@@ -26,29 +26,28 @@ export class UserBetsComponent implements OnInit {
     hasNext = false;
     MIN_LOADING_DISPLAY_TIME = 500;
 
-    betsCache: Record<number, { items: Bet[]; metaData: MetaData }> = {};
+    payoutsCache: Record<number, { items: Payout[]; metaData: MetaData }> = {};
 
     constructor(
-        private betsService: BetsService,
+        private payoutsService: PayoutsService,
         private authService: AuthService
     ) {}
 
     ngOnInit(): void {
-        this.currentUsername = this.authService.getCurrentUsername();
-        if (this.currentUsername && this.authService.isAuthenticated()) {
-            this.loadInitialBets();
+        if (this.authService.isAuthenticated() && this.authService.hasAnyRole([Role.Bookmaker, Role.Administrator])) {
+            this.loadInitialPayouts();
         }
     }
 
-    loadInitialBets(): void {
+    loadInitialPayouts(): void {
         const startTime = Date.now();
 
         this.isLoading = true;
         this.isTransitioning = true;
-        this.bets = [];
+        this.payouts = [];
 
-        this.betsService
-            .getUserBets({
+        this.payoutsService
+            .getAllPayouts({
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
             })
@@ -67,27 +66,27 @@ export class UserBetsComponent implements OnInit {
                     }, remainingTime);
                 },
                 error: (error) => {
-                    console.error('Error loading bets:', error);
+                    console.error('Error loading payouts:', error);
                     this.isLoading = false;
                     this.isTransitioning = false;
                 },
             });
     }
 
-    loadBets(page: number): void {
+    loadPayouts(page: number): void {
         if (this.isTransitioning || page === this.currentPage) return;
 
         const startTime = Date.now();
         this.isTransitioning = true;
-        this.bets = [];
+        this.payouts = [];
 
-        if (this.betsCache[page]) {
+        if (this.payoutsCache[page]) {
             this.applyCachedData(page);
             return;
         }
 
-        this.betsService
-            .getUserBets({
+        this.payoutsService
+            .getAllPayouts({
                 pageNumber: page,
                 pageSize: this.pageSize,
             })
@@ -108,15 +107,15 @@ export class UserBetsComponent implements OnInit {
                     }, remainingTime);
                 },
                 error: (error) => {
-                    console.error('Error loading bets:', error);
+                    console.error('Error loading payouts:', error);
                     this.isTransitioning = false;
                 },
             });
     }
 
     private applyCachedData(page: number): void {
-        const cached = this.betsCache[page];
-        this.bets = cached.items;
+        const cached = this.payoutsCache[page];
+        this.payouts = cached.items;
         this.currentPage = page;
         this.totalPages = cached.metaData?.TotalPages || 0;
         this.totalCount = cached.metaData?.TotalCount || 0;
@@ -128,22 +127,22 @@ export class UserBetsComponent implements OnInit {
         }, 50);
     }
 
-    private cacheData(page: number, items: Bet[], metaData: MetaData): void {
-        this.betsCache[page] = { items, metaData };
+    private cacheData(page: number, items: Payout[], metaData: MetaData): void {
+        this.payoutsCache[page] = { items, metaData };
         this.applyCachedData(page);
     }
 
-    trackByBetId(index: number, bet: Bet): string {
-        return bet.id;
+    trackByPayoutId(index: number, payout: Payout): string {
+        return payout.id;
     }
 
-    getBetStatusName(status: BetStatus): string {
+    getPayoutStatusName(status: PayoutStatus): string {
         switch (status) {
-            case BetStatus.Won:
+            case PayoutStatus.Completed:
                 return 'won';
-            case BetStatus.Lost:
+            case PayoutStatus.Failed:
                 return 'lost';
-            case BetStatus.Pending:
+            case PayoutStatus.Pending:
                 return 'pending';
             default:
                 return '';
@@ -152,6 +151,6 @@ export class UserBetsComponent implements OnInit {
 
     onPageChange(page: number): void {
         if (page < 1 || page > this.totalPages) return;
-        this.loadBets(page);
+        this.loadPayouts(page);
     }
 }

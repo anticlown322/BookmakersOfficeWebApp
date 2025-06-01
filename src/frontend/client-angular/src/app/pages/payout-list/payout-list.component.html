@@ -1,0 +1,66 @@
+<div class="payouts-container">
+  <h2>Выплаты</h2>
+  <div class="payouts-stats">
+    Всего выплат: {{ totalCount }}
+  </div>
+
+  @if (payouts.length === 0 && !isLoading && !isTransitioning) {
+    <div class="empty-message">Список выплат пока пуст... Прибыльно)</div>
+  }
+
+  <div class="payouts-list">
+    @if (!isTransitioning || payouts.length > 0) {
+      <table class="payouts-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>ID ставки</th>
+            <th>Обработана</th>
+            <th>Сумма</th>
+            <th>Статус</th>
+            <th>Причина отмены</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payout of payouts; track trackByPayoutId($index, payout)) {
+            <tr [class]="getPayoutStatusName(payout.status)"
+                [class.fade-out]="isTransitioning && !payoutsCache[currentPage]">
+              <td>{{ payout.id }}</td>
+              <td>{{ payout.betId }}</td>
+              <td>{{ payout.processedAt| date:'short' }}</td>
+              <td>{{ payout.amount }}</td>
+              <td>{{ getPayoutStatusName(payout.status) }}</td>
+              <td>{{ payout.errorReason }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isTransitioning && payouts.length === 0) {
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    }
+  </div>
+
+  <div class="pagination">
+    <button (click)="onPageChange(currentPage - 1)" 
+            [disabled]="!hasPrevious || isTransitioning">
+      Назад
+    </button>
+    <span class="page-count">
+      Страница {{ currentPage }} @if (totalPages > 0) { из {{ totalPages }} }
+    </span>
+    <button (click)="onPageChange(currentPage + 1)" 
+            [disabled]="!hasNext || isTransitioning">
+      Вперед
+    </button>
+  </div>
+</div>
+
+@if (isTransitioning) {
+  <div class="loading-overlay active">
+    <div class="spinner"></div>
+  </div>
+}

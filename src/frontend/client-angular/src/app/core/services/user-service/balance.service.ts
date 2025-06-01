@@ -9,6 +9,7 @@ import { TransactionParameters } from '../../models/user-service/requests/balanc
 import { TransactionHistoryResponse } from '../../models/user-service/responses/balance/transaction-history.response';
 import { MetaData } from '../../models/shared/interfaces/meta-data';
 import { Transaction } from '../../models/user-service/entities/transaction.model';
+import { createPagedRequest } from '../shared/create-paged-request.function';
 
 @Injectable({ providedIn: 'root' })
 export class BalanceService {
@@ -37,46 +38,14 @@ export class BalanceService {
     }
 
     getTransactionHistory(
-        username: string,
+        username: String,
         parameters?: TransactionParameters
     ): Observable<TransactionHistoryResponse> {
-        let params = new HttpParams();
-
-        if (parameters) {
-            if (parameters.pageNumber) {
-                params = params.append(
-                    'pageNumber',
-                    parameters.pageNumber.toString()
-                );
-            }
-            if (parameters.pageSize) {
-                params = params.append(
-                    'pageSize',
-                    parameters.pageSize.toString()
-                );
-            }
-        }
-
-        return this.http
-            .get<Transaction[]>(`${this.baseUrl}/${username}/balance/history`, {
-                params,
-                observe: 'response',
-            })
-            .pipe(
-                map((response) => {
-                    const paginationHeader =
-                        response.headers.get('X-Pagination') ||
-                        response.headers.get('x-pagination');
-
-                    const pagination: MetaData = paginationHeader
-                        ? JSON.parse(paginationHeader)
-                        : null;
-
-                    return {
-                        items: response.body || [],
-                        metaData: pagination,
-                    };
-                })
-            );
+        return createPagedRequest<Transaction, TransactionParameters>(
+            this.http,
+            this.baseUrl,
+            `${username}/balance/history`,
+            parameters
+        );
     }
 }

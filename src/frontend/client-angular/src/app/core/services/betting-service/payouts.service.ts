@@ -6,6 +6,7 @@ import { RequestPayout } from '../../models/betting-serivce/requests/payout/requ
 import { PayoutParameters } from '../../models/betting-serivce/requests/payout/payout-parameters.request';
 import { PagedPayoutResponse } from '../../models/betting-serivce/responses/payout/paged-payout.response';
 import { Payout } from '../../models/betting-serivce/entities/payout/payout.model';
+import { createPagedRequest } from '../shared/create-paged-request.function';
 
 @Injectable({
     providedIn: 'root',
@@ -26,17 +27,21 @@ export class PayoutsService {
     getAllPayouts(
         parameters?: PayoutParameters
     ): Observable<PagedPayoutResponse> {
-        const params = this.createParams(parameters);
-        return this.http.get<PagedPayoutResponse>(this.baseUrl, { params });
+        return createPagedRequest<Payout, PayoutParameters>(
+            this.http,
+            this.baseUrl,
+            '',
+            parameters
+        );
     }
 
-    getUserPayouts(
-        parameters?: PayoutParameters
-    ): Observable<PagedPayoutResponse> {
-        const params = this.createParams(parameters);
-        return this.http.get<PagedPayoutResponse>(`${this.baseUrl}/my`, {
-            params,
-        });
+    getUserPayouts(parameters?: PayoutParameters): Observable<PagedPayoutResponse> {
+        return createPagedRequest<Payout, PayoutParameters>(
+            this.http,
+            this.baseUrl,
+            'my',
+            parameters
+        );
     }
 
     getPayoutById(payoutId: string): Observable<Payout> {
@@ -45,26 +50,5 @@ export class PayoutsService {
 
     getPayoutByBetId(betId: string): Observable<Payout> {
         return this.http.get<Payout>(`${this.baseUrl}/by-bet-id/${betId}`);
-    }
-
-    private createParams(parameters?: PayoutParameters): HttpParams {
-        let params = new HttpParams();
-
-        if (parameters) {
-            if (parameters.pageNumber) {
-                params = params.append(
-                    'pageNumber',
-                    parameters.pageNumber.toString()
-                );
-            }
-            if (parameters.pageSize) {
-                params = params.append(
-                    'pageSize',
-                    parameters.pageSize.toString()
-                );
-            }
-        }
-
-        return params;
     }
 }

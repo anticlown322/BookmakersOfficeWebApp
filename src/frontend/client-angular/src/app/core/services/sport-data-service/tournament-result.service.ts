@@ -6,6 +6,7 @@ import { TournamentResultParameters } from '../../models/sport-data-service/requ
 import { PagedTournamentResultResponse } from '../../models/sport-data-service/responses/tournament-result/paged-tournament-result.response';
 import { TournamentResult } from '../../models/sport-data-service/entities/tournament-result/tournament-result.model';
 import { MetaData } from '../../models/shared/interfaces/meta-data';
+import { createPagedRequest } from '../shared/create-paged-request.function';
 
 @Injectable({
     providedIn: 'root',
@@ -19,47 +20,13 @@ export class TournamentResultService {
         return this.http.post<void>(this.baseUrl, {});
     }
 
-    getTournamentResults(
-        parameters?: TournamentResultParameters
-    ): Observable<PagedTournamentResultResponse> {
-        let params = new HttpParams();
-
-        if (parameters) {
-            if (parameters.pageNumber) {
-                params = params.append(
-                    'pageNumber',
-                    parameters.pageNumber.toString()
-                );
-            }
-            if (parameters.pageSize) {
-                params = params.append(
-                    'pageSize',
-                    parameters.pageSize.toString()
-                );
-            }
-        }
-        
-        return this.http
-            .get<TournamentResult[]>(this.baseUrl, {
-                params,
-                observe: 'response',
-            })
-            .pipe(
-                map((response) => {
-                    const paginationHeader =
-                        response.headers.get('X-Pagination') ||
-                        response.headers.get('x-pagination');
-
-                    const pagination: MetaData = paginationHeader
-                        ? JSON.parse(paginationHeader)
-                        : null;
-
-                    return {
-                        items: response.body || [],
-                        metaData: pagination,
-                    };
-                })
-            );
+    getTournamentResults(parameters?: TournamentResultParameters): Observable<PagedTournamentResultResponse> {
+        return createPagedRequest<TournamentResult, TournamentResultParameters>(
+            this.http,
+            this.baseUrl,
+            '',
+            parameters
+        );
     }
 
     getTournamentResultById(id: string): Observable<TournamentResult> {

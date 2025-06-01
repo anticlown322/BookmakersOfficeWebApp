@@ -12,6 +12,7 @@ import { TokensRefreshRequest } from '../../models/user-service/requests/auth/re
 import { UserLogoutRequest } from '../../models/user-service/requests/auth/logout.request';
 import { Router } from '@angular/router';
 import { JwtToken } from '../../models/user-service/entities/jwtToken.model';
+import { Role } from '../../models/shared/enums/role.enum';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -181,5 +182,38 @@ export class AuthService {
         } catch {
             return null;
         }
+    }
+
+    getUserRoles(): Role[] {
+        const roles = this.getTokenClaims<any>(
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+        );
+
+        if (roles === null || roles === undefined) {
+            return [Role.Guest];
+        }
+
+        if (Array.isArray(roles)) {
+            return roles.filter((role) => Object.values(Role).includes(role));
+        }
+
+        if (
+            typeof roles === 'string' &&
+            Object.values(Role).includes(roles as Role)
+        ) {
+            return [roles as Role];
+        }
+
+        return [Role.Guest];
+    }
+
+    hasRole(role: Role): boolean {
+        const userRoles = this.getUserRoles();
+        return userRoles.includes(role);
+    }
+
+    hasAnyRole(roles: Role[]): boolean {
+        const userRoles = this.getUserRoles();
+        return roles.some((role) => userRoles.includes(role));
     }
 }

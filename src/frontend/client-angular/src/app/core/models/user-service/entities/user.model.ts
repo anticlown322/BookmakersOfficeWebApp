@@ -4,7 +4,7 @@ import { UserProfile } from "./user-profile.model";
 export interface User {
   id: string;
   email: string;
-  userName?: string;            
+  userName: string;            
   refreshToken?: string;
   refreshTokenExpiryTime?: Date;
   profile: UserProfile;

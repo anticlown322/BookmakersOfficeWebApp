@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Bet } from '../../core/models/betting-serivce/entities/bet/bet.model';
 import { BetsService } from '../../core/services/betting-service/bets.service';
+import { MetaData } from '../../core/models/shared/interfaces/meta-data';
 import { AuthService } from '../../core/services/user-service/auth.service';
 import { BetStatus } from '../../core/models/betting-serivce/entities/bet/bet-status.enum';
-import { MetaData } from '../../core/models/shared/interfaces/meta-data';
+import { CommonModule } from '@angular/common';
+import { Role } from '../../core/models/shared/enums/role.enum';
 
 @Component({
-    selector: 'app-user-bets',
-    templateUrl: './user-bets.component.html',
-    styleUrls: ['./user-bets.component.scss'],
+    selector: 'app-bet-list',
+    templateUrl: './bet-list.component.html',
+    styleUrl: './bet-list.component.scss',
     standalone: true,
     imports: [CommonModule],
 })
-export class UserBetsComponent implements OnInit {
-    currentUsername: string | null = null;
+export class BetListComponent implements OnInit {
     bets: Bet[] = [];
     isLoading = true;
     isTransitioning = false;
@@ -34,8 +34,7 @@ export class UserBetsComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.currentUsername = this.authService.getCurrentUsername();
-        if (this.currentUsername && this.authService.isAuthenticated()) {
+        if (this.authService.isAuthenticated() && this.authService.hasAnyRole([Role.Bookmaker, Role.Administrator])) {
             this.loadInitialBets();
         }
     }
@@ -48,7 +47,7 @@ export class UserBetsComponent implements OnInit {
         this.bets = [];
 
         this.betsService
-            .getUserBets({
+            .getAllBets({
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
             })
@@ -87,7 +86,7 @@ export class UserBetsComponent implements OnInit {
         }
 
         this.betsService
-            .getUserBets({
+            .getAllBets({
                 pageNumber: page,
                 pageSize: this.pageSize,
             })
