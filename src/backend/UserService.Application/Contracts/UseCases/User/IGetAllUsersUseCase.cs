@@ -1,5 +1,4 @@
-﻿using Domain.RequestFeatures;
-using UserService.Application.DTO;
+﻿using UserService.Application.DTO;
 using UserService.Application.DTO.User;
 using UserService.Domain.RequestFeatures;
 

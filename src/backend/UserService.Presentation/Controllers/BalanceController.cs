@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Domain.RequestFeatures;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Contracts.UseCases.Balance;

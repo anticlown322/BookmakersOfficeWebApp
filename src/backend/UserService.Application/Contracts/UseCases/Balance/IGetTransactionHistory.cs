@@ -1,5 +1,4 @@
-﻿using Domain.RequestFeatures;
-using UserService.Application.DTO.Balance;
+﻿using UserService.Application.DTO.Balance;
 using UserService.Domain.RequestFeatures;
 
 namespace UserService.Application.Contracts.UseCases.Balance;

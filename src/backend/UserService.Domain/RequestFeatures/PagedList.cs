@@ -1,6 +1,4 @@
-﻿using Domain.RequestFeatures;
-
-namespace UserService.Domain.RequestFeatures;
+﻿namespace UserService.Domain.RequestFeatures;
 
 public class PagedList<T> : List<T>
 {

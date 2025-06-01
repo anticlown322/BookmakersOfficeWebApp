@@ -1,0 +1,9 @@
+﻿global using Moq;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Http;
+global using UserService.Domain;
+global using UserService.Application;
+global using UserService.Infrastructure;
+global using UserService.Presentation;
+global using UserService.GrpcService;
