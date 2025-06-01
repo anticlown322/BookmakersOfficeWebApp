@@ -26,8 +26,10 @@ export function createPagedRequest<T, P>(
         }
     }
 
+    const url = endpoint.trim() == '' ? `${baseUrl}` : `${baseUrl}/${endpoint}`;
+
     return http
-        .get<T[]>(`${baseUrl}/${endpoint}`, {
+        .get<T[]>(url, {
             params,
             observe: 'response',
         })

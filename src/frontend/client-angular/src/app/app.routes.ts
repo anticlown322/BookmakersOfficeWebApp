@@ -13,6 +13,7 @@ import { Role } from './core/models/shared/enums/role.enum';
 import { UserListComponent } from './pages/user-list/user-list.component';
 import { BetListComponent } from './pages/bet-list/bet-list.component';
 import { PayoutListComponent } from './pages/payout-list/payout-list.component';
+import { EmailConfirmationComponent } from './pages/email-confirmation/email-confirmation.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -21,6 +22,7 @@ export const routes: Routes = [
     { path: 'teams', component: TeamsComponent },
     { path: 'prematch', component: PrematchComponent },
     { path: 'results', component: ResultsPageComponent },
+    { path: 'email-confirmation/:username', component: EmailConfirmationComponent },
     {
         path: 'profile',
         component: ProfileComponent,

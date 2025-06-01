@@ -133,6 +133,8 @@ export class ProfileComponent implements OnInit {
             return;
         }
 
+        console.log(this.resetPasswordRequest);
+
         this.loading = true;
         this.accountService
             .resetPassword(this.currentUsername, this.resetPasswordRequest)

@@ -216,4 +216,12 @@
         (canceled)="activeBet = null"
     ></app-bet-modal>
     }
+    <app-bet-notification
+        [isOpen]="notificationStatus.isOpen"
+        [isLoading]="notificationStatus.isLoading"
+        [isSuccess]="notificationStatus.isSuccess"
+        [message]="notificationStatus.message"
+        (closed)="notificationStatus.isOpen = false"
+    >
+    </app-bet-notification>
 </div>

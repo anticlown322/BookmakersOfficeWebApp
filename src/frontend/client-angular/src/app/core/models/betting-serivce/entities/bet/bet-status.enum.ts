@@ -1,5 +1,5 @@
 export enum BetStatus {
-  Pending = 1,
+  Pending = 0,
   Active,
   Won,
   Lost,

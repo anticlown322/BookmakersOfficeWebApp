@@ -15,7 +15,7 @@ export class AccountService {
     constructor(private http: HttpClient) {}
 
     confirmEmail(username: string): Observable<void> {
-        return this.http.post<void>(
+        return this.http.get<void>(
             `${this.baseUrl}/${username}/account/confirm-email`,
             {}
         );

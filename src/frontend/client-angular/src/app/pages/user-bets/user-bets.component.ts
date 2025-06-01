@@ -139,12 +139,16 @@ export class UserBetsComponent implements OnInit {
 
     getBetStatusName(status: BetStatus): string {
         switch (status) {
+            case BetStatus.Active:
+                return 'active';
             case BetStatus.Won:
                 return 'won';
             case BetStatus.Lost:
                 return 'lost';
             case BetStatus.Pending:
                 return 'pending';
+            case BetStatus.Canceled:
+                return 'canceled';
             default:
                 return '';
         }
