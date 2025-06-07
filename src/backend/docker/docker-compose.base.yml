@@ -2,6 +2,7 @@ volumes:
   postgres_data:
   mongodb_data:
   redis_data:
+  elasticsearch_data:
 
 networks:
   bookmaker-net:

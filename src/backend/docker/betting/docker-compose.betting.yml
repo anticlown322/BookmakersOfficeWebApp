@@ -7,15 +7,6 @@ services:
     ports:
       - "50001:50001"
       - "50011:50011"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      user-grpc-service:  
-        condition: service_started
-      sport-data-grpc-service:
-        condition: service_started
     volumes:
       - ./deploy/certs/aspnetapp.crt:/app/Properties/aspnetapp.crt:ro
       - ./deploy/configs/betting-service/secrets.json:/app/Properties/secrets.json:ro

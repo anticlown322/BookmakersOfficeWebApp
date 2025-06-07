@@ -6,11 +6,6 @@ services:
       dockerfile: docker/sport-data-grpc/Dockerfile
     ports:
       - "50022:50022" # HTTPS
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
     volumes:
       - ./deploy/configs/sport-data-grpc-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro

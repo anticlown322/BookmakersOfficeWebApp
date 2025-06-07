@@ -7,9 +7,6 @@ services:
     ports:
       - "50002:50002" # HTTPS
       - "50012:50012" # HTTP
-    depends_on:
-      mongodb:
-        condition: service_healthy
     volumes:
       - ./deploy/configs/sport-data-service/secrets.json:/app/Properties/secrets.json:ro
       - ./deploy/configs/nlog.config:/app/Properties/nlog.config:ro

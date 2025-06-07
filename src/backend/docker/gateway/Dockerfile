@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # 2.1. Copy .csproj files
-COPY ["OcelotApiGateway/OcelotApiGateway.csproj", "OcelotApiGateway/"]
+COPY ["../../OcelotApiGateway/OcelotApiGateway.csproj", "OcelotApiGateway/"]
 
 # 2.2. Restore dependencies
 RUN dotnet restore "OcelotApiGateway/OcelotApiGateway.csproj"
@@ -19,11 +19,11 @@ COPY . .
 
 # 2.4. Build
 WORKDIR "/src/OcelotApiGateway"
-RUN dotnet build "./OcelotApiGateway.csproj" -c Release -o /app/build
+RUN dotnet build "OcelotApiGateway.csproj" -c Release -o /app/build
 
 # 3. Publish stage
 FROM build AS publish
-RUN dotnet publish "./OcelotApiGateway.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "OcelotApiGateway.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # 4. Runtime stage
 FROM base AS final

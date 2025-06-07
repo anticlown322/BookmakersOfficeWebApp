@@ -1,0 +1,16 @@
+services:
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ..
+      dockerfile: docker/gateway/Dockerfile
+    ports:
+      - "5001:5001" # HTTP
+    volumes:
+      - ./deploy/configs/api-gateway/secrets.json:/app/Properties/secrets.json:ro
+    networks:
+      - bookmaker-net
+
+networks:
+  bookmaker-net:
+    external: true

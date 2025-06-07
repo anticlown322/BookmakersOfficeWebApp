@@ -1,7 +1,11 @@
-export enum BetStatus {
-  Pending = 0,
-  Active,
-  Won,
-  Lost,
-  Canceled
+export enum BetStatus
+{
+    Validating,
+    Rejected,
+    Pending,
+    Active,
+    Won,
+    Lost,
+    Cancelled,
+    Refunded,
 }

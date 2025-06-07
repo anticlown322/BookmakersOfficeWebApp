@@ -140,8 +140,20 @@
     background-color: rgba(0, 255, 170, 0.2);
 }
 
-.bets-table tr.canceleed {
+.bets-table tr.canceled {
     background-color: rgba(255, 124, 1, 0.2);
+}
+
+.bets-table tr.rejected {
+    background-color: rgba(255, 124, 1, 0.2);
+}
+
+.bets-table tr.refunded {
+    background-color: rgba(238, 255, 1, 0.2);
+}
+
+.bets-table tr.validating {
+    background-color: rgba(162, 1, 255, 0.2);
 }
 
 .pagination {

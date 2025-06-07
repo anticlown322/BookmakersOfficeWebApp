@@ -147,8 +147,14 @@ export class UserBetsComponent implements OnInit {
                 return 'lost';
             case BetStatus.Pending:
                 return 'pending';
-            case BetStatus.Canceled:
+            case BetStatus.Cancelled:
                 return 'canceled';
+            case BetStatus.Rejected:
+                return 'rejected';
+            case BetStatus.Refunded:
+                return 'refunded';
+            case BetStatus.Validating:
+                return 'validating';
             default:
                 return '';
         }
