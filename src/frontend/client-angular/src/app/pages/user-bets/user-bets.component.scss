@@ -1,0 +1,206 @@
+.bets-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #21213b;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.bets-stats {
+    color: #aaa;
+    font-size: 18px;
+}
+
+.bets-container h2 {
+    color: #4cc9f0;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    border-bottom: 1px solid #4cc9f0;
+    padding-bottom: 0.5rem;
+}
+
+.empty-message {
+    color: #4cc9f0;
+    font-size: 18px;
+    text-align: center;
+    margin: 12px;
+}
+
+.bets-info {
+    background-color: rgba(76, 201, 240, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid #4cc9f0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.bets-amount {
+    font-size: 2rem;
+    color: #fff;
+    margin: 1rem 0;
+    font-weight: bold;
+}
+
+.bets-updated {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.bets-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.operation-form {
+    background-color: rgba(76, 201, 240, 0.05);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid #f72585;
+}
+
+.operation-form h3 {
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.form-group input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4cc9f0;
+    border-radius: 4px;
+    padding: 0.5rem;
+    color: #fff;
+    width: 100%;
+    max-width: 300px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.bets-history {
+    margin-top: 2rem;
+}
+
+.bets-history h3 {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.bets-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.bets-table th {
+    background-color: rgba(76, 201, 240, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.bets-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.bets-table tr.won {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.bets-table tr.lost {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.bets-table tr.pending {
+    background-color: rgba(255, 255, 1, 0.2);
+}
+
+.bets-table tr.active {
+    background-color: rgba(0, 255, 170, 0.2);
+}
+
+.bets-table tr.canceleed {
+    background-color: rgba(255, 124, 1, 0.2);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    color: #aaa;
+}
+
+.pagination button {
+    min-width: 80px;
+}
+
+button {
+    background-color: #4cc9f0;
+    color: #21213b;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background-color: #3ab0d8;
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+}
+
+button.secondary {
+    background-color: transparent;
+    color: #4cc9f0;
+    border: 1px solid #4cc9f0;
+}
+
+button.secondary:hover {
+    background-color: rgba(76, 201, 240, 0.1);
+}
+
+@media (max-width: 768px) {
+    .bets-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .bets-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .bets-actions {
+        flex-direction: column;
+    }
+}

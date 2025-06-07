@@ -1,0 +1,12 @@
+@import "fonts";
+@import "icons";
+
+:root {
+  --primary-color: #4cc9f0;
+  --dark-bg: #1a1a2e;
+}
+
+body {
+  font-family: JetBrainsMono, sans-serif;
+  background: var(--dark-bg);
+}

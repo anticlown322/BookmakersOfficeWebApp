@@ -1,0 +1,157 @@
+<div class="balance-container">
+    <h2>Баланс и транзакции</h2>
+
+    @if (errorMessage) {
+    <div class="alert error">
+        {{ errorMessage }}
+        <button (click)="clearMessages()">×</button>
+    </div>
+    } @if (successMessage) {
+    <div class="alert success">
+        {{ successMessage }}
+        <button (click)="clearMessages()">×</button>
+    </div>
+    } @if (balanceData$ | async; as balance) {
+    <div class="balance-info">
+        <h3>Текущий баланс</h3>
+        <p class="balance-amount">{{ balance.currentBalance }} coins</p>
+        <p class="balance-updated">
+            Обновлен: {{ balance.lastUpdated | date : "medium" }}
+        </p>
+
+        <div class="balance-actions">
+            <button (click)="activeTab = 'deposit'">Пополнить баланс</button>
+            <button (click)="activeTab = 'withdraw'">Вывести средства</button>
+        </div>
+    </div>
+    } @else {
+    <p>Загрузка данных баланса...</p>
+    } @if (activeTab === 'deposit') {
+    <div class="operation-form">
+        <h3>Пополнение баланса</h3>
+        <form (ngSubmit)="deposit()">
+            <div class="form-group">
+                <label>Сумма:</label>
+                <input
+                    type="number"
+                    [(ngModel)]="depositForm.amount"
+                    name="depositAmount"
+                    min="1"
+                    required
+                />
+            </div>
+            <div class="form-group">
+                <label>Комментарий (необязательно):</label>
+                <input
+                    type="text"
+                    [(ngModel)]="depositForm.comment"
+                    name="depositComment"
+                />
+            </div>
+            <div class="form-actions">
+                <button type="submit" [disabled]="isLoading">Пополнить</button>
+                <button type="button" (click)="activeTab = null">Отмена</button>
+            </div>
+        </form>
+    </div>
+    } @if (activeTab === 'withdraw') {
+    <div class="operation-form">
+        <h3>Вывод средств</h3>
+        <form (ngSubmit)="withdraw()">
+            <div class="form-group">
+                <label>Сумма:</label>
+                <input
+                    type="number"
+                    [(ngModel)]="withdrawForm.amount"
+                    name="withdrawAmount"
+                    min="1"
+                    required
+                />
+            </div>
+            <div class="form-group">
+                <label>Комментарий (необязательно):</label>
+                <input
+                    type="text"
+                    [(ngModel)]="withdrawForm.comment"
+                    name="withdrawComment"
+                />
+            </div>
+            <div class="form-actions">
+                <button type="submit" [disabled]="isLoading">Вывести</button>
+                <button type="button" (click)="activeTab = null">Отмена</button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <div class="transactions-history">
+        <h3>История транзакций</h3>
+
+        @if (transactions.length === 0 && !isLoading && !isTransitioning) {
+        <div class="empty-message">Нет данных о транзакциях</div>
+        }
+
+        <div class="transactions-list">
+            @if (!isTransitioning || transactions.length > 0) {
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Тип</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                        <th>Комментарий</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (transaction of transactions; track
+                    trackByTransactionId($index, transaction)) {
+                    <tr
+                        [class]="getStatusClass(transaction.status)"
+                        [class.fade-out]="
+                            isTransitioning && !transactionsCache[currentPage]
+                        "
+                    >
+                        <td>{{ transaction.createdAt | date : "short" }}</td>
+                        <td>
+                            {{ getOperationType(transaction.operationType) }}
+                        </td>
+                        <td>{{ transaction.amount }} coins</td>
+                        <td>{{ transaction.status }}</td>
+                        <td>{{ transaction.comment || "-" }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            } @if (isTransitioning && transactions.length === 0) {
+            @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+            <div class="skeleton-row"></div>
+            } }
+        </div>
+
+        <div class="pagination">
+            <button
+                (click)="onPageChange(currentPage - 1)"
+                [disabled]="!hasPrevious || isTransitioning"
+            >
+                Назад
+            </button>
+            <span
+                >Страница {{ currentPage }} @if (totalPages > 0) { из
+                {{ totalPages }} }</span
+            >
+            <button
+                (click)="onPageChange(currentPage + 1)"
+                [disabled]="!hasNext || isTransitioning"
+            >
+                Вперед
+            </button>
+        </div>
+    </div>
+
+    @if (isTransitioning) {
+    <div class="loading-overlay active">
+        <div class="spinner"></div>
+    </div>
+    }
+</div>

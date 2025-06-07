@@ -1,0 +1,59 @@
+<div class="confirmation-container">
+    @if (isLoading) {
+    <div class="loading-section">
+        <div class="spinner"></div>
+        <p>Подтверждение email...</p>
+    </div>
+    } @else {
+    <div class="result-section">
+        @if (isSuccess) {
+        <div class="success-message">
+            <svg
+                class="checkmark"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 52 52"
+            >
+                <circle
+                    class="checkmark__circle"
+                    cx="26"
+                    cy="26"
+                    r="25"
+                    fill="none"
+                />
+                <path
+                    class="checkmark__check"
+                    fill="none"
+                    d="M14.1 27.2l7.1 7.2 16.7-16.8"
+                />
+            </svg>
+            <h2>Email успешно подтвержден!</h2>
+            <p>Теперь вы можете пользоваться всеми возможностями сервиса.</p>
+        </div>
+        } @else {
+        <div class="error-message">
+            <svg
+                class="crossmark"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 52 52"
+            >
+                <circle
+                    class="crossmark__circle"
+                    cx="26"
+                    cy="26"
+                    r="25"
+                    fill="none"
+                />
+                <path
+                    class="crossmark__cross"
+                    fill="none"
+                    d="M16 16 36 36 M36 16 16 36"
+                />
+            </svg>
+            <h2>Ошибка подтверждения email</h2>
+            <p>{{ errorMessage }}</p>
+            <p>Попробуйте еще раз или обратитесь в поддержку.</p>
+        </div>
+        }
+    </div>
+    }
+</div>

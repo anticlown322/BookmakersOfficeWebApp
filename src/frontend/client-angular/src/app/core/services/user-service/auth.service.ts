@@ -1,0 +1,219 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, Subject, throwError, of } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
+import { CookieService } from 'ngx-cookie-service';
+import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../../environments/environment';
+import { UserRegistrationRequest } from '../../models/user-service/requests/auth/register.request';
+import { UserLoginRequest } from '../../models/user-service/requests/auth/login.request';
+import { TokensGetResponse } from '../../models/user-service/responses/auth/login.response';
+import { TokensRefreshRequest } from '../../models/user-service/requests/auth/refresh-token.request';
+import { UserLogoutRequest } from '../../models/user-service/requests/auth/logout.request';
+import { Router } from '@angular/router';
+import { JwtToken } from '../../models/user-service/entities/jwtToken.model';
+import { Role } from '../../models/shared/enums/role.enum';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+    private readonly baseURL = `${environment.apiUrl}/authentication`;
+    private authStateChangeSubject = new BehaviorSubject<boolean>(
+        this.isAuthenticated()
+    );
+    public authStateChanged$ = this.authStateChangeSubject.asObservable();
+
+    constructor(
+        private http: HttpClient,
+        private cookieService: CookieService,
+        private router: Router
+    ) {}
+
+    register(userData: UserRegistrationRequest): Observable<void> {
+        return this.http.post<void>(`${this.baseURL}/register`, userData);
+    }
+
+    login(credentials: UserLoginRequest): Observable<TokensGetResponse> {
+        return this.http
+            .post<TokensGetResponse>(`${this.baseURL}/login`, credentials)
+            .pipe(
+                tap((response) => {
+                    this.storeTokens(response);
+                    this.notifyAuthStateChange(true);
+                }),
+                catchError((error) => {
+                    this.clearTokens();
+                    return throwError(() => error);
+                })
+            );
+    }
+
+    logout(logoutData?: UserLogoutRequest): Observable<void> {
+        const request = logoutData
+            ? this.http.post<void>(`${this.baseURL}/logout`, logoutData)
+            : of(undefined);
+
+        return request.pipe(
+            tap({
+                next: () => {
+                    this.clearTokens();
+                    this.notifyAuthStateChange(false);
+                    this.router.navigate(['/']);
+                },
+                error: (error) => {
+                    this.clearTokens();
+                    this.notifyAuthStateChange(false);
+                },
+            }),
+            catchError((error) => {
+                return throwError(() => error);
+            })
+        );
+    }
+
+    refreshTokens(tokens: TokensRefreshRequest): Observable<string> {
+        return this.http.post<string>(`${this.baseURL}/refresh`, tokens).pipe(
+            map((newAccessToken) => {
+                this.storeRefreshedToken(newAccessToken);
+                return newAccessToken;
+            }),
+            catchError((error) => {
+                this.clearTokens();
+                return throwError(() => error);
+            })
+        );
+    }
+
+    private storeTokens(tokens: TokensGetResponse): void {
+        this.cookieService.set('accessToken', tokens.accessToken, {
+            expires: this.getTokenExpiry(tokens.accessToken),
+            path: '/',
+            secure: true,
+            sameSite: 'Strict',
+        });
+
+        this.cookieService.set('refreshToken', tokens.refreshToken, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+            path: '/',
+            secure: true,
+            sameSite: 'Strict',
+        });
+    }
+
+    private storeRefreshedToken(accessToken: string): void {
+        this.cookieService.set('accessToken', accessToken, {
+            expires: this.getTokenExpiry(accessToken),
+            path: '/',
+            secure: true,
+            sameSite: 'Strict',
+        });
+    }
+
+    public clearTokens(): void {
+        this.cookieService.delete('accessToken', '/');
+        this.cookieService.delete('refreshToken', '/');
+    }
+
+    private getTokenExpiry(token: string): Date {
+        const decoded = jwtDecode(token);
+        return new Date(decoded.exp! * 1000);
+    }
+
+    private notifyAuthStateChange(isAuthenticated: boolean): void {
+        this.authStateChangeSubject.next(isAuthenticated);
+    }
+
+    getCurrentAccessToken(): string | null {
+        return this.cookieService.get('accessToken') || null;
+    }
+
+    getCurrentRefreshToken(): string | null {
+        return this.cookieService.get('refreshToken') || null;
+    }
+
+    isAuthenticated(): boolean {
+        try {
+            const token = this.getCurrentAccessToken();
+            if (!token) return false;
+
+            const decoded = jwtDecode(token);
+            return Date.now() < decoded.exp! * 1000;
+        } catch {
+            return false;
+        }
+    }
+
+    getTokenClaims<T>(claim: string): T | null {
+        const token = this.getCurrentAccessToken();
+
+        if (!token) return null;
+
+        try {
+            const decoded = jwtDecode<any>(token);
+            return decoded[claim] || null;
+        } catch {
+            return null;
+        }
+    }
+
+    getCurrentUsername(): string | null {
+        const token = this.getCurrentAccessToken();
+        if (!token) return null;
+
+        try {
+            const decoded = jwtDecode<JwtToken>(token);
+            const username =
+                decoded[
+                    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+                ] || null;
+            return username;
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    }
+
+    getTokenExpirationDate(): Date | null {
+        const token = this.getCurrentAccessToken();
+        if (!token) return null;
+
+        try {
+            const decoded = jwtDecode(token);
+            return new Date(decoded.exp! * 1000);
+        } catch {
+            return null;
+        }
+    }
+
+    getUserRoles(): Role[] {
+        const roles = this.getTokenClaims<any>(
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+        );
+
+        if (roles === null || roles === undefined) {
+            return [Role.Guest];
+        }
+
+        if (Array.isArray(roles)) {
+            return roles.filter((role) => Object.values(Role).includes(role));
+        }
+
+        if (
+            typeof roles === 'string' &&
+            Object.values(Role).includes(roles as Role)
+        ) {
+            return [roles as Role];
+        }
+
+        return [Role.Guest];
+    }
+
+    hasRole(role: Role): boolean {
+        const userRoles = this.getUserRoles();
+        return userRoles.includes(role);
+    }
+
+    hasAnyRole(roles: Role[]): boolean {
+        const userRoles = this.getUserRoles();
+        return roles.some((role) => userRoles.includes(role));
+    }
+}

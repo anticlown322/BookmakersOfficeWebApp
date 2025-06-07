@@ -1,0 +1,75 @@
+<header class="header" (document:click)="onDocumentClick()">
+    <a class="logo" routerLink="/">
+        <img src="assets/icons/logo.svg" alt="ScamBet logo" />
+        <span>ScamBet</span>
+    </a>
+
+    <nav class="nav">
+        <a routerLink="/prematch" routerLinkActive="active">Матчи</a>
+        <a routerLink="/results" routerLinkActive="active">Результаты</a>
+        <a routerLink="/teams" routerLinkActive="active">Команды</a>
+    </nav>
+
+    <div class="user-section">
+        @if (authService.isAuthenticated()) {
+        <div class="user-profile" (click)="toggleProfileMenu($event)">
+            <span class="username">{{ currentUsername }}</span>
+            <img
+                class="avatar"
+                [src]="'assets/icons/user-default-icon.svg'"
+                alt="Profile"
+            />
+
+            @if (isProfileMenuOpen) {
+            <div class="profile-menu">
+                <button
+                    routerLink="/profile"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler, Role.Administrator]"
+                >
+                    Профиль
+                </button>
+                <button
+                    routerLink="/balance"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler]"
+                >
+                    Баланс
+                </button>
+                <button
+                    routerLink="/my-bets"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Gambler]"
+                >
+                    Мои ставки
+                </button>
+                <button
+                    routerLink="/bet-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все ставки
+                </button>
+                <button
+                    routerLink="/user-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все пользователи
+                </button>
+                <button
+                    routerLink="/payout-list"
+                    (click)="isProfileMenuOpen = false"
+                    *appHasRole="[Role.Administrator]"
+                >
+                    Все выплаты
+                </button>
+                <button (click)="logout()">Выйти</button>
+            </div>
+            }
+        </div>
+        } @else {
+        <button class="login-btn" routerLink="/login">Войти</button>
+        }
+    </div>
+</header>

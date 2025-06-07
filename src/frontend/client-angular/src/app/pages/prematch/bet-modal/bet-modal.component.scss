@@ -1,0 +1,73 @@
+.bet-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.bet-modal-content {
+  background: #2a2a3a;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 300px;
+
+  h3 {
+    margin-top: 0;
+    color: #4cc9f0;
+    text-align: center;
+  }
+}
+
+.bet-info {
+  color: #aaa;
+  margin: 10px 0;
+  p {
+    margin: 5px 0;
+  }
+}
+
+.bet-input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 1px solid #3a3a4a;
+  background: #1e1e2e;
+  color: #fff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  
+  .modal-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &.cancel {
+      background: red;
+      color: #fff;
+    }
+    
+    &.confirm {
+      background: green;
+      color: #fff;
+      font-weight: bold;
+      
+      &:disabled {
+        color: #1a1a2e;
+        background: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

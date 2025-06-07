@@ -1,0 +1,227 @@
+<div class="match-card" [class.expanded]="isDetailsExpanded">
+    <div class="match-header" (click)="toggleDetails()">
+        <span class="match-time">
+            {{ match.startTime | date : "dd.MM.yyyy HH:mm" }}
+        </span>
+        <span class="toggle-icon">{{ isDetailsExpanded ? "▲" : "▼" }}</span>
+    </div>
+
+    <div class="teams-container">
+        <div class="team">
+            <span class="team-name">{{ match.opponent1.name }}</span>
+        </div>
+
+        <div class="vs-divider">vs</div>
+
+        <div class="team">
+            <span class="team-name">{{ match.opponent2.name }}</span>
+        </div>
+    </div>
+
+    <div class="quick-bets">
+        @if (hasMainLine()) {
+        <div class="bet-line">
+            <button
+                class="bet-button"
+                (click)="placeBet('opponent1Win', match.mainLine?.opponent1Win)"
+            >
+                П1 {{ match.mainLine?.opponent1Win?.value | number : "1.2-2" }}
+            </button>
+            <button
+                class="bet-button"
+                (click)="placeBet('draw', match.mainLine?.draw)"
+                *ngIf="match.mainLine?.draw"
+            >
+                X {{ match.mainLine?.draw?.value | number : "1.2-2" }}
+            </button>
+            <button
+                class="bet-button"
+                (click)="placeBet('opponent2Win', match.mainLine?.opponent2Win)"
+            >
+                П2 {{ match.mainLine?.opponent2Win?.value | number : "1.2-2" }}
+            </button>
+        </div>
+        }
+    </div>
+
+    @if (isDetailsExpanded) {
+    <div class="match-details">
+        @if (hasMapsLine()) {
+        <div class="bet-section">
+            <h4>Карты</h4>
+            <div class="bet-grid">
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'map1HandicapOpponent1',
+                            match.mapsLine?.map1HandicapOpponent1
+                        )
+                    "
+                >
+                    Ф1
+                    {{
+                        match.mapsLine?.map1HandicapOpponent1?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'map1HandicapOpponent2',
+                            match.mapsLine?.map1HandicapOpponent2
+                        )
+                    "
+                >
+                    Ф2
+                    {{
+                        match.mapsLine?.map1HandicapOpponent2?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                @if (match.mapsLine?.map2HandicapOpponent1 ||
+                match.mapsLine?.map2HandicapOpponent2) {
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'map2HandicapOpponent1',
+                            match.mapsLine?.map2HandicapOpponent1
+                        )
+                    "
+                >
+                    Ф1 (M2)
+                    {{
+                        match.mapsLine?.map2HandicapOpponent1?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'map2HandicapOpponent2',
+                            match.mapsLine?.map2HandicapOpponent2
+                        )
+                    "
+                >
+                    Ф2 (M2)
+                    {{
+                        match.mapsLine?.map2HandicapOpponent2?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                }
+            </div>
+        </div>
+        } @if (hasKillsLine()) {
+        <div class="bet-section">
+            <h4>Убийства</h4>
+            <div class="bet-grid">
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'opponent1KillsMain',
+                            match.killsLine?.opponent1KillsMain
+                        )
+                    "
+                >
+                    П1
+                    {{
+                        match.killsLine?.opponent1KillsMain?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'opponent2KillsMain',
+                            match.killsLine?.opponent2KillsMain
+                        )
+                    "
+                >
+                    П2
+                    {{
+                        match.killsLine?.opponent2KillsMain?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'totalKillsUnder',
+                            match.killsLine?.totalKillsUnder
+                        )
+                    "
+                >
+                    ТМ
+                    {{
+                        match.killsLine?.totalKillsUnder?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'totalKillsOver',
+                            match.killsLine?.totalKillsOver
+                        )
+                    "
+                >
+                    ТБ
+                    {{
+                        match.killsLine?.totalKillsOver?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+            </div>
+        </div>
+        } @if (hasSpecialLine()) {
+        <div class="bet-section">
+            <h4>Специальные</h4>
+            <div class="bet-grid">
+                <button
+                    class="bet-button"
+                    (click)="
+                        placeBet(
+                            'eitherOpponent1OrOpponent2',
+                            match.specialLine?.eitherOpponent1OrOpponent2
+                        )
+                    "
+                >
+                    П1 или П2
+                    {{
+                        match.specialLine?.eitherOpponent1OrOpponent2?.value
+                            | number : "1.2-2"
+                    }}
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+    } @if (activeBet) {
+    <app-bet-modal
+        [betData]="{
+            type: activeBet.type,
+            value: activeBet.marketValue,
+            matchId: match.id,
+            lineType: activeBet.lineType
+        }"
+        (confirmed)="onBetConfirmed($event.amount)"
+        (canceled)="activeBet = null"
+    ></app-bet-modal>
+    }
+    <app-bet-notification
+        [isOpen]="notificationStatus.isOpen"
+        [isLoading]="notificationStatus.isLoading"
+        [isSuccess]="notificationStatus.isSuccess"
+        [message]="notificationStatus.message"
+        (closed)="notificationStatus.isOpen = false"
+    >
+    </app-bet-notification>
+</div>

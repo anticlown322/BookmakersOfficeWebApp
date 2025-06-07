@@ -1,0 +1,36 @@
+<div class="results-container" appInfiniteScroll (scrolled)="loadMoreTournaments()">
+  <h1>Результаты турниров</h1>
+  
+  <div class="tournaments-list">
+    @if (tournaments.length === 0 && !isLoading && !isTransitioning) {
+      <div class="empty-message">Список результатов пуст :(</div>
+    }
+    
+    @if (!isTransitioning || tournaments.length > 0) {
+      @for (tournament of tournaments; track trackByTournamentId($index, tournament)) {
+        <app-tournament-result-card 
+          [tournament]="tournament"
+          [class.fade-out]="isTransitioning && !tournamentsCache[currentPage].includes(tournament)">
+        </app-tournament-result-card >
+      }
+    }
+    
+    @if ((isLoading || isTransitioning) && tournaments.length === 0) {
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-card"></div>
+      }
+    }
+  </div>
+
+  @if (isTransitioning && tournaments.length > 0) {
+    <div class="loading-overlay active">
+      <div class="spinner"></div>
+    </div>
+  }
+
+  @if (!hasMore && tournaments.length > 0) {
+    <div class="end-of-list">
+      Вы просмотрели все результаты!
+    </div>
+  }
+</div>

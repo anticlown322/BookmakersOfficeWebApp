@@ -57,6 +57,21 @@ public static class ServiceExtensions
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
     }
 
+    public static void ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithExposedHeaders("X-Pagination");
+            });
+        });
+    }
+
     public static void ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
     {
         Log.Logger = new LoggerConfiguration()

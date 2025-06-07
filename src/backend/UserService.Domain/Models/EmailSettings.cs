@@ -9,4 +9,5 @@ public class EmailSettings
     public bool UseSsl { get; set; }
     public string SenderEmail { get; set; }
     public string SenderName { get; set; }
+    public string ConfirmEmailBaseUrl { get; set; }
 }

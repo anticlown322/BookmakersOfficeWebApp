@@ -1,0 +1,66 @@
+.tournament-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(99, 98, 98, 0.15);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(26, 158, 190, 0.178);
+    }
+
+    .no-matches-span {
+        font-size: 1.1rem;
+        color: #555;
+    }
+
+    .tournament-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border-bottom: 1px solid #000000;
+
+        h3 {
+            margin: 0;
+            flex-grow: 1;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #4cc9f0;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 12px;
+
+            &.ended {
+                background: #d4edda;
+                color: #155724;
+            }
+            &.running {
+                background: #fff3cd;
+                color: #856404;
+            }
+            &.interrupted {
+                background: #f8d7da;
+                color: #721c24;
+            }
+            &.canceled {
+                background: #e2e3e5;
+                color: #383d41;
+            }
+        }
+
+        .toggle-icon {
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    }
+
+    .matches-container {
+        padding: 8px;
+    }
+}

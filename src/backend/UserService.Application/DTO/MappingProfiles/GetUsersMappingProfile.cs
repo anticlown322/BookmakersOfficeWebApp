@@ -7,6 +7,12 @@ public class GetUsersMappingProfile : Profile
 {
     public GetUsersMappingProfile()
     {
-        CreateMap<Domain.Models.User, UserGetDto>().ReverseMap();
+        CreateMap<Domain.Models.User, UserGetDto>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+            .ForMember(
+                dest => dest.Roles,
+                opt => opt.MapFrom((src, dest, _, context) =>
+                    context.Items["Roles"] as List<string> ?? new List<string>()))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
     }
 }

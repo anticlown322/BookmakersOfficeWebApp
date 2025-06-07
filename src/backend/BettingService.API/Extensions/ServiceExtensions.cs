@@ -33,6 +33,21 @@ public static class ServiceExtensions
         services.Configure<GrpcSettings>(configuration.GetSection("GrpcSettings"));
     }
 
+    public static void ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithExposedHeaders("X-Pagination");
+            });
+        });
+    }
+    
     public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthentication(opt =>
